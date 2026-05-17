@@ -1,14 +1,7 @@
 :root {
-    --bg-color: #e5e5e5;
-    --surface-color: #ffffff;
-    --text-main: #000000;
-    --text-muted: #6c757d;
-    --border-color: #000000;
-    --primary: #D4AF37; 
-    --warning: #ffcc00;
-    --danger: #ff3333;
-    --success: #00cc44;
-    --neo-shadow: 6px 6px 0px #000000;
+    --bg-color: #e5e5e5; --surface-color: #ffffff; --text-main: #000000; --text-muted: #6c757d;
+    --border-color: #000000; --primary: #D4AF37; --warning: #ffcc00; --danger: #ff3333;
+    --success: #00cc44; --neo-shadow: 6px 6px 0px #000000;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; border-radius: 0 !important; }
@@ -17,7 +10,8 @@ body { background-color: var(--bg-color); color: var(--text-main); }
 .title-font { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
 .accent-text { color: var(--primary); }
 .flex-between { display: flex; justify-content: space-between; align-items: center; }
-.badge-ok { background: var(--success); color: #000; padding: 5px 10px; font-weight: 800; font-size: 0.75rem; border: 2px solid var(--border-color); text-transform: uppercase; }
+.badge-ok { background: var(--success); color: #000; padding: 5px 10px; font-weight: 800; font-size: 0.75rem; border: 2px solid var(--border-color); text-transform: uppercase; transition: 0.3s; }
+.badge-working { background: var(--warning); }
 
 .topbar { display: flex; justify-content: space-between; align-items: center; padding: 0 4%; height: 70px; background-color: var(--surface-color); border-bottom: 3px solid var(--border-color); }
 .logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; text-transform: lowercase; }
@@ -32,98 +26,30 @@ body { background-color: var(--bg-color); color: var(--text-main); }
 .neo-card { background: var(--surface-color); border: 3px solid var(--border-color); box-shadow: var(--neo-shadow); padding: 25px; flex: 1; display: flex; flex-direction: column; }
 .section-header { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--border-color); }
 
-/* =======================================================
-   ESTILOS DEL EDITOR GIGANTE (CLON VS CODE)
-   ======================================================= */
-#codeEditorContainer {
-    display: flex;
-    background: #1e1e1e;
-    border: 3px solid var(--border-color);
-    min-height: 450px; /* Editor grande */
-    font-family: 'Fira Code', monospace;
-    font-size: 15px;
-    line-height: 1.5;
-    position: relative;
-    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5);
-}
+/* EDITOR VS CODE CLON */
+#codeEditorContainer { display: flex; background: #1e1e1e; border: 3px solid var(--border-color); min-height: 450px; font-family: 'Fira Code', monospace; font-size: 15px; line-height: 1.5; position: relative; box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5); }
+#lineNumbers { width: 50px; background: #252526; color: #858585; padding: 15px 5px 15px 0; text-align: right; border-right: 1px solid #333; user-select: none; overflow: hidden; }
+.editor-wrapper { position: relative; flex: 1; overflow: hidden; }
+#codeEditor, #codeHighlighting { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; padding: 15px; border: none; margin: 0; font-family: inherit; font-size: inherit; line-height: inherit; white-space: pre; tab-size: 4; }
+#codeEditor { color: transparent; background: transparent; caret-color: #ffffff; z-index: 2; outline: none; resize: none; overflow: auto; }
+#codeHighlighting { z-index: 1; pointer-events: none; color: #d4d4d4; overflow: hidden; }
 
-#lineNumbers {
-    width: 50px;
-    background: #252526;
-    color: #858585;
-    padding: 15px 5px 15px 0;
-    text-align: right;
-    border-right: 1px solid #333;
-    user-select: none;
-    overflow: hidden;
-}
+/* COLORES VS CODE EXTENDIDOS PARA emc */
+.token-keyword { color: #c586c0; } /* Morado: if, try, switch... */
+.token-function { color: #dcdcaa; } /* Amarillo: Funciones core (write, len) */
+.token-type { color: #4ec9b0; } /* Verde Aqua: int, string, list */
+.token-identifier { color: #9cdcfe; } /* Azul claro: Variables */
+.token-string { color: #ce9178; } /* Naranja: Textos */
+.token-number { color: #b5cea8; } /* Verde claro: Números */
+.token-operator { color: #d4d4d4; } /* Gris: Operadores */
+.token-brace { color: #ffd700; } /* Dorado: Llaves */
+.token-comment { color: #6A9955; font-style: italic; } /* Verde: Comentarios */
+.token-include { color: #c586c0; font-weight: bold; }
 
-.editor-wrapper {
-    position: relative;
-    flex: 1;
-    overflow: hidden;
-}
-
-#codeEditor, #codeHighlighting {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    width: 100%; height: 100%;
-    padding: 15px;
-    border: none;
-    margin: 0;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-    white-space: pre;
-    tab-size: 4;
-}
-
-/* El textarea es el que recibe los clics, pero es invisible */
-#codeEditor {
-    color: transparent;
-    background: transparent;
-    caret-color: #ffffff; /* Cursor blanco */
-    z-index: 2;
-    outline: none;
-    resize: none;
-    overflow: auto;
-}
-
-/* El div de resaltado está detrás y muestra los colores */
-#codeHighlighting {
-    z-index: 1;
-    pointer-events: none;
-    color: #d4d4d4; /* Color texto base */
-    overflow: hidden;
-}
-
-/* COLORES EXACTOS DE VS CODE */
-.token-keyword { color: #c586c0; } /* Morado para if, else, while */
-.token-function { color: #dcdcaa; } /* Amarillo claro para write */
-.token-identifier { color: #9cdcfe; } /* Azul claro para variables */
-.token-string { color: #ce9178; } /* Naranja para textos */
-.token-number { color: #b5cea8; } /* Verde claro para números */
-.token-operator { color: #d4d4d4; } /* Gris para =, <, > */
-.token-brace { color: #ffd700; } /* Dorado para { } ( ) */
-
-/* =======================================================
-   ESTILOS DE LA TERMINAL
-   ======================================================= */
-.terminal-box {
-    background: #000000;
-    color: #ffffff;
-    font-family: 'Fira Code', monospace;
-    font-size: 0.95rem;
-    padding: 20px;
-    border: 3px solid var(--border-color);
-    overflow-y: auto;
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.8);
-}
+/* TERMINAL */
+.terminal-box { background: #000000; color: #ffffff; font-family: 'Fira Code', monospace; font-size: 0.95rem; padding: 20px; border: 3px solid var(--border-color); overflow-y: auto; min-height: 250px; display: flex; flex-direction: column; gap: 6px; box-shadow: inset 0px 0px 10px rgba(0,0,0,0.8); }
 .terminal-line { word-break: break-all; }
 .system-msg { color: #6c757d; font-style: italic; }
 .error-msg { color: #f14c4c; font-weight: bold; }
 .output-msg { color: #4fc1ff; }
+.prompt-msg { color: #ffd700; }
