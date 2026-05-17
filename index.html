@@ -15,7 +15,7 @@
     <header class="topbar">
         <div class="logo">emc<span>_lang</span></div>
         <div class="top-actions">
-            <span class="badge-ok">ENTORNO ACTIVO</span>
+            <span class="badge-ok" id="statusBadge">COMPILADOR LISTO</span>
         </div>
     </header>
 
@@ -25,7 +25,7 @@
             <div class="section-header flex-between">
                 <h2 class="title-font accent-text">EDITOR .emc</h2>
                 <div style="display:flex; gap:10px;">
-                    <button id="btnRunCode" class="neo-btn-sm success" style="background: var(--success); color: #000;">▶ EJECUTAR</button>
+                    <button id="btnRunCode" class="neo-btn-sm success" style="background: var(--success); color: #000;">▶ EJECUTAR (F5)</button>
                     <button id="btnClearCode" class="neo-btn-sm danger">🗑️ LIMPIAR</button>
                 </div>
             </div>
@@ -41,12 +41,12 @@
             <div class="neo-divider mt-20 mb-20"></div>
 
             <div class="section-header flex-between">
-                <h2 class="title-font accent-text">TERMINAL</h2>
+                <h2 class="title-font accent-text">TERMINAL OUTPUT</h2>
                 <button id="btnClearConsole" class="neo-btn-sm warning">🧹 LIMPIAR TERMINAL</button>
             </div>
             <div id="terminalOutput" class="terminal-box">
-                <div class="terminal-line system-msg">>> emc_lang v1.0.0 cargado.</div>
-                <div class="terminal-line system-msg">>> Compilador listo. Esperando instrucciones...</div>
+                <div class="terminal-line system-msg">>> Emc Beta 2 (AST Core) cargado.</div>
+                <div class="terminal-line system-msg">>> Standard Library (150 funciones) inicializada.</div>
             </div>
             
         </div>
