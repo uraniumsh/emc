@@ -1,171 +1,308 @@
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // ELEMENTOS DEL DOM
-    const editor = document.getElementById('codeEditor');
-    const highlighting = document.getElementById('codeHighlighting');
-    const lineNumbers = document.getElementById('lineNumbers');
-    const terminal = document.getElementById('terminalOutput');
-    const btnRun = document.getElementById('btnRunCode');
-    const btnClearConsole = document.getElementById('btnClearConsole');
-    const btnClearCode = document.getElementById('btnClearCode');
+// --- BASE DE DATOS DE ACTIVOS MÚLTIPLES ---
+const assetsDB = [
+    { id: 'eurusd', name: 'EUR/USD', payout: 0.85, price: 1.08550, history: [], volatility: 0.00010 },
+    { id: 'gbpjpy', name: 'GBP/JPY', payout: 0.82, price: 150.250, history: [], volatility: 0.01500 },
+    { id: 'crypto', name: 'Crypto Idx', payout: 0.88, price: 45000.5, history: [], volatility: 10.5000 },
+    { id: 'gold', name: 'Gold OTC', payout: 0.90, price: 2340.10, history: [], volatility: 1.2000 }
+];
+let activeAssetIndex = 0;
+const MAX_HISTORY = 60; // Puntos en el gráfico
 
-    // ==========================================
-    // 1. LA LIBRERÍA ESTÁNDAR (TUS 150 FUNCIONES)
-    // ==========================================
-    const stdLib = {
-        // ENTRADA / SALIDA
-        write: (...args) => printToTerminal("> " + args.join(" ")),
-        input: (msg) => prompt(msg || "Input requerido:"),
-        clear: () => { terminal.innerHTML = ''; },
-        wait: (ms) => new Promise(r => setTimeout(r, ms)),
-        stop: () => { throw new Error("Ejecución detenida por stop()"); },
-        error: (msg) => { throw new Error(msg); },
-        type: (v) => Array.isArray(v) ? 'list' : typeof v,
-        len: (v) => v ? v.length : 0,
-        eval: (c) => eval(c),
-        itis: (c) => { if(!c) throw new Error("Comprobación itis() falló."); return true; },
-        
-        // CONVERSIÓN DE TIPOS
-        tint: (v) => parseInt(v), tfloat: (v) => parseFloat(v), tstring: (v) => String(v), tbool: (v) => Boolean(v),
-        isint: Number.isInteger, isfloat: (v) => Number(v) === v && v % 1 !== 0, isstring: (v) => typeof v === 'string', isbool: (v) => typeof v === 'boolean', islist: Array.isArray, isnan: Number.isNaN,
-        
-        // MATEMÁTICAS
-        abs: Math.abs, rup: Math.ceil, rdown: Math.floor, rclose: Math.round, max: Math.max, min: Math.min, random: Math.random, pwr: Math.pow, sqrt: Math.sqrt, cbrt: Math.cbrt, pnoc: Math.sign, gmd: Math.trunc, log: Math.log, log10: Math.log10, exp: Math.exp, sin: Math.sin, cos: Math.cos, tan: Math.tan, asin: Math.asin, acos: Math.acos, atan: Math.atan, sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh, hypot: Math.hypot,
-        
-        // STRINGS (TEXTOS)
-        toupper: (s) => String(s).toUpperCase(), tolower: (s) => String(s).toLowerCase(),
-        pm: (s) => { s=String(s); return s.charAt(0).toUpperCase() + s.slice(1); },
-        gms: (s) => String(s).trim(), gmstar: (s) => String(s).trimStart(), gmsend: (s) => String(s).trimEnd(),
-        split: (s, d) => String(s).split(d), replace: (s, a, b) => String(s).replace(a,b), rall: (s, a, b) => String(s).replaceAll(a,b), contains: (s, x) => String(s).includes(x), startswith: (s, x) => String(s).startsWith(x), endswith: (s, x) => String(s).endsWith(x), indexof: (s, x) => String(s).indexOf(x), lastindexof: (s, x) => String(s).lastIndexOf(x), substring: (s, a, b) => String(s).substring(a,b), charat: (s, i) => String(s).charAt(i), charcodeat: (s, i) => String(s).charCodeAt(i), fromcharcode: String.fromCharCode, concat: (...args) => "".concat(...args), repeat: (s, n) => String(s).repeat(n), padstart: (s, l, f) => String(s).padStart(l,f), padend: (s, l, f) => String(s).padEnd(l,f), match: (s, r) => String(s).match(r), search: (s, r) => String(s).search(r), reversestr: (s) => String(s).split('').reverse().join(''),
-        
-        // LISTAS (ARRAYS)
-        push: (l, v) => { l.push(v); return l; }, pop: (l) => l.pop(), unshift: (l, v) => { l.unshift(v); return l; }, shift: (l) => l.shift(), insert: (l, i, v) => { l.splice(i,0,v); return l; }, removeat: (l, i) => { l.splice(i,1); return l; }, removeval: (l, v) => { const i = l.indexOf(v); if(i>-1) l.splice(i,1); return l; }, join: (l, s) => l.join(s), reverselist: (l) => [...l].reverse(), sort: (l) => [...l].sort(), slice: (l, a, b) => l.slice(a,b), splice: (l, ...a) => { l.splice(...a); return l; }, concatlist: (a, b) => a.concat(b), indexoflist: (l, v) => l.indexOf(v), includeslist: (l, v) => l.includes(v), map: (l, c) => l.map(c), filter: (l, c) => l.filter(c), reduce: (l, c, i) => l.reduce(c, i), find: (l, c) => l.find(c), findindex: (l, c) => l.findIndex(c), some: (l, c) => l.some(c), every: (l, c) => l.every(c), fill: (l, v) => l.fill(v), flat: (l) => l.flat(), emptylist: (l) => { l.length = 0; return l; },
-        
-        // OBJETOS (DICCIONARIOS)
-        keys: Object.keys, values: Object.values, entries: Object.entries, haskey: (o, k) => o.hasOwnProperty(k), deletekey: (o, k) => { delete o[k]; return o; }, mergeobj: (a, b) => ({...a, ...b}), cloneobj: (o) => JSON.parse(JSON.stringify(o)), freeze: Object.freeze, isfrozen: Object.isFrozen, sizeobj: (o) => Object.keys(o).length,
-        
-        // TIEMPO Y FECHAS
-        now: Date.now, date: () => new Date().toString(), year: () => new Date().getFullYear(), month: () => new Date().getMonth() + 1, day: () => new Date().getDate(), weekday: () => ['Dom','Lun','Mar','Mie','Jue','Vie','Sab'][new Date().getDay()], hours: () => new Date().getHours(), minutes: () => new Date().getMinutes(), seconds: () => new Date().getSeconds(), isleapyear: () => { const y = new Date().getFullYear(); return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0); }, adddays: (d, a) => new Date(new Date(d).getTime() + a*86400000), diffdays: (a, b) => Math.round(Math.abs((new Date(a) - new Date(b))/(86400000))), formattime: () => new Date().toLocaleTimeString(), formatdate: () => new Date().toLocaleDateString(), parsedate: (s) => Date.parse(s),
-        
-        // ENCRIPTACIÓN Y UTILIDADES
-        base64encode: btoa, base64decode: atob, jsonencode: JSON.stringify, jsondecode: JSON.parse, urlencode: encodeURIComponent, urldecode: decodeURIComponent, hashmd5: (s) => "hash_simulado_"+s.length, hashsha256: (s) => "hash_simulado_"+s.length, uuid: () => crypto.randomUUID(), hextobin: (h) => parseInt(h, 16).toString(2),
-        fetch: async (u) => await (await fetch(u)).json(), ping: () => navigator.onLine, settimeout: setTimeout, setinterval: setInterval, cleartimer: clearInterval, env: () => navigator.userAgent, platform: () => navigator.platform, version: () => "Emc Beta 2", beep: () => printToTerminal("🔔 BEEP!"), copy: (t) => navigator.clipboard.writeText(t), prompt: (m) => prompt(m), rgbtohex: (r,g,b) => "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1), hextorgb: (h) => { let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h); return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null; }, range: (s, e) => Array.from({length: e - s + 1}, (_, i) => s + i), gcd: (a, b) => { while(b) { let t = b; b = a % b; a = t; } return Math.abs(a); }, lcm: (a, b) => Math.abs(a*b)/stdLib.gcd(a,b), isprime: (n) => { for(let i = 2, s = Math.sqrt(n); i <= s; i++) if(n % i === 0) return false; return n > 1; }, factorial: (n) => { let r=1; for(let i=2; i<=n; i++) r*=i; return r; }, radtodeg: (r) => r * (180/Math.PI), degtorad: (d) => d * (Math.PI/180)
-    };
-
-    const coreFuncs = Object.keys(stdLib);
-    const keywords = ['if', 'else', 'elseif', 'switch', 'case', 'default', 'while', 'do', 'for', 'in', 'of', 'break', 'continue', 'try', 'catch', 'finally'];
-    const types = ['string', 'int', 'float', 'bool', 'list', 'obj', 'null', 'undefined'];
-
-    // ==========================================
-    // 2. LÓGICA DEL EDITOR Y SINTAXIS (VS CODE STYLE)
-    // ==========================================
-    function updateEditor() {
-        const text = editor.value;
-        const linesCount = text.split('\n').length;
-        let linesHtml = '';
-        for (let i = 1; i <= linesCount; i++) linesHtml += `<div>${i}</div>`;
-        lineNumbers.innerHTML = linesHtml;
-        highlighting.innerHTML = highlightEMC(text);
+// Inicializar historiales de cada activo
+assetsDB.forEach(asset => {
+    let currentPrice = asset.price;
+    for(let i=0; i<MAX_HISTORY; i++) {
+        currentPrice += (Math.random() - 0.5) * asset.volatility;
+        asset.history.push(currentPrice);
     }
-
-    function highlightEMC(text) {
-        let tokens = text.split(/(\/\/.*|\s+|"[^"]*"|'[^']*'|\d+\.\d+|\d+|[A-Za-z_]\w*|[=+\-*/<>(){}\[\],;])/g).filter(Boolean);
-        return tokens.map(token => {
-            if (/^\s+$/.test(token)) return token;
-            let safeToken = token.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            
-            if (token.startsWith('//')) return `<span class="token-comment">${safeToken}</span>`;
-            if (token.startsWith('"') || token.startsWith("'")) return `<span class="token-string">${safeToken}</span>`;
-            if (/^\d+(\.\d+)?$/.test(token)) return `<span class="token-number">${safeToken}</span>`;
-            
-            const lowerToken = token.toLowerCase();
-            if (lowerToken === 'include' || lowerToken === 'emcweb') return `<span class="token-keyword" style="font-weight:bold;">${safeToken}</span>`;
-            if (keywords.includes(lowerToken)) return `<span class="token-keyword">${safeToken}</span>`;
-            if (types.includes(lowerToken)) return `<span class="token-type" style="color:#4ec9b0;">${safeToken}</span>`;
-            if (coreFuncs.includes(lowerToken)) return `<span class="token-function">${safeToken}</span>`;
-            
-            if (/^[A-Za-z_]\w*$/.test(token)) return `<span class="token-identifier">${safeToken}</span>`;
-            if (['(', ')', '{', '}', '[', ']'].includes(token)) return `<span class="token-brace">${safeToken}</span>`;
-            
-            return safeToken;
-        }).join('');
-    }
-
-    editor.addEventListener('scroll', () => { 
-        highlighting.scrollTop = lineNumbers.scrollTop = editor.scrollTop; 
-        highlighting.scrollLeft = editor.scrollLeft; 
-    });
-    
-    editor.addEventListener('input', updateEditor);
-    
-    // Auto-cierre de llaves y tabulaciones
-    editor.addEventListener('keydown', (e) => {
-        if (e.key === 'Tab') {
-            e.preventDefault(); const s = editor.selectionStart, end = editor.selectionEnd;
-            editor.value = editor.value.substring(0, s) + "    " + editor.value.substring(end);
-            editor.selectionStart = editor.selectionEnd = s + 4; updateEditor();
-        }
-        if (e.key === '{') {
-            e.preventDefault(); const s = editor.selectionStart;
-            editor.value = editor.value.substring(0, s) + "{}" + editor.value.substring(s);
-            editor.selectionStart = editor.selectionEnd = s + 1; updateEditor();
-        }
-    });
-
-    updateEditor();
-
-    // ==========================================
-    // 3. SISTEMA DE CONSOLA Y EJECUCIÓN
-    // ==========================================
-    function printToTerminal(text, type = "output-msg") {
-        const line = document.createElement('div'); line.className = `terminal-line ${type}`;
-        line.innerText = String(text); terminal.appendChild(line); terminal.scrollTop = terminal.scrollHeight;
-    }
-    
-    btnClearConsole.addEventListener('click', () => { terminal.innerHTML = '<div class="terminal-line system-msg">>> Consola limpia.</div>'; });
-    btnClearCode.addEventListener('click', () => { if(confirm("¿Borrar todo el código?")) { editor.value = ""; updateEditor(); }});
-
-    // ==========================================
-    // 4. MOTOR ASÍNCRONO DEL INTÉRPRETE emc
-    // ==========================================
-    btnRun.addEventListener('click', async () => {
-        printToTerminal("\n>> Ejecutando...", "system-msg");
-        
-        const rawCode = editor.value;
-        
-        try {
-            await executeEMC(rawCode);
-            printToTerminal(">> Ejecución finalizada con éxito.", "system-msg");
-        } catch (err) {
-            printToTerminal(`⚠️ ERROR: ${err.message}`, "error-msg");
-        }
-    });
-
-    // Transpilador a Sandbox Asíncrono
-    async function executeEMC(code) {
-        // 1. Verificación de librería base
-        let isWebIncluded = /include\s+emcweb\s*;?/i.test(code);
-        let cleanCode = code.replace(/include\s+emcweb\s*;?/ig, ""); 
-        if(isWebIncluded) printToTerminal(">> Librería [emcweb] enlazada.", "system-msg");
-
-        // 2. Pre-Procesador Mágico
-        // Esto permite que escribas wait() y el sistema lo detecte como asíncrono
-        let processedCode = cleanCode.replace(/\bwait\s*\(/ig, "await wait(");
-        processedCode = processedCode.replace(/\bfetch\s*\(/ig, "await fetch(");
-        processedCode = processedCode.replace(/\belseif\b/ig, "else if"); // Transforma elseif nativamente
-        
-        // 3. Inyección en Sandbox sin Strict Mode
-        const paramNames = Object.keys(stdLib);
-        const paramValues = Object.values(stdLib);
-
-        // Instanciamos una AsyncFunction pura que permite variables globales (como "i = 1" en los for loops)
-        const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-        
-        try {
-            const runner = new AsyncFunction(...paramNames, processedCode);
-            await runner(...paramValues);
-        } catch (e) {
-            throw new Error(`Sintaxis inválida o ejecución fallida:\n"${e.message}"`);
-        }
-    }
+    asset.price = currentPrice;
 });
+
+// --- ESTADO GLOBAL ---
+let state = {
+    account: 'practice',
+    balancePrac: 10000.00,
+    balanceReal: 0.00,
+    amount: 1000,
+    duration: 60, // Segundos
+    activeTrades: []
+};
+
+// --- RENDERIZADO DE TABS ---
+function renderTabs() {
+    const container = document.getElementById('tabs-container');
+    container.innerHTML = '';
+    assetsDB.forEach((asset, index) => {
+        const tab = document.createElement('div');
+        tab.className = `tab ${index === activeAssetIndex ? 'active' : ''}`;
+        tab.innerHTML = `${asset.name} <span class="payout">${(asset.payout * 100)}%</span>`;
+        tab.onclick = () => {
+            activeAssetIndex = index;
+            document.getElementById('chart-title-overlay').innerText = asset.name;
+            renderTabs();
+            updateUI();
+        };
+        container.appendChild(tab);
+    });
+}
+
+// --- ACTUALIZACIÓN UI Y PANELES ---
+const formatMoney = (val, real = false) => (real ? 'COL$ ' : '$') + val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+function updateUI() {
+    const isReal = state.account === 'real';
+    const bal = isReal ? state.balanceReal : state.balancePrac;
+    const asset = assetsDB[activeAssetIndex];
+    
+    // Header
+    document.getElementById('header-balance').innerText = formatMoney(bal, isReal);
+    document.getElementById('header-balance').style.color = isReal ? 'var(--green)' : 'var(--orange)';
+    document.getElementById('header-type').innerText = isReal ? 'REAL' : 'PRÁCTICA';
+    
+    // Panel Cuentas
+    document.getElementById('pop-real-bal').innerText = formatMoney(state.balanceReal, true);
+    document.getElementById('pop-prac-bal').innerText = formatMoney(state.balancePrac, false);
+    document.getElementById('check-real').style.display = isReal ? 'block' : 'none';
+    document.getElementById('check-prac').style.display = !isReal ? 'block' : 'none';
+
+    // Panel Inversión
+    document.getElementById('display-amount').innerText = `$${state.amount.toLocaleString()}`;
+    document.getElementById('numpad-display').innerText = `$${state.amount.toLocaleString()}`;
+    
+    // Beneficios y Porcentajes
+    const profit = state.amount * asset.payout;
+    document.getElementById('display-profit-val').innerText = `+$${profit.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+    document.getElementById('display-profit-pct').innerText = `${(asset.payout * 100)}%`;
+    
+    document.getElementById('t-prof-1').innerText = `${(asset.payout * 100)}%`;
+    document.getElementById('t-prof-2').innerText = `${(asset.payout * 100)}%`;
+    document.getElementById('t-prof-3').innerText = `${(asset.payout * 100)}%`;
+
+    updatePortfolioUI();
+}
+
+function openPanel(id) {
+    closeAllPanels();
+    document.getElementById('overlay-bg').classList.add('active');
+    document.getElementById(id).classList.add('active');
+}
+
+function closeAllPanels() {
+    document.getElementById('overlay-bg').classList.remove('active');
+    document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('active'));
+}
+
+// --- INTERACCIONES Y BOTONES ---
+let numpadStr = "";
+function typeNumpad(val) {
+    if(val === 'del') numpadStr = numpadStr.slice(0, -1);
+    else if(numpadStr.length < 7) numpadStr += val;
+    setAmount(parseFloat(numpadStr) || 0, false);
+}
+function setAmount(val, resetStr = true) {
+    state.amount = val;
+    if(resetStr) numpadStr = val.toString();
+    updateUI();
+}
+function setTime(sec, label) {
+    state.duration = sec;
+    document.getElementById('display-time').innerText = label;
+    closeAllPanels();
+}
+function switchAccount(type) {
+    state.account = type; updateUI(); closeAllPanels(); showToast(`Cuenta cambiada a ${type.toUpperCase()}`, true);
+}
+function reloadPractice() {
+    state.balancePrac = 10000; updateUI(); closeAllPanels(); showToast('Cuenta de práctica recargada', true);
+}
+function depositReal(amount) {
+    state.balanceReal += amount; updateUI(); closeAllPanels(); showToast(`Depósito de COL$ ${amount.toLocaleString()} exitoso`, true);
+}
+
+// --- TOASTS ANIMADOS ---
+function showToast(msg, isWin) {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${isWin ? 'win' : 'loss'}`;
+    t.innerText = msg;
+    c.appendChild(t);
+    setTimeout(() => { t.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+// --- LÓGICA DE TRADING REALISTA ---
+function triggerTrade(dir) {
+    const currentBal = state.account === 'real' ? state.balanceReal : state.balancePrac;
+    if(currentBal < state.amount || state.amount <= 0) {
+        showToast('Saldo insuficiente', false); return;
+    }
+
+    const asset = assetsDB[activeAssetIndex];
+    if(state.account === 'real') state.balanceReal -= state.amount;
+    else state.balancePrac -= state.amount;
+    
+    const trade = {
+        id: Math.random().toString(36).substr(2, 5),
+        assetIndex: activeAssetIndex,
+        dir: dir,
+        amount: state.amount,
+        strikePrice: asset.price,
+        payout: asset.payout,
+        timeLeft: state.duration, // Segundos reales
+        account: state.account
+    };
+    state.activeTrades.push(trade);
+    updateUI();
+    closeAllPanels();
+    showToast(`Orden Abierta: ${dir === 'CALL' ? 'SUBE' : 'BAJA'} a ${asset.price.toFixed(4)}`, true);
+}
+
+function updatePortfolioUI() {
+    const portEl = document.getElementById('portfolio-content');
+    if(state.activeTrades.length === 0) {
+        portEl.innerHTML = "No hay operaciones activas en este momento.";
+        return;
+    }
+    let html = '';
+    state.activeTrades.forEach(t => {
+        html += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border); color:white;">
+            <div style="text-align:left;">
+                <span style="font-weight:bold;">${assetsDB[t.assetIndex].name}</span><br>
+                <span style="color:${t.dir==='CALL'?'var(--green)':'var(--red)'}">${t.dir}</span> | $${t.amount}
+            </div>
+            <div style="text-align:right;">
+                <span style="font-size:16px; font-weight:bold;">${t.timeLeft}s</span><br>
+                <span>Strike: ${t.strikePrice.toFixed(4)}</span>
+            </div>
+        </div>`;
+    });
+    portEl.innerHTML = html;
+}
+
+// --- MOTOR DEL GRÁFICO (TIEMPO REAL LENTO) ---
+setInterval(() => {
+    // 1. Mover todos los mercados cada 1 segundo (Tick Realista)
+    assetsDB.forEach(asset => {
+        const change = (Math.random() - 0.5) * asset.volatility;
+        asset.price += change;
+        asset.history.shift();
+        asset.history.push(asset.price);
+    });
+
+    // 2. Procesar Trades Activos (Temporizador real en segundos)
+    for(let i = state.activeTrades.length - 1; i >= 0; i--) {
+        const t = state.activeTrades[i];
+        t.timeLeft--;
+        if(t.timeLeft <= 0) {
+            const finalAsset = assetsDB[t.assetIndex];
+            let isWin = false;
+            if(t.dir === 'CALL' && finalAsset.price > t.strikePrice) isWin = true;
+            if(t.dir === 'PUT' && finalAsset.price < t.strikePrice) isWin = true;
+
+            if(isWin) {
+                const profit = t.amount * (1 + t.payout);
+                if(t.account === 'real') state.balanceReal += profit;
+                else state.balancePrac += profit;
+                showToast(`¡Ganancia! +${formatMoney(profit - t.amount, t.account==='real')}`, true);
+            } else {
+                showToast('Operación cerrada sin beneficio', false);
+            }
+            state.activeTrades.splice(i, 1);
+        }
+    }
+    updateUI(); // Refresca saldos y portafolio si algo cambió
+}, 1000); // 1 Tick por Segundo
+
+// --- RENDERIZADO FLUIDO (CANVAS 60FPS) ---
+const canvas = document.getElementById('chart');
+const ctx = canvas.getContext('2d');
+let width, height;
+
+function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    width = canvas.parentElement.clientWidth;
+    height = canvas.parentElement.clientHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+}
+window.addEventListener('resize', resizeCanvas);
+
+function drawChart() {
+    ctx.clearRect(0, 0, width, height);
+    
+    const asset = assetsDB[activeAssetIndex];
+    const hist = asset.history;
+    const min = Math.min(...hist);
+    const max = Math.max(...hist);
+    const range = (max - min) || 1;
+    const padding = height * 0.2; 
+    const finalMin = min - (range * 0.1);
+    const finalMax = max + (range * 0.1);
+    const finalRange = finalMax - finalMin;
+
+    // Cuadrícula sutil
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for(let i=0; i<width; i+=80) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,height); ctx.stroke(); }
+    for(let i=0; i<height; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(width,i); ctx.stroke(); }
+
+    // Renderizar Líneas de Trades Activos en el activo actual
+    state.activeTrades.forEach(t => {
+        if(t.assetIndex !== activeAssetIndex) return;
+        const y = height - ((t.strikePrice - finalMin) / finalRange) * height;
+        ctx.beginPath();
+        ctx.strokeStyle = t.dir === 'CALL' ? '#26b948' : '#ff4b4b';
+        ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+        ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); ctx.setLineDash([]);
+    });
+
+    // Línea Principal (Interpolación suave nativa del Canvas)
+    ctx.beginPath();
+    const isUp = hist[hist.length-1] >= hist[0];
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'; 
+    ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+
+    let lastX, lastY;
+    for(let i=0; i<hist.length; i++) {
+        const x = (i / (hist.length - 1)) * (width - 60); // Espacio derecho para la etiqueta
+        const y = height - ((hist[i] - finalMin) / finalRange) * height;
+        if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        if(i === hist.length - 1) { lastX = x; lastY = y; }
+    }
+    ctx.stroke();
+
+    // Degradado bajo la línea
+    ctx.lineTo(lastX, height); ctx.lineTo(0, height);
+    const grad = ctx.createLinearGradient(0, 0, 0, height);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = grad; ctx.fill();
+
+    // Línea punteada dinámica hacia el eje Y
+    ctx.beginPath();
+    ctx.strokeStyle = isUp ? 'rgba(38, 185, 72, 0.8)' : 'rgba(255, 75, 75, 0.8)';
+    ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.moveTo(lastX, lastY); ctx.lineTo(width, lastY); ctx.stroke(); ctx.setLineDash([]);
+
+    // Punto Brillante Actual
+    ctx.beginPath(); ctx.arc(lastX, lastY, 4, 0, Math.PI*2);
+    ctx.fillStyle = isUp ? '#26b948' : '#ff4b4b'; ctx.fill();
+    ctx.shadowBlur = 10; ctx.shadowColor = ctx.fillStyle; ctx.fill(); ctx.shadowBlur = 0;
+
+    // Etiqueta Eje Y
+    ctx.fillStyle = ctx.fillStyle;
+    ctx.fillRect(width - 60, lastY - 12, 60, 24);
+    ctx.beginPath(); ctx.moveTo(width - 60, lastY - 12); ctx.lineTo(width - 68, lastY); ctx.lineTo(width - 60, lastY + 12); ctx.fill();
+    
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(hist[hist.length-1].toFixed(4), width - 30, lastY + 4);
+    ctx.textAlign = 'left';
+
+    requestAnimationFrame(drawChart); // Dibuja fluidamente los cambios del array
+}
+
+// --- INIT ---
+renderTabs();
+resizeCanvas();
+updateUI();
+requestAnimationFrame(drawChart);
