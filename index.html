@@ -2,184 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IQ Frontend - Mobile Experience</title>
-    <style>
-        /* --- VARIABLES DE DISEÑO --- */
-        :root {
-            --bg-main: #14151a;
-            --bg-panel: #1e222a;
-            --bg-overlay: rgba(30, 34, 42, 0.95);
-            --bg-modal: #232731;
-            --text-main: #ffffff;
-            --text-muted: #8890a5;
-            --green: #26b948;
-            --green-active: #1e9938;
-            --red: #ff4b4b;
-            --red-active: #d63d3d;
-            --orange: #ff8c00;
-            --border: #313642;
-            --border-light: #3f4656;
-        }
-
-        * {
-            box-sizing: border-box; margin: 0; padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent; /* Quita el brillo azul al tocar en móviles */
-            user-select: none; /* Evita seleccionar texto por error */
-        }
-
-        body {
-            background-color: var(--bg-main); color: var(--text-main);
-            height: 100vh; width: 100vw; overflow: hidden;
-            display: flex; flex-direction: column;
-        }
-
-        /* --- PANTALLA DE ROTACIÓN (Solo se ve si el cel está vertical) --- */
-        #rotate-screen {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-main); z-index: 99999; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center; padding: 20px;
-        }
-        @media screen and (orientation: portrait) {
-            #rotate-screen { display: flex; }
-        }
-
-        /* --- TOP BAR (Adaptada para no robar espacio vertical) --- */
-        .topbar {
-            height: 40px; background-color: var(--bg-panel); display: flex;
-            justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
-            z-index: 10;
-        }
-        .topbar-left { display: flex; align-items: center; height: 100%; overflow-x: auto; scroll-behavior: smooth; }
-        .topbar-left::-webkit-scrollbar { display: none; }
-        
-        .menu-btn {
-            min-width: 45px; height: 100%; display: flex; justify-content: center; align-items: center;
-            font-size: 20px; color: var(--text-muted); cursor: pointer; border-right: 1px solid var(--border);
-        }
-        .menu-btn:active { background: rgba(255,255,255,0.05); }
-
-        .tab {
-            padding: 0 12px; display: flex; align-items: center; gap: 8px; height: 100%;
-            background-color: var(--bg-panel); border-right: 1px solid var(--border);
-            border-top: 2px solid transparent; font-size: 11px; font-weight: 600; color: var(--text-muted);
-            transition: all 0.2s ease; min-width: 120px; justify-content: space-between;
-        }
-        .tab.active { background-color: var(--bg-overlay); border-top: 2px solid var(--orange); color: white; }
-        .tab span.payout { color: var(--green); font-size: 11px; }
-
-        .topbar-right { display: flex; align-items: center; padding-right: 10px; gap: 10px; }
-        .account-wrapper { display: flex; align-items: center; background: #1a1d24; border: 1px solid var(--border); border-radius: 4px; height: 30px; }
-        .account-info { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding: 0 8px; height: 100%; }
-        .acc-balance { color: var(--orange); font-size: 13px; font-weight: bold; line-height: 1; }
-        .acc-type { color: var(--text-muted); font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
-        .acc-dropdown-btn { background: #262a34; padding: 0 8px; display: flex; align-items: center; justify-content: center; height: 100%; border-left: 1px solid var(--border); font-size: 10px;}
-        .btn-deposit { background-color: transparent; color: var(--green); border: 1px solid var(--green); padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-
-        /* --- LAYOUT PRINCIPAL --- */
-        .main-layout { display: flex; flex: 1; height: calc(100vh - 40px); position: relative; }
-
-        /* BARRA LATERAL (Más fina para móvil) */
-        .sidebar {
-            width: 45px; background-color: var(--bg-panel); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 10px;
-            z-index: 5;
-        }
-        .side-icon {
-            width: 35px; height: 35px; display: flex; justify-content: center; align-items: center;
-            font-size: 16px; color: var(--text-muted); border-radius: 6px; transition: 0.2s;
-        }
-        .side-icon:active { color: white; background: rgba(255,255,255,0.1); transform: scale(0.9); }
-
-        /* GRÁFICO */
-        .chart-container { flex: 1; position: relative; background: linear-gradient(to bottom, #1e222a, #14151a); overflow: hidden; }
-        canvas { display: block; width: 100%; height: 100%; }
-        .asset-title-overlay {
-            position: absolute; top: 15px; left: 15px; font-size: 20px; font-weight: bold; color: rgba(255,255,255,0.4);
-            pointer-events: none; text-transform: uppercase; letter-spacing: 1px;
-        }
-
-        /* CONTROLES DERECHOS (Optimizados para pantalla táctil) */
-        .right-panel {
-            width: 220px; background-color: rgba(25, 28, 35, 0.95); border-left: 1px solid var(--border);
-            padding: 10px; display: flex; flex-direction: column; gap: 8px; z-index: 5;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
-        }
-        
-        .control-group {
-            background-color: var(--bg-overlay); border-radius: 6px; padding: 8px 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid var(--border-light); transition: transform 0.1s, background 0.2s;
-        }
-        .control-group:active { transform: scale(0.97); background-color: #333947; }
-        .control-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; display: block; font-weight: bold;}
-        .control-value { font-size: 16px; font-weight: bold; }
-
-        .profit-info { margin: 5px 0; padding: 0 5px; }
-        .profit-row { display: flex; justify-content: space-between; align-items: flex-end; }
-        .profit-amount { font-size: 18px; font-weight: bold; color: var(--text-main); }
-        .profit-percent { font-size: 16px; font-weight: bold; color: var(--green); }
-
-        .btn-trade {
-            width: 100%; flex: 1; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; color: white;
-            display: flex; justify-content: space-between; align-items: center; padding: 0 15px;
-            transition: transform 0.1s ease, box-shadow 0.2s; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
-        }
-        .btn-trade:active { transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0.3); }
-        .btn-call { background: linear-gradient(180deg, var(--green) 0%, #1e9938 100%); }
-        .btn-put { background: linear-gradient(180deg, var(--red) 0%, #d63d3d 100%); }
-
-        /* --- ANIMACIONES Y OVERLAYS MODALES --- */
-        .overlay-bg {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index: 100; opacity: 0; transition: opacity 0.3s;
-        }
-        .overlay-bg.active { display: block; opacity: 1; }
-
-        .slide-panel {
-            position: fixed; right: -300px; top: 0; width: 280px; height: 100vh;
-            background: var(--bg-modal); z-index: 101; box-shadow: -10px 0 20px rgba(0,0,0,0.5);
-            transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            display: flex; flex-direction: column;
-        }
-        .slide-panel.active { right: 0; }
-        
-        .panel-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 14px;}
-        .close-btn { font-size: 20px; color: var(--text-muted); padding: 5px; }
-
-        /* Numpad Mobile */
-        .numpad-display { background: var(--bg-main); margin: 15px; padding: 15px; border-radius: 6px; font-size: 28px; text-align: center; border: 1px solid var(--border-light); font-weight: bold;}
-        .numpad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 15px 15px 15px; }
-        .num-key { background: #313642; border: none; color: white; font-size: 20px; padding: 15px 0; border-radius: 6px; font-weight: 500; transition: 0.1s;}
-        .num-key:active { background: var(--text-muted); transform: scale(0.95); }
-        .quick-amounts-row { display: flex; overflow-x: auto; gap: 10px; padding: 0 15px 15px 15px; }
-        .quick-amounts-row::-webkit-scrollbar { display: none; }
-        .q-amt-btn { background: transparent; border: 1px solid var(--border-light); color: white; padding: 8px 15px; border-radius: 20px; font-size: 12px; white-space: nowrap; transition: 0.1s;}
-        .q-amt-btn:active { background: rgba(255,255,255,0.1); }
-
-        /* Time Panel */
-        .time-list { overflow-y: auto; flex: 1; }
-        .time-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--border); transition: 0.1s; }
-        .time-item:active { background: rgba(255,255,255,0.05); }
-        .t-val { font-size: 16px; font-weight: bold; }
-        .t-profit { color: var(--green); font-size: 12px; font-weight: bold; }
-
-        /* Account Panel */
-        #panel-account { width: 320px; }
-        .acc-item { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transition: 0.1s;}
-        .acc-item:active { background: rgba(255,255,255,0.05); }
-        .acc-item h4 { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
-        .acc-item .bal { font-size: 20px; font-weight: bold; }
-
-        /* Toasts Animados */
-        .toast-container { position: absolute; bottom: 15px; left: 60px; display: flex; flex-direction: column-reverse; gap: 8px; z-index: 50; pointer-events: none;}
-        .toast { background: var(--bg-modal); border-left: 4px solid var(--green); padding: 12px 15px; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); color: white; font-weight: bold; font-size: 12px; animation: slideUpFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: auto;}
-        .toast.loss { border-color: var(--red); }
-        @keyframes slideUpFade { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
-
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Uranium Trade - Pro Platform</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -190,17 +15,17 @@
             <path d="M12 18h.01"></path>
         </svg>
         <h2 style="font-size: 18px;">Por favor, gira tu dispositivo</h2>
-        <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">Esta plataforma está optimizada para la vista horizontal (landscape).</p>
-        <style>@keyframes rotatePhone { 0% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } 100% { transform: rotate(-90deg); } }</style>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">Plataforma optimizada para vista horizontal.</p>
     </div>
 
+    <!-- BARRA SUPERIOR -->
     <header class="topbar">
         <div class="topbar-left">
-            <div class="menu-btn">≡</div>
-            <div class="tab active">EUR/USD <span class="payout">85%</span></div>
-            <div class="tab">GBP/JPY <span class="payout">82%</span></div>
-            <div class="tab">Crypto Idx <span class="payout">88%</span></div>
-            <div class="menu-btn" style="border-left: 1px solid var(--border);">+</div >
+            <div class="menu-btn" onclick="openPanel('panel-menu')">≡</div>
+            <div id="tabs-container" style="display: flex; height: 100%;">
+                <!-- Las pestañas se inyectan vía JS -->
+            </div>
+            <div class="menu-btn" style="border-left: 1px solid var(--border);" onclick="openPanel('panel-assets')">+</div>
         </div>
         <div class="topbar-right">
             <div class="account-wrapper" onclick="openPanel('panel-account')">
@@ -210,24 +35,28 @@
                 </div>
                 <div class="acc-dropdown-btn">▼</div>
             </div>
-            <button class="btn-deposit">Depósito</button>
+            <button class="btn-deposit" onclick="openPanel('panel-deposit')">Depósito</button>
         </div>
     </header>
 
+    <!-- LAYOUT PRINCIPAL -->
     <div class="main-layout">
+        <!-- BARRA LATERAL -->
         <aside class="sidebar">
-            <div class="side-icon" onclick="showToast('Portafolio abierto', true)">💼</div>
-            <div class="side-icon" onclick="showToast('Historial cargado', true)">📋</div>
-            <div class="side-icon">🏆</div>
-            <div class="side-icon" style="margin-top: auto; margin-bottom: 5px;" onclick="openPanel('panel-admin')">⚙️</div>
+            <div class="side-icon" onclick="openPanel('panel-portfolio')" title="Portafolio">💼</div>
+            <div class="side-icon" onclick="openPanel('panel-history')" title="Historial">📋</div>
+            <div class="side-icon" onclick="openPanel('panel-leaderboard')" title="Torneos">🏆</div>
+            <div class="side-icon" style="margin-top: auto; margin-bottom: 5px;" onclick="openPanel('panel-admin')" title="Ajustes">⚙️</div>
         </aside>
 
+        <!-- GRÁFICO -->
         <main class="chart-container">
-            <div class="asset-title-overlay">EUR/USD</div>
+            <div class="asset-title-overlay" id="chart-title-overlay">EUR/USD</div>
             <canvas id="chart"></canvas>
             <div class="toast-container" id="toast-container"></div>
         </main>
 
+        <!-- PANEL DERECHO (CONTROLES) -->
         <aside class="right-panel">
             <div class="control-group" onclick="openPanel('panel-amount')">
                 <div>
@@ -249,7 +78,7 @@
                 <span class="control-label">Beneficio</span>
                 <div class="profit-row">
                     <span class="profit-amount" id="display-profit-val">+$850.00</span>
-                    <span class="profit-percent">85%</span>
+                    <span class="profit-percent" id="display-profit-pct">85%</span>
                 </div>
             </div>
 
@@ -264,17 +93,13 @@
         </aside>
     </div>
 
-    <!-- FONDO OSCURO PARA PANELES -->
+    <!-- OVERLAYS Y MODALES -->
     <div class="overlay-bg" id="overlay-bg" onclick="closeAllPanels()"></div>
 
-    <!-- PANEL INVERSIÓN (DESLIZABLE) -->
+    <!-- Panel Importe -->
     <div class="slide-panel" id="panel-amount">
-        <div class="panel-header">
-            <span>Importe de Inversión</span>
-            <div class="close-btn" onclick="closeAllPanels()">✕</div>
-        </div>
+        <div class="panel-header"><span>Importe de Inversión</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
         <div class="numpad-display" id="numpad-display">$1,000</div>
-        
         <div class="quick-amounts-row">
             <button class="q-amt-btn" onclick="setAmount(10)">$10</button>
             <button class="q-amt-btn" onclick="setAmount(50)">$50</button>
@@ -282,7 +107,6 @@
             <button class="q-amt-btn" onclick="setAmount(500)">$500</button>
             <button class="q-amt-btn" onclick="setAmount(1000)">$1,000</button>
         </div>
-
         <div class="numpad-grid">
             <button class="num-key" onclick="typeNumpad(1)">1</button>
             <button class="num-key" onclick="typeNumpad(2)">2</button>
@@ -299,311 +123,58 @@
         </div>
     </div>
 
-    <!-- PANEL TIEMPO -->
+    <!-- Panel Tiempo -->
     <div class="slide-panel" id="panel-time">
-        <div class="panel-header">
-            <span>Tiempo de Expiración</span>
-            <div class="close-btn" onclick="closeAllPanels()">✕</div>
-        </div>
+        <div class="panel-header"><span>Tiempo de Expiración</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
         <div class="time-list">
-            <div class="time-item" onclick="setTime(15, '15 Seg')">
-                <span class="t-val">15 Segundos</span><span class="t-profit">Rápido</span>
-            </div>
-            <div class="time-item" onclick="setTime(60, '1 Min')">
-                <span class="t-val">1 Minuto</span><span class="t-profit">85%</span>
-            </div>
-            <div class="time-item" onclick="setTime(120, '2 Min')">
-                <span class="t-val">2 Minutos</span><span class="t-profit">85%</span>
-            </div>
-            <div class="time-item" onclick="setTime(300, '5 Min')">
-                <span class="t-val">5 Minutos</span><span class="t-profit">85%</span>
-            </div>
+            <div class="time-item" onclick="setTime(15, '15 Seg')"><span class="t-val">15 Segundos</span><span class="t-profit">Rápido</span></div>
+            <div class="time-item" onclick="setTime(60, '1 Min')"><span class="t-val">1 Minuto</span><span class="t-profit" id="t-prof-1">85%</span></div>
+            <div class="time-item" onclick="setTime(120, '2 Min')"><span class="t-val">2 Minutos</span><span class="t-profit" id="t-prof-2">85%</span></div>
+            <div class="time-item" onclick="setTime(300, '5 Min')"><span class="t-val">5 Minutos</span><span class="t-profit" id="t-prof-3">85%</span></div>
         </div>
     </div>
 
-    <!-- PANEL CUENTAS -->
+    <!-- Panel Cuentas -->
     <div class="slide-panel" id="panel-account">
-        <div class="panel-header">
-            <span>Seleccionar Cuenta</span>
-            <div class="close-btn" onclick="closeAllPanels()">✕</div>
-        </div>
+        <div class="panel-header"><span>Seleccionar Cuenta</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
         <div class="acc-item" onclick="switchAccount('real')">
-            <div><h4>CUENTA REAL</h4><div class="bal" style="color:var(--green)">COL$ 0.00</div></div>
+            <div><h4>CUENTA REAL</h4><div class="bal" style="color:var(--green)" id="pop-real-bal">COL$ 0.00</div></div>
             <div id="check-real" style="display:none; color:white; font-size:20px;">✓</div>
         </div>
         <div class="acc-item" onclick="switchAccount('practice')">
-            <div><h4>CUENTA DE PRÁCTICA</h4><div class="bal" style="color:var(--orange)">$10,000.00</div></div>
+            <div><h4>CUENTA DE PRÁCTICA</h4><div class="bal" style="color:var(--orange)" id="pop-prac-bal">$10,000.00</div></div>
             <div id="check-prac" style="color:white; font-size:20px;">✓</div>
         </div>
         <div style="padding: 20px;">
-            <button onclick="reloadPractice()" style="width:100%; padding:15px; border:none; border-radius:6px; background:var(--orange); color:white; font-weight:bold; font-size:14px; box-shadow: 0 4px 0 #cc7000; transition: transform 0.1s, box-shadow 0.1s;">↻ RECARGAR PRÁCTICA</button>
+            <button onclick="reloadPractice()" class="btn-primary" style="background:var(--orange); box-shadow: 0 4px 0 #cc7000;">↻ RECARGAR PRÁCTICA</button>
         </div>
     </div>
 
-    <!-- PANEL ADMIN (Mantenido visualmente) -->
-    <div class="slide-panel" id="panel-admin">
-        <div class="panel-header">
-            <span>Configuración (Admin)</span>
-            <div class="close-btn" onclick="closeAllPanels()">✕</div>
-        </div>
-        <div style="padding: 20px; display:flex; flex-direction:column; gap:15px;">
-            <div style="background:var(--bg-main); padding:15px; border-radius:6px; border:1px solid var(--border);">
-                <label style="font-size:10px; color:var(--text-muted); display:block; margin-bottom:5px;">MANUAL OVERRIDE (PRÁCTICA)</label>
-                <input type="number" id="admin-input" placeholder="Monto" style="width:100%; padding:10px; background:var(--bg-panel); border:1px solid var(--border); color:white; border-radius:4px; margin-bottom:10px; outline:none;">
-                <div style="display:flex; gap:10px;">
-                    <button onclick="adminAction('add')" style="flex:1; padding:10px; border:none; background:var(--green); color:white; border-radius:4px; font-weight:bold;">Añadir</button>
-                    <button onclick="adminAction('sub')" style="flex:1; padding:10px; border:none; background:var(--red); color:white; border-radius:4px; font-weight:bold;">Quitar</button>
-                </div>
-            </div>
-            <button onclick="alert('Funcionalidad de baneo bloqueada en modo visual frontend.')" style="padding:15px; border:1px solid var(--border); background:transparent; color:var(--red); border-radius:4px; font-weight:bold;">Bloquear Acceso</button>
+    <!-- Otros Paneles UI Genéricos -->
+    <div class="slide-panel" id="panel-portfolio">
+        <div class="panel-header"><span>Portafolio Activo</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
+        <div style="padding: 15px; color: var(--text-muted); font-size: 12px; text-align: center;" id="portfolio-content">
+            No hay operaciones activas en este momento.
         </div>
     </div>
 
-<script>
-    // --- ESTADO LOCAL ---
-    let state = {
-        account: 'practice',
-        balancePrac: 10000.00,
-        balanceReal: 0.00,
-        amount: 1000,
-        payout: 0.85
-    };
-    
-    // --- UI Y PANELES (Animaciones CSS) ---
-    function openPanel(id) {
-        closeAllPanels();
-        document.getElementById('overlay-bg').classList.add('active');
-        document.getElementById(id).classList.add('active');
-    }
-    
-    function closeAllPanels() {
-        document.getElementById('overlay-bg').classList.remove('active');
-        document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('active'));
-    }
+    <div class="slide-panel" id="panel-history">
+        <div class="panel-header"><span>Historial de Trading</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
+        <div style="padding: 15px; color: var(--text-muted); font-size: 12px; text-align: center;">
+            El historial está vacío.
+        </div>
+    </div>
 
-    const formatMoney = (val, real = false) => (real ? 'COL$ ' : '$') + val.toLocaleString('en-US', {minimumFractionDigits: 2});
+    <div class="slide-panel" id="panel-deposit">
+        <div class="panel-header"><span>Depósito (Simulado)</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
+        <div style="padding: 20px;">
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Recarga tu cuenta real para operar en el mercado en vivo.</p>
+            <button onclick="depositReal(50000)" class="btn-primary" style="background:var(--green); box-shadow: 0 4px 0 #1e9938; margin-bottom: 10px;">Depositar COL$ 50,000</button>
+            <button onclick="depositReal(100000)" class="btn-primary" style="background:var(--green); box-shadow: 0 4px 0 #1e9938;">Depositar COL$ 100,000</button>
+        </div>
+    </div>
 
-    function updateUI() {
-        const isReal = state.account === 'real';
-        const bal = isReal ? state.balanceReal : state.balancePrac;
-        
-        document.getElementById('header-balance').innerText = formatMoney(bal, isReal);
-        document.getElementById('header-balance').style.color = isReal ? 'var(--green)' : 'var(--orange)';
-        document.getElementById('header-type').innerText = isReal ? 'REAL' : 'PRÁCTICA';
-        
-        document.getElementById('check-real').style.display = isReal ? 'block' : 'none';
-        document.getElementById('check-prac').style.display = !isReal ? 'block' : 'none';
-
-        document.getElementById('display-amount').innerText = `$${state.amount.toLocaleString()}`;
-        document.getElementById('numpad-display').innerText = `$${state.amount.toLocaleString()}`;
-        
-        const profit = state.amount * state.payout;
-        document.getElementById('display-profit-val').innerText = `+$${profit.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-    }
-
-    // --- INTERACCIONES ---
-    let numpadStr = "";
-    function typeNumpad(val) {
-        if(val === 'del') numpadStr = numpadStr.slice(0, -1);
-        else if(numpadStr.length < 7) numpadStr += val;
-        setAmount(parseFloat(numpadStr) || 0, false);
-    }
-    function setAmount(val, resetStr = true) {
-        state.amount = val;
-        if(resetStr) numpadStr = val.toString();
-        updateUI();
-    }
-    function setTime(sec, label) {
-        document.getElementById('display-time').innerText = label;
-        closeAllPanels();
-    }
-    function switchAccount(type) {
-        state.account = type; updateUI(); closeAllPanels();
-    }
-    function reloadPractice() {
-        state.balancePrac = 10000; updateUI(); closeAllPanels();
-        showToast('Cuenta de práctica recargada', true);
-    }
-
-    // --- TOASTS ANIMADOS ---
-    function showToast(msg, isWin) {
-        const c = document.getElementById('toast-container');
-        const t = document.createElement('div');
-        t.className = `toast ${isWin ? 'win' : 'loss'}`;
-        t.innerText = msg;
-        c.appendChild(t);
-        
-        // Remover con animación de salida
-        setTimeout(() => {
-            t.style.animation = 'fadeOut 0.3s forwards';
-            setTimeout(() => t.remove(), 300);
-        }, 3000);
-    }
-
-    // --- LÓGICA DE TRADING SIMULADA (Visual) ---
-    let activeTrades = [];
-    
-    function triggerTrade(dir) {
-        const currentBal = state.account === 'real' ? state.balanceReal : state.balancePrac;
-        if(currentBal < state.amount || state.amount <= 0) {
-            showToast('Saldo insuficiente', false);
-            return;
-        }
-
-        // Descontar visualmente
-        if(state.account === 'real') state.balanceReal -= state.amount;
-        else state.balancePrac -= state.amount;
-        updateUI();
-
-        const trade = {
-            dir: dir,
-            amount: state.amount,
-            strikeY: currentY, // Guardamos la coordenada Y actual del gráfico para pintar la línea
-            timer: 150 // Simula frames (aprox 2.5 seg) para un resultado rápido visual
-        };
-        activeTrades.push(trade);
-        showToast(`Orden enviada: ${dir === 'CALL' ? 'SUBE' : 'BAJA'}`, true);
-    }
-
-    // --- GRÁFICO SÚPER FLUIDO (ANIMACIÓN 60FPS) ---
-    const canvas = document.getElementById('chart');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-    let pricePoints = [];
-    const maxPoints = 100;
-    
-    // Variables para simular mercado suave
-    let timeOffset = 0;
-    let baseValue = 100;
-    let currentY = 0;
-
-    function resizeCanvas() {
-        const dpr = window.devicePixelRatio || 1;
-        width = canvas.parentElement.clientWidth;
-        height = canvas.parentElement.clientHeight;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        ctx.scale(dpr, dpr);
-        
-        // Llenar datos iniciales
-        if(pricePoints.length === 0) {
-            for(let i=0; i<maxPoints; i++) {
-                pricePoints.push(generateNextPoint());
-            }
-        }
-    }
-    window.addEventListener('resize', resizeCanvas);
-
-    function generateNextPoint() {
-        timeOffset += 0.04; // Velocidad de las "olas"
-        const noise = (Math.random() - 0.5) * 0.5; // Ruido errático tipo mercado
-        const wave = Math.sin(timeOffset) * 2 + Math.cos(timeOffset * 0.5) * 1;
-        baseValue += wave * 0.1 + noise;
-        return baseValue;
-    }
-
-    function renderLoop() {
-        // Generar nuevo dato en cada frame
-        pricePoints.shift();
-        pricePoints.push(generateNextPoint());
-
-        ctx.clearRect(0, 0, width, height);
-
-        const min = Math.min(...pricePoints);
-        const max = Math.max(...pricePoints);
-        const range = (max - min) || 1;
-        const padding = height * 0.2; // Margen interior
-
-        // Cuadrícula de fondo
-        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-        ctx.lineWidth = 1;
-        for(let i=0; i<width; i+=60) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,height); ctx.stroke(); }
-        for(let i=0; i<height; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(width,i); ctx.stroke(); }
-
-        // Renderizar Trades Activos (Líneas horizontales)
-        for(let i = activeTrades.length - 1; i >= 0; i--) {
-            const t = activeTrades[i];
-            ctx.beginPath();
-            ctx.strokeStyle = t.dir === 'CALL' ? '#26b948' : '#ff4b4b';
-            ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
-            ctx.moveTo(0, t.strikeY); ctx.lineTo(width, t.strikeY);
-            ctx.stroke(); ctx.setLineDash([]);
-
-            // Lógica de expiración visual
-            t.timer--;
-            if(t.timer <= 0) {
-                // Resolver trade aleatoriamente para el efecto frontend
-                const isWin = Math.random() > 0.5;
-                if(isWin) {
-                    const profit = t.amount * (1 + state.payout);
-                    if(state.account === 'real') state.balanceReal += profit;
-                    else state.balancePrac += profit;
-                    showToast(`Ganancia: +$${(profit - t.amount).toLocaleString()}`, true);
-                } else {
-                    showToast('Operación cerrada sin beneficio', false);
-                }
-                updateUI();
-                activeTrades.splice(i, 1);
-            }
-        }
-
-        // Trazado de la línea del gráfico
-        ctx.beginPath();
-        const isUp = pricePoints[pricePoints.length-1] >= pricePoints[pricePoints.length-10];
-        ctx.strokeStyle = 'rgba(255,255,255,0.9)'; // Línea blanca estándar
-        ctx.lineWidth = 2.5;
-        ctx.lineJoin = 'round';
-
-        let lastX;
-        for(let i=0; i<pricePoints.length; i++) {
-            const x = (i / (maxPoints - 1)) * (width - 50); // Eje Y derecho libre
-            const y = height - padding - ((pricePoints[i] - min) / range) * (height - padding * 2);
-            if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            
-            if(i === pricePoints.length - 1) {
-                lastX = x; currentY = y;
-            }
-        }
-        ctx.stroke();
-
-        // Degradado bajo la línea
-        ctx.lineTo(lastX, height); ctx.lineTo(0, height);
-        const grad = ctx.createLinearGradient(0, 0, 0, height);
-        grad.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
-        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = grad; ctx.fill();
-
-        // Punto Brillante
-        ctx.beginPath(); ctx.arc(lastX, currentY, 5, 0, Math.PI*2);
-        ctx.fillStyle = isUp ? '#26b948' : '#ff4b4b'; ctx.fill();
-        ctx.shadowBlur = 12; ctx.shadowColor = ctx.fillStyle; ctx.fill(); ctx.shadowBlur = 0;
-
-        // Etiqueta de Eje Y
-        ctx.fillStyle = ctx.fillStyle;
-        ctx.fillRect(width - 55, currentY - 10, 55, 20);
-        ctx.beginPath(); ctx.moveTo(width - 55, currentY - 10); ctx.lineTo(width - 62, currentY); ctx.lineTo(width - 55, currentY + 10); ctx.fill();
-        
-        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(pricePoints[pricePoints.length-1].toFixed(5), width - 25, currentY + 4);
-        ctx.textAlign = 'left';
-
-        requestAnimationFrame(renderLoop);
-    }
-
-    // --- ADMIN ACTIONS ---
-    function adminAction(type) {
-        const amt = parseFloat(document.getElementById('admin-input').value) || 0;
-        if(type === 'add') state.balancePrac += amt;
-        if(type === 'sub') state.balancePrac = Math.max(0, state.balancePrac - amt);
-        updateUI();
-        showToast('Saldo admin actualizado', true);
-    }
-
-    // --- ARRANQUE ---
-    updateUI();
-    resizeCanvas();
-    requestAnimationFrame(renderLoop);
-
-</script>
+    <!-- Script -->
+    <script src="script.js"></script>
 </body>
 </html>
