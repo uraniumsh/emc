@@ -1,4 +1,4 @@
-// --- BASE DE DATOS MÚLTIPLES ---
+// --- BASE DE DATOS MÚLTIPLES ACTIVOS ---
 const assetsDB = [
     { id: 'eurusd', name: 'EUR/USD', payout: 0.85, basePrice: 1.08550, volatility: 0.00010 },
     { id: 'gbpjpy', name: 'GBP/JPY', payout: 0.82, basePrice: 150.250, volatility: 0.01500 },
@@ -6,11 +6,11 @@ const assetsDB = [
     { id: 'gold', name: 'Gold OTC', payout: 0.90, basePrice: 2340.10, volatility: 1.5000 }
 ];
 
-let activeTabs = [0, 1]; // Índices de los activos abiertos
-let activeAssetIndex = 0; // El que se está viendo
+let activeTabs = [0, 1, 2]; 
+let activeAssetIndex = 0; 
 const MAX_HISTORY = 50;
 
-// Inicialización de historial y animación suave
+// Inicialización de historial y animación suave (easing)
 assetsDB.forEach(asset => {
     asset.history = [];
     asset.currentPrice = asset.basePrice;
@@ -42,9 +42,7 @@ function renderTabs() {
         const asset = assetsDB[assetIdx];
         const tab = document.createElement('div');
         tab.className = `tab ${assetIdx === activeAssetIndex ? 'active' : ''}`;
-        tab.innerHTML = `
-            <span>${asset.name} <span class="payout">${(asset.payout * 100)}%</span></span>
-        `;
+        tab.innerHTML = `<span>${asset.name}</span> <span class="payout">${(asset.payout * 100)}%</span>`;
         tab.onclick = () => {
             activeAssetIndex = assetIdx;
             document.getElementById('chart-title-overlay').innerText = asset.name;
@@ -91,7 +89,7 @@ function closeAllPanels() {
     document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('active'));
 }
 
-// --- INTERACCIONES ---
+// --- INTERACCIONES Y TECLADO ---
 let numpadStr = "";
 function typeNumpad(val) {
     if(val === 'del') numpadStr = numpadStr.slice(0, -1);
@@ -105,16 +103,19 @@ function setTime(sec, label) {
     state.duration = sec; document.getElementById('display-time').innerText = label; closeAllPanels();
 }
 function switchAccount(type) {
-    state.account = type; updateUI(); closeAllPanels(); showToast(`Cuenta ${type.toUpperCase()}`, true, 'info');
+    state.account = type; updateUI(); closeAllPanels(); showToast(`Cambiado a Cuenta ${type === 'real' ? 'Real' : 'de Práctica'}`, true, 'info');
 }
 function reloadPractice() {
-    state.balancePrac = 10000; updateUI(); closeAllPanels(); showToast('Práctica recargada', true);
+    state.balancePrac = 10000; updateUI(); closeAllPanels(); showToast('Cuenta recargada', true);
+}
+function depositReal(amount) {
+    state.balanceReal += amount; updateUI(); closeAllPanels(); showToast(`Depósito de COL$ ${amount.toLocaleString()} exitoso`, true);
 }
 function toggleIndicator(name) {
     showToast(`Indicador ${name} aplicado`, true, 'info'); closeAllPanels();
 }
 
-// --- TOASTS ---
+// --- TOASTS (Notificaciones Animadas) ---
 function showToast(msg, isWin, type='normal') {
     const c = document.getElementById('toast-container');
     const t = document.createElement('div');
@@ -124,7 +125,7 @@ function showToast(msg, isWin, type='normal') {
     setTimeout(() => { t.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3000);
 }
 
-// --- LÓGICA DE TRADING ---
+// --- LÓGICA DE TRADING EN VIVO ---
 function triggerTrade(dir) {
     const currentBal = state.account === 'real' ? state.balanceReal : state.balancePrac;
     if(currentBal < state.amount || state.amount <= 0) { showToast('Saldo insuficiente', false); return; }
@@ -136,7 +137,7 @@ function triggerTrade(dir) {
         id: Math.random().toString(36).substr(2, 5),
         assetIndex: activeAssetIndex,
         dir: dir, amount: state.amount,
-        strikePrice: asset.currentPrice, // El precio exacto en pantalla
+        strikePrice: asset.currentPrice,
         payout: asset.payout,
         timeLeft: state.duration,
         account: state.account
@@ -162,7 +163,7 @@ function updateHistoryUI() {
     const histEl = document.getElementById('history-content');
     if(state.closedTrades.length === 0) { histEl.innerHTML = "Historial vacío."; return; }
     let html = '';
-    [...state.closedTrades].reverse().slice(0, 10).forEach(t => { // Mostrar últimas 10
+    [...state.closedTrades].reverse().slice(0, 10).forEach(t => {
         html += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border); color:white;">
             <div style="text-align:left;"><b>${assetsDB[t.assetIndex].name}</b><br><span style="color:${t.dir==='CALL'?'var(--green)':'var(--red)'}">${t.dir}</span></div>
             <div style="text-align:right;"><span style="color:${t.profit > 0 ? 'var(--green)' : 'var(--red)'}; font-weight:bold;">${t.profit > 0 ? '+' : ''}$${t.profit.toFixed(2)}</span></div></div>`;
@@ -173,7 +174,6 @@ function updateHistoryUI() {
 // --- MOTOR DE MERCADO (TICK CADA 1.5s) ---
 setInterval(() => {
     assetsDB.forEach(asset => {
-        // Establecer un nuevo "Target" aleatorio
         asset.targetPrice = asset.currentPrice + ((Math.random() - 0.5) * asset.volatility);
         asset.history.shift();
         asset.history.push(asset.targetPrice);
@@ -224,10 +224,8 @@ function drawChart() {
     ctx.clearRect(0, 0, width, height);
     const asset = assetsDB[activeAssetIndex];
     
-    // INTERPOLACIÓN (EASING) SMOOTH
+    // Easing smooth para la gráfica
     asset.currentPrice += (asset.targetPrice - asset.currentPrice) * 0.1;
-    
-    // Usamos el historial, pero el último punto es el currentPrice animado
     let visualHistory = [...asset.history];
     visualHistory[visualHistory.length - 1] = asset.currentPrice;
 
@@ -236,12 +234,10 @@ function drawChart() {
     const finalMin = min - (range * 0.1); const finalMax = max + (range * 0.1);
     const finalRange = finalMax - finalMin;
 
-    // Cuadrícula
     ctx.strokeStyle = 'rgba(255,255,255,0.03)'; ctx.lineWidth = 1;
     for(let i=0; i<width; i+=60) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,height); ctx.stroke(); }
     for(let i=0; i<height; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(width,i); ctx.stroke(); }
 
-    // Líneas de Trades Activos
     state.activeTrades.forEach(t => {
         if(t.assetIndex !== activeAssetIndex) return;
         const y = height - ((t.strikePrice - finalMin) / finalRange) * height;
@@ -250,37 +246,32 @@ function drawChart() {
         ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); ctx.setLineDash([]);
     });
 
-    // Línea Principal
     ctx.beginPath();
     const isUp = visualHistory[visualHistory.length-1] >= visualHistory[visualHistory.length-10];
     ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2; ctx.lineJoin = 'round';
 
     let lastX, lastY;
     for(let i=0; i<visualHistory.length; i++) {
-        const x = (i / (visualHistory.length - 1)) * (width - 50); // Eje Y
+        const x = (i / (visualHistory.length - 1)) * (width - 50); 
         const y = height - ((visualHistory[i] - finalMin) / finalRange) * height;
         if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         if(i === visualHistory.length - 1) { lastX = x; lastY = y; }
     }
     ctx.stroke();
 
-    // Degradado
     ctx.lineTo(lastX, height); ctx.lineTo(0, height);
     const grad = ctx.createLinearGradient(0, 0, 0, height);
     grad.addColorStop(0, 'rgba(255, 255, 255, 0.15)'); grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
     ctx.fillStyle = grad; ctx.fill();
 
-    // Línea a Eje Y
     ctx.beginPath(); ctx.strokeStyle = isUp ? 'rgba(38, 185, 72, 0.8)' : 'rgba(255, 75, 75, 0.8)';
     ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
     ctx.moveTo(lastX, lastY); ctx.lineTo(width, lastY); ctx.stroke(); ctx.setLineDash([]);
 
-    // Punto Brillante
     ctx.beginPath(); ctx.arc(lastX, lastY, 4, 0, Math.PI*2);
     ctx.fillStyle = isUp ? '#26b948' : '#ff4b4b'; ctx.fill();
     ctx.shadowBlur = 8; ctx.shadowColor = ctx.fillStyle; ctx.fill(); ctx.shadowBlur = 0;
 
-    // Etiqueta Eje Y
     ctx.fillStyle = ctx.fillStyle; ctx.fillRect(width - 50, lastY - 10, 50, 20);
     ctx.beginPath(); ctx.moveTo(width - 50, lastY - 10); ctx.lineTo(width - 56, lastY); ctx.lineTo(width - 50, lastY + 10); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
@@ -289,7 +280,7 @@ function drawChart() {
     requestAnimationFrame(drawChart);
 }
 
-// --- INIT ---
+// --- INICIO ---
 renderTabs();
 resizeCanvas();
 updateUI();
