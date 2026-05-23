@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Uranium Trade - Pro</title>
+    <title>Uranium Trade - Pro Platform</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- ADVERTENCIA ROTACIÓN -->
+    <!-- ADVERTENCIA DE ROTACIÓN -->
     <div id="rotate-screen">
-        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="margin-bottom:15px; animation: rotatePhone 2s infinite;">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="margin-bottom:20px; animation: rotatePhone 2s infinite;">
             <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
             <path d="M12 18h.01"></path>
         </svg>
-        <h3>Gira tu teléfono</h3>
-        <p>Usa la vista horizontal.</p>
+        <h2 style="font-size: 18px;">Por favor, gira tu dispositivo</h2>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">Plataforma optimizada para vista horizontal.</p>
     </div>
 
-    <!-- CONTENEDOR PRINCIPAL (Forzado a los límites del dispositivo) -->
     <div id="app-container">
-        
         <!-- BARRA SUPERIOR -->
         <header class="topbar">
             <div class="topbar-left">
-                <div class="menu-btn" onclick="openPanel('panel-menu')">≡</div>
-                <div id="tabs-container" class="tabs-wrapper"></div>
-                <div class="menu-btn" style="border-left: 1px solid var(--border);" onclick="openPanel('panel-assets')">+</div>
+                <div class="menu-btn" onclick="openPanel('panel-portfolio')">≡</div>
+                <div id="tabs-container" style="display: flex; height: 100%; overflow-x: auto;">
+                    <!-- Las pestañas se inyectan vía JS -->
+                </div>
+                <div class="menu-btn" style="border-left: 1px solid var(--border);" onclick="alert('Buscador de activos en desarrollo')">+</div>
             </div>
             <div class="topbar-right">
                 <div class="account-wrapper" onclick="openPanel('panel-account')">
@@ -40,7 +40,7 @@
             </div>
         </header>
 
-        <!-- LAYOUT -->
+        <!-- LAYOUT PRINCIPAL -->
         <div class="main-layout">
             <!-- BARRA LATERAL -->
             <aside class="sidebar">
@@ -48,7 +48,7 @@
                 <div class="side-icon" onclick="openPanel('panel-history')" title="Historial">📋</div>
                 <div class="side-icon" onclick="openPanel('panel-indicators')" title="Indicadores">📈</div>
                 <div class="side-icon" onclick="openPanel('panel-leaderboard')" title="Torneos">🏆</div>
-                <div class="side-icon" style="margin-top: auto; margin-bottom: 5px;" onclick="openPanel('panel-settings')" title="Configuración">⚙️</div>
+                <div class="side-icon" style="margin-top: auto; margin-bottom: 5px;" onclick="openPanel('panel-admin')" title="Ajustes">⚙️</div>
             </aside>
 
             <!-- GRÁFICO -->
@@ -58,7 +58,7 @@
                 <div class="toast-container" id="toast-container"></div>
             </main>
 
-            <!-- PANEL DERECHO -->
+            <!-- PANEL DERECHO (CONTROLES) -->
             <aside class="right-panel">
                 <div class="control-group" onclick="openPanel('panel-amount')">
                     <div>
@@ -153,15 +153,14 @@
         </div>
     </div>
 
-    <!-- Panel Portafolio -->
+    <!-- Otros Paneles UI Genéricos -->
     <div class="slide-panel" id="panel-portfolio">
         <div class="panel-header"><span>Portafolio Activo</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
         <div class="list-wrapper" id="portfolio-content" style="padding: 10px; font-size: 12px; color: var(--text-muted); text-align:center;">
-            Sin operaciones activas.
+            No hay operaciones activas.
         </div>
     </div>
 
-    <!-- Panel Historial -->
     <div class="slide-panel" id="panel-history">
         <div class="panel-header"><span>Historial Cerrado</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
         <div class="list-wrapper" id="history-content" style="padding: 10px; font-size: 12px; color: var(--text-muted); text-align:center;">
@@ -169,9 +168,17 @@
         </div>
     </div>
 
-    <!-- Panel Indicadores -->
+    <div class="slide-panel" id="panel-deposit">
+        <div class="panel-header"><span>Depósito (Simulado)</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
+        <div style="padding: 20px;">
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Recarga tu cuenta real para operar en vivo.</p>
+            <button onclick="depositReal(50000)" class="btn-primary" style="background:var(--green); box-shadow: 0 4px 0 #1e9938; margin-bottom: 10px;">Depositar COL$ 50,000</button>
+            <button onclick="depositReal(100000)" class="btn-primary" style="background:var(--green); box-shadow: 0 4px 0 #1e9938;">Depositar COL$ 100,000</button>
+        </div>
+    </div>
+
     <div class="slide-panel" id="panel-indicators">
-        <div class="panel-header"><span>Indicadores</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
+        <div class="panel-header"><span>Indicadores Técnicos</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
         <div class="list-wrapper">
             <div class="list-item" onclick="toggleIndicator('RSI')"><span class="val">RSI (Relative Strength)</span><span class="prof" style="color:var(--text-muted)">Añadir</span></div>
             <div class="list-item" onclick="toggleIndicator('MACD')"><span class="val">MACD</span><span class="prof" style="color:var(--text-muted)">Añadir</span></div>
@@ -179,7 +186,19 @@
         </div>
     </div>
 
-    <!-- Script enlazado (asegúrate de que emc.js exista) -->
+    <!-- Configuración Admin Básica -->
+    <div class="slide-panel" id="panel-admin">
+        <div class="panel-header"><span>Configuración</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
+        <div style="padding: 20px;">
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Interfaz de Trading</p>
+            <div class="list-item" style="border:1px solid var(--border); border-radius:4px; margin-bottom:10px;" onclick="showToast('Tema Oscuro Aplicado', true, 'info')">
+                <span class="val">Tema</span><span class="prof" style="color:var(--text-main)">Oscuro</span>
+            </div>
+            <button onclick="alert('Función de Cierre de Sesión en desarrollo')" class="btn-primary" style="background:var(--border-light);">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <!-- Script principal -->
     <script src="emc.js"></script>
 </body>
 </html>
