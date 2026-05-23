@@ -3,94 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Uranium Trade - Pro Platform</title>
+    <title>Uranium Trade - Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- ADVERTENCIA DE ROTACIÓN -->
+    <!-- ADVERTENCIA ROTACIÓN -->
     <div id="rotate-screen">
-        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="margin-bottom:20px; animation: rotatePhone 2s infinite;">
+        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="margin-bottom:15px; animation: rotatePhone 2s infinite;">
             <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
             <path d="M12 18h.01"></path>
         </svg>
-        <h2 style="font-size: 18px;">Por favor, gira tu dispositivo</h2>
-        <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">Plataforma optimizada para vista horizontal.</p>
+        <h3>Gira tu teléfono</h3>
+        <p>Usa la vista horizontal.</p>
     </div>
 
-    <!-- BARRA SUPERIOR -->
-    <header class="topbar">
-        <div class="topbar-left">
-            <div class="menu-btn" onclick="openPanel('panel-menu')">≡</div>
-            <div id="tabs-container" style="display: flex; height: 100%;">
-                <!-- Las pestañas se inyectan vía JS -->
+    <!-- CONTENEDOR PRINCIPAL (Forzado a los límites del dispositivo) -->
+    <div id="app-container">
+        
+        <!-- BARRA SUPERIOR -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <div class="menu-btn" onclick="openPanel('panel-menu')">≡</div>
+                <div id="tabs-container" class="tabs-wrapper"></div>
+                <div class="menu-btn" style="border-left: 1px solid var(--border);" onclick="openPanel('panel-assets')">+</div>
             </div>
-            <div class="menu-btn" style="border-left: 1px solid var(--border);" onclick="openPanel('panel-assets')">+</div>
+            <div class="topbar-right">
+                <div class="account-wrapper" onclick="openPanel('panel-account')">
+                    <div class="account-info">
+                        <div class="acc-balance practice" id="header-balance">$10,000.00</div>
+                        <div class="acc-type" id="header-type">PRÁCTICA</div>
+                    </div>
+                    <div class="acc-dropdown-btn">▼</div>
+                </div>
+                <button class="btn-deposit" onclick="openPanel('panel-deposit')">Depósito</button>
+            </div>
+        </header>
+
+        <!-- LAYOUT -->
+        <div class="main-layout">
+            <!-- BARRA LATERAL -->
+            <aside class="sidebar">
+                <div class="side-icon" onclick="openPanel('panel-portfolio')" title="Portafolio">💼</div>
+                <div class="side-icon" onclick="openPanel('panel-history')" title="Historial">📋</div>
+                <div class="side-icon" onclick="openPanel('panel-indicators')" title="Indicadores">📈</div>
+                <div class="side-icon" onclick="openPanel('panel-leaderboard')" title="Torneos">🏆</div>
+                <div class="side-icon" style="margin-top: auto; margin-bottom: 5px;" onclick="openPanel('panel-settings')" title="Configuración">⚙️</div>
+            </aside>
+
+            <!-- GRÁFICO -->
+            <main class="chart-container">
+                <div class="asset-title-overlay" id="chart-title-overlay">EUR/USD</div>
+                <canvas id="chart"></canvas>
+                <div class="toast-container" id="toast-container"></div>
+            </main>
+
+            <!-- PANEL DERECHO -->
+            <aside class="right-panel">
+                <div class="control-group" onclick="openPanel('panel-amount')">
+                    <div>
+                        <span class="control-label">Inversión</span>
+                        <span class="control-value" id="display-amount">$1,000</span>
+                    </div>
+                    <span style="color:var(--text-muted); font-size: 14px;">✎</span>
+                </div>
+
+                <div class="control-group" onclick="openPanel('panel-time')">
+                    <div>
+                        <span class="control-label">Tiempo</span>
+                        <span class="control-value" id="display-time">1 Min</span>
+                    </div>
+                    <span style="color:var(--text-muted); font-size: 14px;">🕒</span>
+                </div>
+
+                <div class="profit-info">
+                    <span class="control-label">Beneficio</span>
+                    <div class="profit-row">
+                        <span class="profit-amount" id="display-profit-val">+$850.00</span>
+                        <span class="profit-percent" id="display-profit-pct">85%</span>
+                    </div>
+                </div>
+
+                <button class="btn-trade btn-call" onclick="triggerTrade('CALL')">
+                    <span>Sube ↗</span>
+                </button>
+                <button class="btn-trade btn-put" onclick="triggerTrade('PUT')">
+                    <span>Baja ↘</span>
+                </button>
+            </aside>
         </div>
-        <div class="topbar-right">
-            <div class="account-wrapper" onclick="openPanel('panel-account')">
-                <div class="account-info">
-                    <div class="acc-balance practice" id="header-balance">$10,000.00</div>
-                    <div class="acc-type" id="header-type">PRÁCTICA</div>
-                </div>
-                <div class="acc-dropdown-btn">▼</div>
-            </div>
-            <button class="btn-deposit" onclick="openPanel('panel-deposit')">Depósito</button>
-        </div>
-    </header>
-
-    <!-- LAYOUT PRINCIPAL -->
-    <div class="main-layout">
-        <!-- BARRA LATERAL -->
-        <aside class="sidebar">
-            <div class="side-icon" onclick="openPanel('panel-portfolio')" title="Portafolio">💼</div>
-            <div class="side-icon" onclick="openPanel('panel-history')" title="Historial">📋</div>
-            <div class="side-icon" onclick="openPanel('panel-leaderboard')" title="Torneos">🏆</div>
-            <div class="side-icon" style="margin-top: auto; margin-bottom: 5px;" onclick="openPanel('panel-admin')" title="Ajustes">⚙️</div>
-        </aside>
-
-        <!-- GRÁFICO -->
-        <main class="chart-container">
-            <div class="asset-title-overlay" id="chart-title-overlay">EUR/USD</div>
-            <canvas id="chart"></canvas>
-            <div class="toast-container" id="toast-container"></div>
-        </main>
-
-        <!-- PANEL DERECHO (CONTROLES) -->
-        <aside class="right-panel">
-            <div class="control-group" onclick="openPanel('panel-amount')">
-                <div>
-                    <span class="control-label">Inversión</span>
-                    <span class="control-value" id="display-amount">$1,000</span>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-            </div>
-
-            <div class="control-group" onclick="openPanel('panel-time')">
-                <div>
-                    <span class="control-label">Tiempo</span>
-                    <span class="control-value" id="display-time">1 Min</span>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-
-            <div class="profit-info">
-                <span class="control-label">Beneficio</span>
-                <div class="profit-row">
-                    <span class="profit-amount" id="display-profit-val">+$850.00</span>
-                    <span class="profit-percent" id="display-profit-pct">85%</span>
-                </div>
-            </div>
-
-            <button class="btn-trade btn-call" onclick="triggerTrade('CALL')">
-                <span>Sube</span>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
-            </button>
-            <button class="btn-trade btn-put" onclick="triggerTrade('PUT')">
-                <span>Baja</span>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-        </aside>
     </div>
 
     <!-- OVERLAYS Y MODALES -->
@@ -126,55 +127,59 @@
     <!-- Panel Tiempo -->
     <div class="slide-panel" id="panel-time">
         <div class="panel-header"><span>Tiempo de Expiración</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div class="time-list">
-            <div class="time-item" onclick="setTime(15, '15 Seg')"><span class="t-val">15 Segundos</span><span class="t-profit">Rápido</span></div>
-            <div class="time-item" onclick="setTime(60, '1 Min')"><span class="t-val">1 Minuto</span><span class="t-profit" id="t-prof-1">85%</span></div>
-            <div class="time-item" onclick="setTime(120, '2 Min')"><span class="t-val">2 Minutos</span><span class="t-profit" id="t-prof-2">85%</span></div>
-            <div class="time-item" onclick="setTime(300, '5 Min')"><span class="t-val">5 Minutos</span><span class="t-profit" id="t-prof-3">85%</span></div>
+        <div class="list-wrapper">
+            <div class="list-item" onclick="setTime(15, '15 Seg')"><span class="val">15 Segundos</span><span class="prof">Rápido</span></div>
+            <div class="list-item" onclick="setTime(60, '1 Min')"><span class="val">1 Minuto</span><span class="prof dyn-prof">85%</span></div>
+            <div class="list-item" onclick="setTime(120, '2 Min')"><span class="val">2 Minutos</span><span class="prof dyn-prof">85%</span></div>
+            <div class="list-item" onclick="setTime(300, '5 Min')"><span class="val">5 Minutos</span><span class="prof dyn-prof">85%</span></div>
         </div>
     </div>
 
     <!-- Panel Cuentas -->
     <div class="slide-panel" id="panel-account">
         <div class="panel-header"><span>Seleccionar Cuenta</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div class="acc-item" onclick="switchAccount('real')">
-            <div><h4>CUENTA REAL</h4><div class="bal" style="color:var(--green)" id="pop-real-bal">COL$ 0.00</div></div>
-            <div id="check-real" style="display:none; color:white; font-size:20px;">✓</div>
+        <div class="list-wrapper">
+            <div class="list-item" onclick="switchAccount('real')" style="align-items: center;">
+                <div><h4 style="font-size:10px; color:var(--text-muted);">CUENTA REAL</h4><div class="val" style="color:var(--green)" id="pop-real-bal">COL$ 0.00</div></div>
+                <div id="check-real" style="display:none; color:white; font-size:18px;">✓</div>
+            </div>
+            <div class="list-item" onclick="switchAccount('practice')" style="align-items: center;">
+                <div><h4 style="font-size:10px; color:var(--text-muted);">CUENTA DE PRÁCTICA</h4><div class="val" style="color:var(--orange)" id="pop-prac-bal">$10,000.00</div></div>
+                <div id="check-prac" style="color:white; font-size:18px;">✓</div>
+            </div>
         </div>
-        <div class="acc-item" onclick="switchAccount('practice')">
-            <div><h4>CUENTA DE PRÁCTICA</h4><div class="bal" style="color:var(--orange)" id="pop-prac-bal">$10,000.00</div></div>
-            <div id="check-prac" style="color:white; font-size:20px;">✓</div>
-        </div>
-        <div style="padding: 20px;">
-            <button onclick="reloadPractice()" class="btn-primary" style="background:var(--orange); box-shadow: 0 4px 0 #cc7000;">↻ RECARGAR PRÁCTICA</button>
+        <div style="padding: 15px;">
+            <button onclick="reloadPractice()" class="btn-primary" style="background:var(--orange); box-shadow: 0 4px 0 #cc7000;">↻ RECARGAR</button>
         </div>
     </div>
 
-    <!-- Otros Paneles UI Genéricos -->
+    <!-- Panel Portafolio -->
     <div class="slide-panel" id="panel-portfolio">
         <div class="panel-header"><span>Portafolio Activo</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div style="padding: 15px; color: var(--text-muted); font-size: 12px; text-align: center;" id="portfolio-content">
-            No hay operaciones activas en este momento.
+        <div class="list-wrapper" id="portfolio-content" style="padding: 10px; font-size: 12px; color: var(--text-muted); text-align:center;">
+            Sin operaciones activas.
         </div>
     </div>
 
+    <!-- Panel Historial -->
     <div class="slide-panel" id="panel-history">
-        <div class="panel-header"><span>Historial de Trading</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div style="padding: 15px; color: var(--text-muted); font-size: 12px; text-align: center;">
-            El historial está vacío.
+        <div class="panel-header"><span>Historial Cerrado</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
+        <div class="list-wrapper" id="history-content" style="padding: 10px; font-size: 12px; color: var(--text-muted); text-align:center;">
+            Aún no has cerrado operaciones.
         </div>
     </div>
 
-    <div class="slide-panel" id="panel-deposit">
-        <div class="panel-header"><span>Depósito (Simulado)</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div style="padding: 20px;">
-            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Recarga tu cuenta real para operar en el mercado en vivo.</p>
-            <button onclick="depositReal(50000)" class="btn-primary" style="background:var(--green); box-shadow: 0 4px 0 #1e9938; margin-bottom: 10px;">Depositar COL$ 50,000</button>
-            <button onclick="depositReal(100000)" class="btn-primary" style="background:var(--green); box-shadow: 0 4px 0 #1e9938;">Depositar COL$ 100,000</button>
+    <!-- Panel Indicadores -->
+    <div class="slide-panel" id="panel-indicators">
+        <div class="panel-header"><span>Indicadores</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
+        <div class="list-wrapper">
+            <div class="list-item" onclick="toggleIndicator('RSI')"><span class="val">RSI (Relative Strength)</span><span class="prof" style="color:var(--text-muted)">Añadir</span></div>
+            <div class="list-item" onclick="toggleIndicator('MACD')"><span class="val">MACD</span><span class="prof" style="color:var(--text-muted)">Añadir</span></div>
+            <div class="list-item" onclick="toggleIndicator('Bollinger')"><span class="val">Bandas de Bollinger</span><span class="prof" style="color:var(--text-muted)">Añadir</span></div>
         </div>
     </div>
 
-    <!-- Script Corregido a emc.js -->
+    <!-- Script enlazado (asegúrate de que emc.js exista) -->
     <script src="emc.js"></script>
 </body>
 </html>
