@@ -386,11 +386,18 @@
     </div>
 
     <!-- CREAR DEBATE -->
-    <div id="modal-forum" class="modal hidden">
+        <div id="modal-forum" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-forum')">✕</span>
             <h2>Nuevo Debate</h2>
             <div class="apple-form" style="margin-top: 15px;">
+                
+                <div class="upload-zone" onclick="document.getElementById('f-file-input').click()" style="height: 100px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 12px;">
+                    <span id="f-upload-label" style="color: var(--text-muted);">Adjuntar Imagen 📸</span>
+                    <img id="f-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);">
+                </div>
+                <input type="file" id="f-file-input" accept="image/*" class="hidden" onchange="previewForumImage()">
+                
                 <input type="text" id="f-title" placeholder="Asunto o Tema">
                 <select id="f-type" onchange="toggleForumPassword()" style="margin-bottom: 10px;">
                     <option value="publico">Público</option>
@@ -399,8 +406,8 @@
                     <option value="cerrado">Cerrado (Solo lectura)</option>
                 </select>
                 <input type="password" id="f-password" class="hidden" placeholder="Establecer Clave">
-                <textarea id="f-content" placeholder="Escribe tu mensaje aquí..." style="height: 100px;"></textarea>
-                <button class="apple-btn" style="margin-top: 15px;" onclick="saveForumPost()">Publicar Debate</button>
+                <textarea id="f-content" placeholder="Escribe tu mensaje aquí..." style="height: 100px; margin-bottom:12px;"></textarea>
+                <button class="apple-btn" onclick="saveForumPost()">Publicar Debate</button>
             </div>
         </div>
     </div>
