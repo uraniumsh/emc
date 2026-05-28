@@ -787,28 +787,28 @@ body {
     border-radius: 0 0 var(--radius-md) var(--radius-md); /* Redondea las esquinas de abajo */
 }
 /* ==========================================
-   EFECTO HOVER PARA LAS TARJETAS (AZUL Y BLANCO)
+   EFECTO EN PC (HOVER) Y CELULAR (ACTIVE)
    ========================================== */
 
-/* 1. Le damos una transición suave a la tarjeta para que no cambie de golpe */
+/* Asegura una animación suave en todo momento */
 .product-card {
-    transition: all 0.3s ease;
-    border: 1px solid transparent; /* Borde invisible por defecto */
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent; /* Quita el cuadro gris feo que pone Android al tocar */
 }
 
-/* 2. Lo que pasa cuando se pasa el mouse (:hover) o se presiona con el dedo (:active) */
+/* Cuando pasas el mouse o mantienes presionado el dedo */
 .product-card:hover, 
 .product-card:active {
-    transform: translateY(-4px); /* Levanta la tarjeta un poquito */
-    border: 1px solid var(--accent); /* Le pone el borde azul (o tu color principal) */
-    box-shadow: 0 8px 20px rgba(10, 132, 255, 0.25); /* Sombra azul difuminada */
+    transform: scale(0.98) translateY(-2px); /* Se encoge un pelín y sube (da sensación de botón físico) */
+    border-color: #007aff !important; /* Fuerza el azul Apple directo */
+    box-shadow: 0 10px 25px rgba(0, 122, 255, 0.3); /* Sombra azul intensa */
 }
 
-/* 3. Lo que le pasa al texto de abajo cuando se toca la tarjeta */
+/* El texto cambia a fondo azul y letra blanca inmediatamente al tocarlo */
 .product-card:hover .card-product-name, 
 .product-card:active .card-product-name {
-    background: var(--accent); /* El fondito del texto se pone azul */
-    color: #ffffff !important; /* El texto resalta en blanco puro */
-    transition: all 0.3s ease;
+    background: #007aff !important; /* Fondo azul obligatorio */
+    color: #ffffff !important; /* Texto blanco obligatorio */
+    transition: background 0.15s ease, color 0.15s ease;
 }
-
