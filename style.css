@@ -786,3 +786,29 @@ body {
     background: var(--surface-elevated); /* Fondo oscuro igual al resto */
     border-radius: 0 0 var(--radius-md) var(--radius-md); /* Redondea las esquinas de abajo */
 }
+/* ==========================================
+   EFECTO HOVER PARA LAS TARJETAS (AZUL Y BLANCO)
+   ========================================== */
+
+/* 1. Le damos una transición suave a la tarjeta para que no cambie de golpe */
+.product-card {
+    transition: all 0.3s ease;
+    border: 1px solid transparent; /* Borde invisible por defecto */
+}
+
+/* 2. Lo que pasa cuando se pasa el mouse (:hover) o se presiona con el dedo (:active) */
+.product-card:hover, 
+.product-card:active {
+    transform: translateY(-4px); /* Levanta la tarjeta un poquito */
+    border: 1px solid var(--accent); /* Le pone el borde azul (o tu color principal) */
+    box-shadow: 0 8px 20px rgba(10, 132, 255, 0.25); /* Sombra azul difuminada */
+}
+
+/* 3. Lo que le pasa al texto de abajo cuando se toca la tarjeta */
+.product-card:hover .card-product-name, 
+.product-card:active .card-product-name {
+    background: var(--accent); /* El fondito del texto se pone azul */
+    color: #ffffff !important; /* El texto resalta en blanco puro */
+    transition: all 0.3s ease;
+}
+
