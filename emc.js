@@ -96,36 +96,24 @@ async function initSession() {
         await userRef.update({ lastActive: rightNow });
     }
 
-    // LÓGICA ESTRICTA DE ADMIN: 
-    // Tiene el permiso en BD Y metió la clave correctamente (admin_auth)
     const hasAdminRole = currentUser.role === 'superadmin' || currentUser.role === 'admin';
     const hasAuth = localStorage.getItem('admin_auth') === 'true';
-    
     isAdmin = hasAdminRole && hasAuth;
 
-    // 1. Forzar a que la tuerca y el botón de publicar estén ocultos al cargar
-    const gear = document.getElementById('btn-login-gear');
+    // Ocultar botón + por defecto
     const addBtn = document.getElementById('btn-add-post-header');
-    if(gear) gear.classList.add('hidden');
     if(addBtn) addBtn.classList.add('hidden');
 
-    // 2. Si es Admin en la base de datos, le mostramos la tuerquita
-    if (hasAdminRole) {
-        if (gear) gear.classList.remove('hidden');
-    }
-
-    // 3. Si ya metió la contraseña correctamente, le habilitamos todo
+    // Si ya metió clave y es admin, se activa todo
     if (isAdmin) {
         activateAdminUI();
         if (addBtn) addBtn.classList.remove('hidden');
     }
     
-    // Pinta la tienda
     if(categories.length > 0) renderAll(); else renderGrid(); 
     
     updateProfileUI();
 }
-
 window.onload = initSession;
 
 // ==========================================
@@ -221,6 +209,7 @@ function openMenu() {
 }
 function closeMenu() { document.getElementById('mobile-menu').classList.add('hidden'); }
 
+
 // ==========================================
 // 6. LOGIN ADMIN Y PANEL DE CONTROL
 // ==========================================
@@ -240,7 +229,7 @@ async function handleLogin() {
             myUserId = adminDoc.id; 
             localStorage.setItem('u_id', myUserId);
             
-            // ESTA LÍNEA ES LA MAGIA: Confirma que metió la clave bien
+            // Confirmamos que metió la clave bien
             localStorage.setItem('admin_auth', 'true'); 
             
             showToast("SESIÓN DE ADMIN INICIADA");
@@ -251,13 +240,30 @@ async function handleLogin() {
     } catch (error) { showToast("ERROR DE ACCESO"); }
 }
 
+function activateAdminUI() {
+    document.getElementById('btn-login-header')?.classList.add('hidden');
+    document.getElementById('login-box')?.classList.add('hidden');
+    document.getElementById('logout-box')?.classList.remove('hidden');
+    
+    // Habilita Cerrar Sesión en el menú hamburguesa
+    document.getElementById('btn-logout-menu')?.classList.remove('hidden');
+
+    if(currentUser) {
+        if(currentUser.role === 'superadmin') {
+            document.getElementById('btn-security')?.classList.remove('hidden');
+            document.getElementById('admin-list-container')?.classList.remove('hidden');
+            cargarAdminsEnDashboard(); 
+        }
+        cargarUsuariosEnDashboard();
+    }
+}
+
 async function handleLogout() {
-    localStorage.setItem('admin_auth', 'false'); // Le quitamos el permiso de sesión
+    localStorage.setItem('admin_auth', 'false'); // Quitamos el permiso
     let originalId = localStorage.getItem('original_uid');
     if (originalId) { myUserId = originalId; localStorage.setItem('u_id', originalId); }
     location.reload(); 
 }
-
 
 function cargarUsuariosEnDashboard() {
     const tbody = document.getElementById('users-table');
@@ -847,15 +853,21 @@ function addLog(action, item) {
 // ==========================================
 function openForumModal() {
     if(!currentUser || !currentUser.registered) return showToast("DEBES REGISTRAR TU PERFIL PARA CREAR UN DEBATE");
+    
     document.getElementById('f-title').value = "";
     document.getElementById('f-content').value = "";
     document.getElementById('f-password').value = "";
     document.getElementById('f-type').value = "publico";
     
+    // Limpieza segura de la imagen
     currentForumImg = "";
-    document.getElementById('f-preview').src = "";
-    document.getElementById('f-preview').classList.add('hidden');
-    document.getElementById('f-upload-label').classList.remove('hidden');
+    const preview = document.getElementById('f-preview');
+    if(preview) {
+        preview.src = "";
+        preview.classList.add('hidden');
+    }
+    const label = document.getElementById('f-upload-label');
+    if(label) label.classList.remove('hidden');
 
     toggleForumPassword();
     openModal('modal-forum');
