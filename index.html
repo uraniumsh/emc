@@ -385,13 +385,12 @@
         </div>
     </div>
 
-    <!-- CREAR DEBATE -->
-        <div id="modal-forum" class="modal hidden">
+        <!-- CREAR DEBATE -->
+    <div id="modal-forum" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-forum')">✕</span>
             <h2>Nuevo Debate</h2>
             <div class="apple-form" style="margin-top: 15px;">
-                
                 <div class="upload-zone" onclick="document.getElementById('f-file-input').click()" style="height: 100px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 12px;">
                     <span id="f-upload-label" style="color: var(--text-muted);">Adjuntar Imagen 📸</span>
                     <img id="f-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);">
@@ -399,18 +398,43 @@
                 <input type="file" id="f-file-input" accept="image/*" class="hidden" onchange="previewForumImage()">
                 
                 <input type="text" id="f-title" placeholder="Asunto o Tema">
-                <select id="f-type" onchange="toggleForumPassword()" style="margin-bottom: 10px;">
+                <select id="f-type" onchange="toggleForumPassword()" style="margin-bottom: 12px;">
                     <option value="publico">Público</option>
-                    <option value="vip">Solo VIP</option>
+                    <option value="vip">Solo VIP (Monetizado)</option>
                     <option value="clave">Con Clave</option>
                     <option value="cerrado">Cerrado (Solo lectura)</option>
                 </select>
+                
+                <!-- Campos dinámicos de seguridad/cobro -->
                 <input type="password" id="f-password" class="hidden" placeholder="Establecer Clave">
+                <div id="f-vip-options" class="hidden">
+                    <input type="number" id="f-vip-price" placeholder="Precio de entrada ($)">
+                    <input type="number" id="f-vip-phone" placeholder="Tu WhatsApp (Para recibir pagos)">
+                    <p class="text-muted" style="font-size:11px; margin-bottom:12px; line-height:1.3;">Uranium retiene el 30%. Recibirás el 70% de cada venta directamente a este número cuando los usuarios paguen.</p>
+                </div>
+
                 <textarea id="f-content" placeholder="Escribe tu mensaje aquí..." style="height: 100px; margin-bottom:12px;"></textarea>
                 <button class="apple-btn" onclick="saveForumPost()">Publicar Debate</button>
             </div>
         </div>
     </div>
+
+        <!-- MODAL DE COMPRA VIP -->
+    <div id="modal-buy-vip" class="modal hidden">
+        <div class="modal-content ios-card" style="text-align:center;">
+            <span class="close" onclick="closeModal('modal-buy-vip')">✕</span>
+            <div style="font-size:40px; margin-bottom:10px;">💎</div>
+            <h2>Acceso Exclusivo</h2>
+            <p class="text-muted" id="vip-buy-title" style="margin-bottom:15px; font-size:14px;"></p>
+            <h1 style="color:var(--accent); margin-bottom:20px;" id="vip-buy-price">$0</h1>
+            
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="apple-btn" style="background:#28a745;" onclick="processVipWallet()">Pagar con Billetera (Instantáneo)</button>
+                <button class="apple-btn" style="background:#da0081;" onclick="processVipNequi()">Pagar con Nequi (Requiere revisión)</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- SCRIPTS -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
