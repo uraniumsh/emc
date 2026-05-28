@@ -641,7 +641,7 @@ function renderGrid(catId = 'all') {
         card.className = 'product-card';
         card.onclick = () => openDetail(p.id);
         
-        card.innerHTML = `
+                card.innerHTML = `
             ${isAdmin ? `
             <div style="position:absolute; top:8px; right:8px; z-index:10; display:flex; gap:5px;">
                 <button onclick="event.stopPropagation(); openPublishModal('${p.id}')" style="background:var(--accent); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✏️</button>
@@ -652,11 +652,10 @@ function renderGrid(catId = 'all') {
                 <div class="price-tag">$${parseFloat(p.price).toLocaleString()}</div>
                 <img src="${p.img}">
             </div>
-            <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${p.id}')">VER MÁS</button>
+            <!-- SE CAMBIÓ EL BOTÓN POR UN TEXTO -->
+            <div class="card-product-name">${p.name}</div>
         `;
-        grid.appendChild(card);
-    });
-}
+
 
 function renderAll() {
     const navMob = document.getElementById('mobile-nav-cats');
