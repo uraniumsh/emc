@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>URANIUM DIGITAL | Apple Style</title>
-    <link rel="stylesheet" href="style.css">
+    <title>URANIUM DIGITAL | Store Pro</title>
+    <link rel="stylesheet" href="ecss.css">
 </head>
 <body>
 
@@ -16,6 +16,11 @@
             URANIUM
         </div>
         <div class="header-right">
+            <!-- Icono de Billetera/Perfil rápido -->
+            <div class="header-icon" onclick="openModal('modal-settings')" id="btn-login-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </div>
+            
             <div class="cart-wrapper" onclick="openModal('modal-cart')">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                 <span id="cart-count" class="cart-badge">0</span>
@@ -27,7 +32,7 @@
         </div>
     </header>
 
-    <!-- MENÚ HAMBURGUESA DESLIZABLE (FULL SCREEN GLASS) -->
+    <!-- MENÚ HAMBURGUESA DESLIZABLE -->
     <div id="mobile-menu" class="apple-menu hidden">
         <div class="menu-header">
             <button class="close-menu" onclick="closeMenu()">✕</button>
@@ -36,70 +41,75 @@
             <div class="menu-profile" onclick="openModal('modal-profile'); closeMenu()">
                 <div class="avatar">👤</div>
                 <div class="user-info">
-                    <h3 id="menu-user-name">Perfil de Usuario</h3>
-                    <p id="menu-user-id">ID: Cargando...</p>
+                    <h3 id="menu-user-name">Usuario</h3>
+                    <p id="menu-user-id">ID:</p>
                 </div>
             </div>
             <nav class="menu-links">
                 <a href="#" onclick="showView('products'); closeMenu()">Tienda Oficial</a>
                 <a href="#" onclick="showView('foro'); closeMenu()">Comunidad & Foro</a>
-                <!-- Solo visible para Admins -->
-                <a href="#" id="btn-admin-menu" class="hidden admin-link" onclick="showView('dashboard'); closeMenu()">Panel de Control (Admin)</a>
+                <!-- Opciones que solo verá el Admin -->
+                <a href="#" id="btn-admin-menu" class="hidden text-accent" onclick="showView('dashboard'); closeMenu()">Panel de Control (Admin)</a>
                 <a href="#" id="btn-logout-menu" class="hidden text-danger" onclick="handleLogout()">Cerrar Sesión</a>
             </nav>
         </div>
     </div>
 
     <main class="content">
-        <!-- TIENDA -->
+        <!-- VISTA DE PRODUCTOS -->
         <section id="view-products" class="view-section">
             <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
             <div class="product-grid" id="product-grid"></div>
         </section>
 
-        <!-- DASHBOARD ADMIN APPLE STYLE -->
+        <!-- VISTA DASHBOARD ADMIN -->
         <section id="view-dashboard" class="view-section hidden">
             <h1 class="section-title">Panel de Control</h1>
             
-            <div class="admin-actions">
-                <button class="apple-btn-secondary" onclick="openPublishModal()">+ Publicar Producto</button>
-                <button class="apple-btn-secondary" onclick="openModal('modal-add-cat')">+ Crear Categoría</button>
-                <button class="apple-btn-secondary" onclick="openDeleteCatModal()">- Eliminar Categoría</button>
-                <button class="apple-btn-secondary" onclick="openModal('modal-add-balance')">Añadir Saldo</button>
-                <button id="btn-security" class="apple-btn-secondary hidden" onclick="openModal('modal-manage-admins')">Gestión Admins</button>
+            <div style="display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap;">
+                <button class="apple-btn-secondary" style="width: auto; background: #28a745; color: white;" onclick="openModal('modal-add-balance')">+ Añadir Saldo Manual</button>
+                <button class="apple-btn-secondary" style="width: auto; background: var(--accent); color: white;" onclick="openModal('modal-add-cat')">+ Crear Categoría</button>
+                <button class="apple-btn-secondary" style="width: auto; background: var(--danger); color: white;" onclick="openDeleteCatModal()">- Eliminar Categoría</button>
+                <button class="apple-btn-secondary" style="width: auto;" onclick="openModal('modal-manage-admins')">Gestión Admins</button>
+                <button id="btn-security" class="apple-btn-secondary hidden" style="width: auto; background: #ffcc00; color: black;" onclick="openModal('modal-security')">🔐 Seguridad Súper Admin</button>
+            </div>
+            
+            <div id="admin-list-container" class="admin-card hidden">
+                <h3>Administradores Activos</h3>
+                <div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
             </div>
 
             <div class="admin-card">
-                <h3>Usuarios Registrados</h3>
-                <div class="table-container">
+                <h3>👥 Registro General de Usuarios</h3>
+                <div class="table-container" style="max-height: 300px; overflow-y: auto;">
                     <table class="apple-table">
-                        <thead><tr><th>Usuario</th><th>Saldo</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th>ID / Usuario</th><th>Saldo</th><th>Estado / Acción</th></tr></thead>
                         <tbody id="users-table"></tbody>
                     </table>
                 </div>
             </div>
-            
+
             <div class="admin-card">
-                <h3>Registro de Movimientos</h3>
+                <h3>Log de Movimientos</h3>
                 <div class="table-container">
                     <table class="apple-table">
-                        <thead><tr><th>Fecha/Hora</th><th>Acción</th><th>Detalle</th></tr></thead>
+                        <thead><tr><th>Hora</th><th>Acción</th><th>Detalle / Valor</th></tr></thead>
                         <tbody id="log-table"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- LISTA DE FOROS -->
+        <!-- VISTA FORO / COMUNIDAD -->
         <section id="view-foro" class="view-section hidden">
-            <div class="forum-header">
-                <h1 class="section-title">Comunidad</h1>
-                <button class="apple-btn" onclick="openForumModal()">Nuevo Debate</button>
+            <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1 class="section-title" style="margin: 0;">Comunidad 💬</h1>
+                <button class="apple-btn" style="width: auto; padding: 10px 20px;" onclick="openForumModal()">+ Nuevo Debate</button>
             </div>
             <div id="forum-feed" class="forum-grid"></div>
         </section>
 
-        <!-- DETALLE DEL FORO (ESTILO iMESSAGE/WHATSAPP) -->
+        <!-- VISTA DETALLE DEL FORO (ESTILO iMESSAGE) -->
         <section id="view-forum-detail" class="view-section hidden">
             <div class="chat-header glass-header">
                 <button class="back-btn" onclick="showView('foro')">
@@ -112,101 +122,293 @@
                 </div>
             </div>
             
-            <!-- Burbujas de chat -->
+            <!-- Aquí se inyectan las burbujas desde JS -->
             <div id="chat-messages" class="chat-messages"></div>
             
-            <!-- Input estilo iOS -->
+            <!-- Input fijado estilo Apple -->
             <div class="chat-input-area glass-footer">
                 <div id="replying-to-box" class="replying-to hidden">
                     <span>Respondiendo a: <strong id="reply-to-name"></strong></span>
                     <button onclick="cancelReply()">✕</button>
                 </div>
                 <div class="input-wrapper">
-                    <input type="text" id="chat-input" placeholder="Mensaje...">
+                    <input type="text" id="chat-input" placeholder="Escribe un mensaje...">
                     <button class="send-btn" onclick="sendForumReply()">↑</button>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- MODALES (Adaptados a estilo tarjeta iOS) -->
-    
-    <!-- Perfil -->
-    <div id="modal-profile" class="modal hidden">
+    <!-- ========================================= -->
+    <!-- MODALES COMPLETOS CON CLASES APPLE        -->
+    <!-- ========================================= -->
+
+    <!-- PAGO BILLETERA -->
+    <div id="modal-wallet-confirm" class="modal hidden">
         <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-profile')">✕</span>
-            <div class="profile-header-modal">
-                <div class="avatar-lg">👤</div>
-                <h2 id="profile-name-display">Usuario</h2>
-                <p id="profile-id" class="text-muted">ID:</p>
+            <span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span>
+            <h2 class="text-accent">Pago Billetera</h2>
+            <p class="text-muted" style="margin-bottom: 15px;">Confirma tu pedido para descontar el saldo.</p>
+            <div id="wallet-form" class="apple-form">
+                <input type="text" id="w-pay-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="w-pay-phone" placeholder="Tu Número de WhatsApp">
+                <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total a descontar: <strong id="w-pay-val"></strong></div>
+                <button class="apple-btn" style="background: #28a745;" onclick="processWalletPayment()">Confirmar Compra</button>
             </div>
-            <div class="wallet-card">
-                <p class="text-muted">Saldo Disponible</p>
-                <h1 id="wallet-balance">$0</h1>
-                <button class="apple-btn" onclick="openUserRecharge()">Recargar Saldo</button>
-            </div>
-            <div id="register-section" class="apple-form hidden">
-                <hr>
-                <p class="text-accent" style="font-weight: 600; text-align: center; margin-bottom: 10px;">Regístrate y gana $5,000 COP</p>
-                <input type="text" id="reg-username" placeholder="Nombre de usuario (Único)">
-                <input type="text" id="reg-name" placeholder="Tu Nombre">
-                <button class="apple-btn" onclick="registerUser()">Completar Registro</button>
+            <div id="wallet-processing" class="hidden" style="text-align: center; padding: 20px 0;">
+                <div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3>
             </div>
         </div>
     </div>
 
-    <!-- Detalle Producto (Premium) -->
+    <!-- PERFIL Y REGISTRO -->
+    <div id="modal-profile" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-profile')">✕</span>
+            <div class="profile-header-modal" style="text-align: center;">
+                <div class="avatar-lg" style="font-size: 50px;">👤</div>
+                <h2 id="profile-name-display" style="margin-top: 10px;">Usuario</h2>
+                <p class="text-muted">ID: <span id="profile-id"></span></p>
+            </div>
+            <div class="wallet-card" style="background: var(--surface-elevated); padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;">
+                <p class="text-muted" style="font-size: 12px;">SALDO DISPONIBLE</p>
+                <h1 id="wallet-balance" style="margin: 5px 0;">$0</h1>
+                <button class="apple-btn" style="background: #28a745; margin-top: 10px; padding: 10px;" onclick="openUserRecharge()">Recargar Mi Saldo</button>
+            </div>
+            <div id="register-section" class="apple-form" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <p class="text-accent" style="font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: center;">REGÍSTRATE Y GANA $5,000 COP</p>
+                <input type="text" id="reg-username" placeholder="@Usuario (Único)">
+                <input type="text" id="reg-name" placeholder="Nombre Mostrado">
+                <button class="apple-btn" onclick="registerUser()">Guardar Perfil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECARGAR SALDO -->
+    <div id="modal-user-recharge" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-user-recharge')">✕</span>
+            <h2>Recargar Mi Saldo</h2>
+            <div id="recharge-form" class="apple-form" style="margin-top: 15px;">
+                <input type="text" id="r-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="r-phone" placeholder="Tu Número de WhatsApp">
+                <input type="number" id="r-amount" placeholder="Monto a recargar ($)">
+                <button class="apple-btn" style="background: #28a745;" onclick="processRecharge()">Continuar</button>
+            </div>
+            <div id="recharge-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <!-- COMPROBANTE -->
+    <div id="modal-receipt" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-receipt')">✕</span>
+            <h3>Adjuntar Comprobante</h3>
+            <p id="receipt-instructions" class="text-accent" style="font-size: 14px; margin-bottom: 15px; font-weight: bold; line-height: 1.4;"></p>
+            <div id="receipt-form" class="apple-form">
+                <div class="upload-zone" onclick="document.getElementById('receipt-file-input').click()" style="height: 200px; border: 2px dashed var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;">
+                    <span id="receipt-upload-label" style="text-align: center; color: var(--accent);">Clic para subir comprobante 📸</span>
+                    <img id="receipt-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute;">
+                </div>
+                <input type="file" id="receipt-file-input" accept="image/*" class="hidden" onchange="previewReceipt()">
+                <button class="apple-btn" onclick="submitReceipt()">Enviar Comprobante</button>
+            </div>
+            <div id="receipt-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <!-- GESTIÓN ADMINS -->
+    <div id="modal-manage-admins" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-manage-admins')">✕</span>
+            <h2>Gestión Admins</h2>
+            <p class="text-muted" style="font-size: 12px; margin-bottom:15px;">El usuario con este ID podrá acceder al panel de control.</p>
+            <div class="apple-form">
+                <input type="text" id="new-admin-id" placeholder="ID del Usuario">
+                <input type="email" id="new-admin-email" placeholder="Correo Provisional">
+                <input type="password" id="new-admin-pass" placeholder="Clave Provisional">
+                <button class="apple-btn" onclick="addSubAdmin()">Agregar Admin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AÑADIR SALDO MANUAL -->
+    <div id="modal-add-balance" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-add-balance')">✕</span>
+            <h2>Recargar Saldo Manual</h2>
+            <div class="apple-form">
+                <input type="text" id="bal-user-id" placeholder="ID del Usuario">
+                <input type="number" id="bal-amount" placeholder="Cantidad ($)">
+                <button class="apple-btn" style="background: #28a745;" onclick="addBalanceToUser()">Recargar Billetera</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREAR Y ELIMINAR CATEGORÍA -->
+    <div id="modal-add-cat" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-add-cat')">✕</span>
+            <h2>Nueva Categoría</h2>
+            <div class="apple-form">
+                <input type="text" id="new-cat-name" placeholder="Nombre de Plataforma">
+                <button class="apple-btn" onclick="saveNewCategory()">Crear Plataforma</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-delete-cat" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-delete-cat')">✕</span>
+            <h2>Eliminar Categoría</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <select id="d-cat-select"></select>
+                <button class="apple-btn" style="background: var(--danger);" onclick="deleteCategory()">🗑️ Eliminar Plataforma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PUBLICAR PRODUCTO (CON EDITOR GRANDE) -->
+    <div id="modal-publish" class="modal hidden">
+        <div class="modal-content ios-card" style="max-width: 500px;">
+            <span class="close" onclick="closeModal('modal-publish')">✕</span>
+            <h2 id="pub-title">Publicar Producto</h2>
+            <div class="apple-form">
+                <div class="upload-zone" onclick="document.getElementById('file-input').click()" style="height: 150px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;">
+                    <span id="upload-label" style="color: var(--text-muted);">Clic para subir imagen *</span>
+                    <img id="file-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute; background: var(--surface-elevated);">
+                </div>
+                <input type="file" id="file-input" accept="image/*" class="hidden" onchange="previewImage()">
+                <input type="text" id="p-name" placeholder="Nombre (Ej: Netflix)">
+                <textarea id="p-short" placeholder="Slogan / Info extra"></textarea>
+                <input type="number" id="p-price" placeholder="Precio ($)">
+                <select id="p-cat-select"></select>
+                
+                <textarea id="p-desc" placeholder="Descripción Detallada"></textarea>
+                <button type="button" class="apple-btn-secondary" style="margin-top:-5px; margin-bottom:10px; padding: 8px;" onclick="openBigEditor()">📝 Abrir Editor Avanzado</button>
+
+                <input type="text" id="p-contact" placeholder="WhatsApp de Contacto">
+                <input type="text" id="p-wa" placeholder="Msj predeterminado WhatsApp">
+                
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <input type="checkbox" id="p-pinned" style="width: auto;"> 
+                    <label for="p-pinned">⭐ Fijar publicación al inicio</label>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="apple-btn" onclick="handleSaveProduct()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDITOR GRANDE -->
+    <div id="modal-big-editor" class="modal hidden">
+        <div class="modal-content ios-card" style="width: 95%; max-width: 800px;">
+            <span class="close" onclick="closeBigEditor()">✕</span>
+            <h2>Editor Avanzado</h2>
+            <p class="text-muted" style="font-size:12px; margin-bottom:10px;">Usa **negrita**, __cursiva__, >resaltado o =#FF0000color</p>
+            <textarea id="big-editor-area" style="height: 300px; width: 100%; background: var(--surface-elevated); color: var(--text-main); border: none; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-family: monospace;"></textarea>
+            <button class="apple-btn" onclick="saveBigEditor()">Guardar y Cerrar</button>
+        </div>
+    </div>
+
+    <!-- DETALLE DEL PRODUCTO (VISTA CLIENTE) -->
     <div id="modal-detail" class="modal hidden">
-        <div class="modal-content ios-card detail-box">
+        <div class="modal-content ios-card detail-box" style="max-width: 800px;">
             <span class="close" onclick="closeModal('modal-detail')">✕</span>
             <div id="detail-body"></div>
         </div>
     </div>
 
-    <!-- Crear Debate -->
+    <!-- CARRITO DE COMPRAS -->
+    <div id="modal-cart" class="modal hidden">
+        <div class="modal-content ios-card cart-tall" style="height: 85vh; display: flex; flex-direction: column;">
+            <span class="close" onclick="closeModal('modal-cart')">✕</span>
+            <h2>Carrito</h2>
+            <div id="cart-list" style="flex-grow: 1; overflow-y: auto; margin: 15px 0;"></div>
+            <div class="total-box" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-bottom: 15px; font-size: 20px; font-weight: bold;">
+                Total: <span id="cart-total">$0</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="apple-btn" onclick="goToWalletPayment()">Pagar con Billetera</button>
+                <button class="apple-btn" style="background: #da0081;" onclick="goToPayment()">Pagar con Nequi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGO NEQUI -->
+    <div id="modal-nequi" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-nequi')">✕</span>
+            <h2 style="color: #da0081; margin-bottom: 15px;">Pago Nequi</h2>
+            <div id="nequi-form" class="apple-form">
+                <input type="text" id="pay-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="pay-phone" placeholder="Tu Número de WhatsApp">
+                <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total: <strong id="pay-val"></strong></div>
+                <button class="apple-btn" style="background: #da0081;" onclick="processPayment()">Generar Orden Segura</button>
+            </div>
+            <div id="nequi-processing" class="hidden" style="text-align: center; padding: 20px 0;">
+                <div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACCESO Y CONFIGURACIÓN -->
+    <div id="modal-settings" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-settings')">✕</span>
+            <div id="login-box">
+                <h2>Acceso Administrador</h2>
+                <div class="apple-form" style="margin-top: 15px;">
+                    <input type="email" id="l-email" placeholder="Correo Electrónico">
+                    <input type="password" id="l-pass" placeholder="Contraseña">
+                    <button class="apple-btn" onclick="handleLogin()">Entrar</button>
+                </div>
+            </div>
+            <div id="logout-box" class="hidden" style="text-align: center;">
+                <h2>Sesión Iniciada</h2>
+                <button class="apple-btn" style="margin-top: 15px; background: var(--danger);" onclick="handleLogout()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEGURIDAD SUPER ADMIN -->
+    <div id="modal-security" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-security')">✕</span>
+            <h2>Cambiar Credenciales Súper Admin</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <input type="email" id="sec-new-email" placeholder="Nuevo Correo">
+                <input type="password" id="sec-new-pass" placeholder="Nueva Contraseña">
+                <button class="apple-btn" style="background: #ffcc00; color: black;" onclick="updateSuperAdminCreds()">Actualizar Datos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREAR DEBATE -->
     <div id="modal-forum" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-forum')">✕</span>
             <h2>Nuevo Debate</h2>
-            <div class="apple-form">
+            <div class="apple-form" style="margin-top: 15px;">
                 <input type="text" id="f-title" placeholder="Asunto o Tema">
-                <select id="f-type" onchange="toggleForumPassword()">
+                <select id="f-type" onchange="toggleForumPassword()" style="margin-bottom: 10px;">
                     <option value="publico">Público</option>
                     <option value="vip">Solo VIP</option>
                     <option value="clave">Con Clave</option>
                     <option value="cerrado">Cerrado (Solo lectura)</option>
                 </select>
                 <input type="password" id="f-password" class="hidden" placeholder="Establecer Clave">
-                <textarea id="f-content" placeholder="Escribe el mensaje principal..." style="height: 100px;"></textarea>
-                <button class="apple-btn" onclick="saveForumPost()">Publicar</button>
+                <textarea id="f-content" placeholder="Escribe tu mensaje aquí..." style="height: 100px;"></textarea>
+                <button class="apple-btn" style="margin-top: 15px;" onclick="saveForumPost()">Publicar Debate</button>
             </div>
         </div>
     </div>
 
-    <!-- Gestión de Admins -->
-    <div id="modal-manage-admins" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-manage-admins')">✕</span>
-            <h2>Agregar Sub-Admin</h2>
-            <p class="text-muted" style="font-size: 12px; margin-bottom:15px;">Solo el usuario con el ID especificado podrá acceder.</p>
-            <div class="apple-form">
-                <input type="text" id="new-admin-id" placeholder="ID del Usuario">
-                <button class="apple-btn" onclick="addSubAdmin()">Conceder Permisos</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Demás modales simplificados para no hacer el código gigante (Mantienen sus IDs originales de tu JS pero con clases de Apple) -->
-    <div id="modal-cart" class="modal hidden"><div class="modal-content ios-card cart-tall"><span class="close" onclick="closeModal('modal-cart')">✕</span><h2>Carrito</h2><div id="cart-list" class="cart-list-scroll"></div><div class="total-box">Total: <span id="cart-total">$0</span></div><button class="apple-btn" onclick="goToWalletPayment()">Pagar con Billetera</button><button class="apple-btn-secondary" style="margin-top:10px;" onclick="goToPayment()">Pagar con Nequi</button></div></div>
-    <div id="modal-wallet-confirm" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span><h2>Confirmar Compra</h2><div id="wallet-form" class="apple-form"><input type="text" id="w-pay-name" placeholder="Tus Nombres"><input type="number" id="w-pay-phone" placeholder="WhatsApp"><div class="pay-sum">Total: <strong id="w-pay-val"></strong></div><button class="apple-btn" onclick="processWalletPayment()">Confirmar</button></div></div></div>
-    <div id="modal-nequi" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-nequi')">✕</span><h2>Pago Nequi</h2><div id="nequi-form" class="apple-form"><input type="text" id="pay-name" placeholder="Tus Nombres"><input type="number" id="pay-phone" placeholder="WhatsApp"><div class="pay-sum">Total: <strong id="pay-val"></strong></div><button class="apple-btn" style="background:#da0081;" onclick="processPayment()">Generar Orden</button></div><div id="nequi-processing" class="hidden" style="text-align:center;"><div class="spinner"></div></div></div></div>
-    <div id="modal-user-recharge" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-user-recharge')">✕</span><h2>Recargar Saldo</h2><div id="recharge-form" class="apple-form"><input type="text" id="r-name" placeholder="Tus Nombres"><input type="number" id="r-phone" placeholder="WhatsApp"><input type="number" id="r-amount" placeholder="Monto ($)"><button class="apple-btn" onclick="processRecharge()">Continuar</button></div></div></div>
-    <div id="modal-receipt" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-receipt')">✕</span><h3>Comprobante</h3><p id="receipt-instructions" class="text-muted"></p><div id="receipt-form" class="apple-form"><div class="upload-zone" onclick="document.getElementById('receipt-file-input').click()"><span id="receipt-upload-label">Subir Foto</span><img id="receipt-preview" class="hidden"></div><input type="file" id="receipt-file-input" accept="image/*" class="hidden" onchange="previewReceipt()"><button class="apple-btn" onclick="submitReceipt()">Enviar</button></div></div></div>
-
-    <!-- Scripts de Firebase y el tuyo -->
+    <!-- SCRIPTS -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="emc.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
