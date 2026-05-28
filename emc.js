@@ -60,6 +60,8 @@ let currentReceiptContext = {};
 let forumPosts = [];
 let currentThreadId = null;
 let replyingTo = null;
+let pendingVipPost = null; // Para guardar el debate VIP que intentan comprar
+
 
 // ==========================================
 // 3. INICIALIZACIÓN DE SESIÓN Y SEGURIDAD
@@ -465,10 +467,17 @@ async function submitReceipt() {
 
     let caption = "";
     if(currentReceiptContext.type === 'recharge') {
-        caption = `💰 *SOLICITUD DE RECARGA*\n\n*Token:* ${currentReceiptContext.token}\n*Usuario:* ${currentReceiptContext.name}\n*WhatsApp:* ${currentReceiptContext.phone}\n*ID:* #${myUserId}\n*Monto a recargar:* $${currentReceiptContext.amount}\n\n_Revisa el comprobante adjunto y recarga la billetera manualmente._`;
+        caption = `💰 *SOLICITUD DE RECARGA*\n\n*Token:* ${currentReceiptContext.token}\n*Usuario:* ${currentReceiptContext.name}\n*WhatsApp:* ${currentReceiptContext.phone}\n*ID:* #${myUserId}\n*Monto a recargar:* $${currentReceiptContext.amount}\n\n_Revisa el comprobante y recarga la billetera manualmente._`;
         addLog(`TOKEN: ${currentReceiptContext.token}`, `RECARGA PENDIENTE | $${currentReceiptContext.amount}`);
+        
+    } else if (currentReceiptContext.type === 'vip_access') {
+        const gananciaCreador = currentReceiptContext.amount * 0.7;
+        const gananciaUranium = currentReceiptContext.amount * 0.3;
+        caption = `💎 *PAGO VIP NEQUI (COMPROBANTE)*\n\n*Token:* ${currentReceiptContext.token}\n*Debate:* ${currentReceiptContext.title}\n*Comprador ID:* #${myUserId}\n*Creador WA:* ${currentReceiptContext.authorPhone}\n*Pagado:* $${currentReceiptContext.amount}\n\n⚠️ *ACCIÓN REQUERIDA:*\n1. Si es válido, añade el ID #${myUserId} a la accessList del debate manualmente en Firebase.\n2. Transfiere $${gananciaCreador} al creador.\n*Ganancia Uranium:* $${gananciaUranium}`;
+        addLog(`TOKEN: ${currentReceiptContext.token}`, `VIP NEQUI | Total: $${currentReceiptContext.amount}`);
+        
     } else {
-        caption = `🛒 *NUEVA ORDEN (COMPROBANTE ADJUNTO)*\n\n*Token:* ${currentReceiptContext.token}\n*Cliente:* ${currentReceiptContext.name}\n*WhatsApp:* ${currentReceiptContext.phone}\n*ID:* #${myUserId}\n*Servicios:* ${currentReceiptContext.details}\n*Total Pagado:* $${currentReceiptContext.amount}`;
+        caption = `🛒 *NUEVA ORDEN (COMPROBANTE)*\n\n*Token:* ${currentReceiptContext.token}\n*Cliente:* ${currentReceiptContext.name}\n*WhatsApp:* ${currentReceiptContext.phone}\n*ID:* #${myUserId}\n*Servicios:* ${currentReceiptContext.details}\n*Total Pagado:* $${currentReceiptContext.amount}`;
         addLog(`TOKEN: ${currentReceiptContext.token}`, `NEQUI PENDIENTE | Total: $${currentReceiptContext.amount}`);
         cart = {}; updateCartUI(); 
     }
@@ -876,7 +885,44 @@ function openForumModal() {
 function toggleForumPassword() {
     const type = document.getElementById('f-type').value;
     const pwdInput = document.getElementById('f-password');
-    if(type === 'clave') pwdInput.classList.remove('hidden'); else pwdInput.classList.add('hidden');
+    const vipOptions = document.getElementById('f-vip-options');
+    
+    pwdInput.classList.add('hidden');
+    vipOptions.classList.add('hidden');
+    
+    if(type === 'clave') pwdInput.classList.remove('hidden');
+    if(type === 'vip') vipOptions.classList.remove('hidden');
+}
+
+async function saveForumPost() {
+    const title = document.getElementById('f-title').value.trim();
+    const content = document.getElementById('f-content').value.trim();
+    const type = document.getElementById('f-type').value;
+    const password = document.getElementById('f-password').value.trim();
+    
+    if(!title || !content) return showToast("FALTAN DATOS");
+    if(type === 'clave' && !password) return showToast("DEBES ESTABLECER UNA CLAVE");
+
+    let vipPrice = 0, vipPhone = "";
+    if(type === 'vip') {
+        vipPrice = parseInt(document.getElementById('f-vip-price').value);
+        vipPhone = document.getElementById('f-vip-phone').value.trim();
+        if(!vipPrice || !vipPhone) return showToast("DEBES PONER EL PRECIO Y TU WHATSAPP");
+    }
+
+    await db.collection("foro").add({
+        authorId: myUserId, authorName: currentUser.name, title: title, content: content, 
+        img: currentForumImg, type: type, password: password, 
+        vipPrice: vipPrice, vipPhone: vipPhone, accessList: [myUserId], // El creador siempre tiene acceso
+        replies: [], timestamp: new Date().toISOString()
+    });
+
+    currentForumImg = ""; 
+    document.getElementById('f-preview').src = "";
+    document.getElementById('f-preview').classList.add('hidden');
+    document.getElementById('f-upload-label').classList.remove('hidden');
+
+    closeModal('modal-forum'); showToast("¡DEBATE PUBLICADO!");
 }
 
 function previewForumImage() {
@@ -938,7 +984,18 @@ async function openForumThread(postId) {
     const post = forumPosts.find(p => p.id === postId);
     if(!post) return;
     
-    if (post.type === 'vip' && !isAdmin) return showToast("ACCESO DENEGADO. SOLO VIP.");
+    // FILTRO VIP (Muro de Pago)
+    if (post.type === 'vip' && !isAdmin) {
+        if (!post.accessList || !post.accessList.includes(myUserId)) {
+            pendingVipPost = post; 
+            document.getElementById('vip-buy-title').innerText = post.title;
+            document.getElementById('vip-buy-price').innerText = "$" + (post.vipPrice || 0).toLocaleString();
+            openModal('modal-buy-vip');
+            return; // Bloquea la entrada
+        }
+    }
+
+    // FILTRO CLAVE
     if (post.type === 'clave' && !isAdmin) {
         const guess = prompt("Este debate requiere contraseña:");
         if (guess !== post.password) return showToast("CONTRASEÑA INCORRECTA");
@@ -949,10 +1006,9 @@ async function openForumThread(postId) {
     
     document.getElementById('chat-title-display').innerText = post.title;
     
-    // AQUÍ INYECTAMOS EL BOTÓN DE ELIMINAR PARA ADMINS
     let statusHtml = post.type === 'cerrado' ? 'Debate cerrado' : `Activo`;
     if (isAdmin) {
-        statusHtml += ` &nbsp;|&nbsp; <button onclick="deleteForumPost('${post.id}')" style="background:var(--danger); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:bold;">🗑️ ELIMINAR DEBATE</button>`;
+        statusHtml += ` &nbsp;|&nbsp; <button onclick="deleteForumPost('${post.id}')" style="background:var(--danger); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:bold;">🗑️ ELIMINAR</button>`;
     }
     document.getElementById('chat-status-display').innerHTML = statusHtml;
     
@@ -965,6 +1021,7 @@ async function openForumThread(postId) {
 
     renderChatMessages(post);
 }
+
 
 function renderChatMessages(post) {
     const container = document.getElementById('chat-messages');
@@ -1035,4 +1092,52 @@ async function deleteForumPost(id) {
         showToast("DEBATE ELIMINADO");
     }
 }
+// ==========================================
+// LÓGICA DE PAGOS VIP (BILLETERA Y NEQUI)
+// ==========================================
+async function processVipWallet() {
+    if(!pendingVipPost) return;
+    const price = pendingVipPost.vipPrice;
+    
+    if(currentUser.balance < price) return showToast("SALDO INSUFICIENTE EN BILLETERA");
 
+    closeModal('modal-buy-vip');
+    showToast("Procesando acceso...");
+
+    // 1. Descuenta saldo
+    await db.collection("usuarios").doc(myUserId).update({ 
+        balance: firebase.firestore.FieldValue.increment(-price) 
+    });
+    
+    // 2. Le da acceso en la base de datos
+    await db.collection("foro").doc(pendingVipPost.id).update({
+        accessList: firebase.firestore.FieldValue.arrayUnion(myUserId)
+    });
+
+    // 3. Notificación a Telegram para que pagues el 70%
+    const gananciaCreador = price * 0.7;
+    const gananciaUranium = price * 0.3;
+    let tgMsg = `💎 *ACCESO VIP VENDIDO (BILLETERA)* 💎\n\n*Debate:* ${pendingVipPost.title}\n*Comprador ID:* #${myUserId}\n*Creador ID:* #${pendingVipPost.authorId}\n*Precio Pagado:* $${price}\n\n⚠️ *ACCIÓN REQUERIDA:*\nTransfiere $${gananciaCreador} al creador (WA: ${pendingVipPost.vipPhone})\nTu ganancia libre: $${gananciaUranium}`;
+    sendTelegramNotification(tgMsg);
+
+    setTimeout(() => { 
+        showToast("¡ACCESO CONCEDIDO!");
+        openForumThread(pendingVipPost.id); 
+    }, 1500);
+}
+
+function processVipNequi() {
+    if(!pendingVipPost) return;
+    closeModal('modal-buy-vip');
+    
+    currentReceiptContext = {
+        type: 'vip_access', 
+        postId: pendingVipPost.id,
+        title: pendingVipPost.title,
+        authorPhone: pendingVipPost.vipPhone,
+        amount: pendingVipPost.vipPrice,
+        token: "VIP-" + Math.random().toString(36).substr(2,5).toUpperCase()
+    };
+    
+    showReceiptModal(`Envía $${pendingVipPost.vipPrice.toLocaleString()} al NEQUI 3137084357 para entrar al debate VIP.\nUna vez verificado, un admin te dará acceso.`);
+}
