@@ -948,10 +948,20 @@ async function openForumThread(postId) {
     showView('forum-detail');
     
     document.getElementById('chat-title-display').innerText = post.title;
-    document.getElementById('chat-status-display').innerText = post.type === 'cerrado' ? 'Debate cerrado' : `Activo`;
+    
+    // AQUÍ INYECTAMOS EL BOTÓN DE ELIMINAR PARA ADMINS
+    let statusHtml = post.type === 'cerrado' ? 'Debate cerrado' : `Activo`;
+    if (isAdmin) {
+        statusHtml += ` &nbsp;|&nbsp; <button onclick="deleteForumPost('${post.id}')" style="background:var(--danger); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:bold;">🗑️ ELIMINAR DEBATE</button>`;
+    }
+    document.getElementById('chat-status-display').innerHTML = statusHtml;
     
     const inputArea = document.querySelector('.chat-input-area');
-    if(post.type === 'cerrado' && !isAdmin) inputArea.classList.add('hidden'); else inputArea.classList.remove('hidden');
+    if(post.type === 'cerrado' && !isAdmin) {
+        inputArea.classList.add('hidden'); 
+    } else {
+        inputArea.classList.remove('hidden');
+    }
 
     renderChatMessages(post);
 }
