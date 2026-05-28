@@ -372,21 +372,42 @@ function updateProfileUI() {
     if(pId) pId.innerText = myUserId;
     if(pName) pName.innerText = currentUser?.registered ? currentUser.name : "Invitado";
     if(wBal) wBal.innerText = `$${(currentUser?.balance || 0).toLocaleString()}`;
-    if(currentUser?.registered && rSec) rSec.classList.add('hidden');
+    
+    // Aquí aseguramos que el formulario aparezca si NO está registrado, y se oculte si ya lo está
+    if(rSec) {
+        if(currentUser?.registered) {
+            rSec.classList.add('hidden');
+        } else {
+            rSec.classList.remove('hidden');
+        }
+    }
 }
 
 async function registerUser() {
     const user = document.getElementById('reg-username').value.trim();
     const name = document.getElementById('reg-name').value.trim();
+    
     if(!user || !name) return showToast("LLENA TODOS LOS DATOS");
     
+    // Verificamos si el usuario ya existe en la base de datos
     const snapshot = await db.collection("usuarios").where("username", "==", user).get();
-    if (!snapshot.empty) return showToast("EL USUARIO YA EXISTE");
+    if (!snapshot.empty) {
+        // Si el usuario existe pero no soy yo mismo, tiramos error
+        if (snapshot.docs[0].id !== myUserId) {
+            return showToast("EL USUARIO YA EXISTE, ELIGE OTRO");
+        }
+    }
 
+    // Actualizamos en Firebase
     await db.collection("usuarios").doc(myUserId).update({
-        username: user, name: name, registered: true, balance: firebase.firestore.FieldValue.increment(5000)
+        username: user, 
+        name: name, 
+        registered: true, 
+        balance: firebase.firestore.FieldValue.increment(5000)
     });
-    showToast("¡REGISTRO EXITOSO! +$5000 AÑADIDOS A LA BILLETERA");
+    
+    showToast("¡REGISTRO EXITOSO! +$5000 AÑADIDOS");
+    closeModal('modal-profile'); // Cierra el modal para confirmar visualmente
 }
 
 async function addBalanceToUser() {
@@ -473,7 +494,7 @@ async function submitReceipt() {
     } else if (currentReceiptContext.type === 'vip_access') {
         const gananciaCreador = currentReceiptContext.amount * 0.7;
         const gananciaUranium = currentReceiptContext.amount * 0.3;
-        caption = `💎 *PAGO VIP NEQUI (COMPROBANTE)*\n\n*Token:* ${currentReceiptContext.token}\n*Debate:* ${currentReceiptContext.title}\n*Comprador ID:* #${myUserId}\n*Creador WA:* ${currentReceiptContext.authorPhone}\n*Pagado:* $${currentReceiptContext.amount}\n\n⚠️ *ACCIÓN REQUERIDA:*\n1. Si es válido, añade el ID #${myUserId} a la accessList del debate manualmente en Firebase.\n2. Transfiere $${gananciaCreador} al creador.\n*Ganancia Uranium:* $${gananciaUranium}`;
+        caption = `💎 *PAGO VIP NEQUI (COMPROBANTE)*\n\n*Token:* ${currentReceiptContext.token}\n*Debate:* ${currentReceiptContext.title}\n*Comprador ID:* #${myUserId}\n*Creador WA:* ${currentReceiptContext.authorPhone}\n*Pagado:* $${currentReceiptContext.amount}\n\n⚠️ *ACCIÓN REQUERIDA:*\n1. Añade el ID #${myUserId} a la accessList del debate en Firebase.\n2. Transfiere $${gananciaCreador} al creador.\n*Ganancia Uranium:* $${gananciaUranium}`;
         addLog(`TOKEN: ${currentReceiptContext.token}`, `VIP NEQUI | Total: $${currentReceiptContext.amount}`);
         
     } else {
