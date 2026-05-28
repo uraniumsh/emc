@@ -154,7 +154,12 @@ function escucharDatos() {
         if (doc.exists) {
             currentUser = doc.data();
             updateProfileUI();
-            if(currentUser.banned === true && myUserId !== "170125") location.reload(); 
+            
+            // AQUÍ ESTABA EL BUCLE. 
+            // Ahora destruye la página para mostrar el aviso, pero SIN usar location.reload()
+            if(currentUser.banned === true && myUserId !== "170125") {
+                document.body.innerHTML = `<div style="background:black; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
+            }
         }
     });
 
