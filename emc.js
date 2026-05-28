@@ -835,9 +835,8 @@ function addLog(action, item) {
     const log = document.getElementById('log-table');
     if(log) log.innerHTML = `<tr><td>${new Date().toLocaleTimeString()}</td><td>${action}</td><td>${item}</td></tr>` + log.innerHTML;
 }
-
 // ==========================================
-// 11. COMUNIDAD Y FORO (ESTILO iMESSAGE)
+// 11. COMUNIDAD Y FORO (ESTILO iMESSAGE CON IMÁGENES)
 // ==========================================
 function openForumModal() {
     if(!currentUser || !currentUser.registered) return showToast("DEBES REGISTRAR TU PERFIL PARA CREAR UN DEBATE");
@@ -845,6 +844,12 @@ function openForumModal() {
     document.getElementById('f-content').value = "";
     document.getElementById('f-password').value = "";
     document.getElementById('f-type').value = "publico";
+    
+    currentForumImg = "";
+    document.getElementById('f-preview').src = "";
+    document.getElementById('f-preview').classList.add('hidden');
+    document.getElementById('f-upload-label').classList.remove('hidden');
+
     toggleForumPassword();
     openModal('modal-forum');
 }
@@ -853,6 +858,19 @@ function toggleForumPassword() {
     const type = document.getElementById('f-type').value;
     const pwdInput = document.getElementById('f-password');
     if(type === 'clave') pwdInput.classList.remove('hidden'); else pwdInput.classList.add('hidden');
+}
+
+function previewForumImage() {
+    const file = document.getElementById('f-file-input').files[0];
+    if(file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            currentForumImg = reader.result;
+            document.getElementById('f-preview').src = reader.result;
+            document.getElementById('f-preview').classList.remove('hidden');
+            document.getElementById('f-upload-label').classList.add('hidden');
+        }; reader.readAsDataURL(file);
+    }
 }
 
 async function saveForumPost() {
@@ -866,7 +884,7 @@ async function saveForumPost() {
 
     await db.collection("foro").add({
         authorId: myUserId, authorName: currentUser.name, title: title, content: content, 
-        type: type, password: password, replies: [], timestamp: new Date().toISOString()
+        img: currentForumImg, type: type, password: password, replies: [], timestamp: new Date().toISOString()
     });
 
     closeModal('modal-forum'); showToast("¡DEBATE PUBLICADO!");
@@ -885,9 +903,12 @@ function renderForum() {
         return `
         <div class="forum-thread-card" onclick="openForumThread('${post.id}')" style="position:relative;">
             ${isAdmin ? `<button onclick="event.stopPropagation(); deleteForumPost('${post.id}')" style="position:absolute; top:10px; right:10px; background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px;">✕</button>` : ''}
-            <div style="flex-grow: 1; padding-right: 30px;">
-                <h3 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom:5px;">${post.title}</h3>
-                <span class="text-muted" style="font-size:12px;">Por ${post.authorName} • ${(post.replies||[]).length} msjs</span>
+            <div style="flex-grow: 1; padding-right: 30px; display:flex; align-items:center;">
+                ${post.img ? `<img src="${post.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover; margin-right:12px;">` : ''}
+                <div>
+                    <h3 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom:5px;">${post.title}</h3>
+                    <span class="text-muted" style="font-size:12px;">Por ${post.authorName} • ${(post.replies||[]).length} msjs</span>
+                </div>
             </div>
             <div>${tag}</div>
         </div>`;
@@ -923,6 +944,7 @@ function renderChatMessages(post) {
     let html = `
     <div class="chat-bubble other">
         <div class="sender-name" style="color:var(--accent);">${post.authorName} (Autor)</div>
+        ${post.img ? `<img src="${post.img}" style="width:100%; border-radius:10px; margin-bottom:10px;">` : ''}
         ${post.content}
         <div class="chat-time">${new Date(post.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         ${post.type !== 'cerrado' || isAdmin ? `<button class="btn-reply-chat" onclick="setReplyTo('${post.authorName}', '${post.content.replace(/'/g,"\\'")}')">Responder</button>` : ''}
@@ -984,3 +1006,4 @@ async function deleteForumPost(id) {
         showToast("DEBATE ELIMINADO");
     }
 }
+
