@@ -327,6 +327,7 @@ body {
     object-fit: cover;
 }
 
+/* Arreglo del Precio (z-index para que no lo tape la imagen) */
 .price-tag {
     position: absolute; 
     top: 8px; 
@@ -338,7 +339,42 @@ body {
     border-radius: var(--radius-sm);
     font-size: 13px; 
     font-weight: 600;
+    z-index: 10; /* ESTO HACE QUE SE VEA EL PRECIO */
+    color: white;
 }
+
+/* Arreglo de Botones (Todos del mismo tamaño y padding) */
+.apple-btn, .apple-btn-secondary {
+    width: 100%; 
+    border: none; 
+    padding: 14px; /* Mismo tamaño para todos */
+    border-radius: var(--radius-md);
+    font-weight: 600; 
+    cursor: pointer;
+    display: block;
+    text-align: center;
+    box-sizing: border-box;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+.apple-btn {
+    background: var(--text-main); 
+    color: var(--bg-color);
+    font-size: 16px; 
+}
+
+.apple-btn-secondary {
+    background: var(--surface-elevated); 
+    color: var(--text-main);
+    font-size: 15px; 
+    margin-bottom: 10px;
+}
+
+.apple-btn:active, .apple-btn-secondary:active { 
+    transform: scale(0.97); 
+    opacity: 0.8; 
+}
+
 
 /* El botón ancho inferior (Estilo App Store) */
 .btn-add-cart {
