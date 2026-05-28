@@ -727,6 +727,110 @@ function openDetail(id) {
                     <button class="apple-btn" onclick="addToCart('${p.id}'); closeModal('modal-detail')">Añadir al carrito</button>
                     <button class="apple-btn-secondary" style="background:#28a745; color:white;" onclick="window.open('https://wa.me/57${p.contact || '3128194596'}?text=${encodeURIComponent(p.wa || 'Hola')}')">Chat WhatsApp</button>
                     <button class="apple-btn-secondary" style="background:#da0081; color:white;" onclick="buyDirectNequi('${p.id}')">Pago Rápido Nequi</button>
+// ==========================================
+// 9. RENDERIZAR INTERFAZ PRINCIPAL (TIENDA Y DETALLES)
+// ==========================================
+function renderGrid(catId = 'all') {
+    const grid = document.getElementById('product-grid');
+    if(!grid) return; grid.innerHTML = '';
+    
+    let filtered = products.filter(p => catId === 'all' || p.catId === catId);
+    filtered.sort((a, b) => (b.pinned === true) - (a.pinned === true));
+    
+    filtered.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.onclick = () => openDetail(p.id);
+        
+        card.innerHTML = `
+            ${isAdmin ? `
+            <div style="position:absolute; top:8px; right:8px; z-index:10; display:flex; gap:5px;">
+                <button onclick="event.stopPropagation(); openPublishModal('${p.id}')" style="background:var(--accent); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✏️</button>
+                <button onclick="event.stopPropagation(); deleteProduct('${p.id}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✕</button>
+            </div>
+            ` : ''}
+            <div class="card-img">
+                <div class="price-tag">$${parseFloat(p.price).toLocaleString()}</div>
+                <img src="${p.img}">
+            </div>
+            <div class="card-product-name">${p.name}</div>
+        `;
+        
+        // ¡ESTO FUE LO QUE SE BORRÓ! Sin esto, las tarjetas no aparecen y el código se rompe.
+        grid.appendChild(card);
+    });
+}
+
+function renderAll() {
+    const navMob = document.getElementById('mobile-nav-cats');
+    const sel = document.getElementById('p-cat-select');
+    const selDel = document.getElementById('d-cat-select');
+    
+    let htmlMob = categories.map(c => `<button onclick="setActiveCat(this, '${c.id}')">${c.name}</button>`).join('');
+    let htmlOptions = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+    if(navMob) navMob.innerHTML = `<button class="active" onclick="setActiveCat(this, 'all')">Todas</button>` + htmlMob;
+    if(sel) sel.innerHTML = htmlOptions;
+    if(selDel) selDel.innerHTML = htmlOptions;
+    
+    renderGrid();
+}
+
+function setActiveCat(btn, catId) {
+    document.querySelectorAll('.mobile-cat-nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGrid(catId);
+}
+
+function formatText(text) {
+    if (!text) return "";
+    return String(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/__(.*?)__/g, '<em>$1</em>')
+        .replace(/>(.*?)</g, '<mark style="background:rgba(255,215,0,0.3); color:white; padding:0 4px; border-radius:4px;">$1</mark>')
+        .replace(/=#([0-9A-Fa-f]{6})(.*?)(?=\s|$)/g, '<span style="color:#$1">$2</span>')
+        .replace(/\n/g, '<br>');
+}
+
+function openDetail(id) {
+    const p = products.find(prod => prod.id.toString() === id.toString());
+    if(!p) return;
+    const body = document.getElementById('detail-body');
+    
+    let likes = 0, dislikes = 0;
+    let myReaction = p.reactions ? p.reactions[myUserId] : null;
+    
+    if(p.reactions) {
+        for(let user in p.reactions) {
+            if(p.reactions[user] === 'like') likes++;
+            if(p.reactions[user] === 'dislike') dislikes++;
+        }
+    }
+
+    let commentsHTML = (p.comments || []).map(c => `
+        <div style="border-bottom: 1px solid var(--border-color); padding: 10px 0; font-size: 13px;">
+            <strong style="color:var(--text-muted); font-size:11px;">#${c.userId}</strong><br>
+            ${c.text}
+        </div>
+    `).join('');
+
+    body.innerHTML = `
+        <div class="detail-layout">
+            <div class="detail-img-container"><img src="${p.img}"></div>
+            <div class="detail-info">
+                <h2 style="margin-bottom:5px;">${p.name}</h2>
+                <h3 style="color:var(--accent); margin-bottom:15px;">$${parseFloat(p.price).toLocaleString()}</h3>
+                <p style="font-size:14px; flex-grow:1; line-height:1.6;">${formatText(p.desc || '')}</p>
+                
+                <div class="social-bar">
+                    <button onclick="handleReaction('${p.id}', 'like')" style="color: ${myReaction==='like' ? 'var(--accent)' : 'inherit'}">👍 <span>${likes}</span></button>
+                    <button onclick="handleReaction('${p.id}', 'dislike')" style="color: ${myReaction==='dislike' ? 'var(--danger)' : 'inherit'}">👎 <span>${dislikes}</span></button>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <button class="apple-btn" onclick="addToCart('${p.id}'); closeModal('modal-detail')">Añadir al carrito</button>
+                    <button class="apple-btn-secondary" style="background:#28a745; color:white;" onclick="window.open('https://wa.me/57${p.contact || '3128194596'}?text=${encodeURIComponent(p.wa || 'Hola')}')">Chat WhatsApp</button>
+                    <button class="apple-btn-secondary" style="background:#da0081; color:white;" onclick="buyDirectNequi('${p.id}')">Pago Rápido Nequi</button>
                 </div>
 
                 <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top:20px;">
@@ -769,6 +873,7 @@ function saveBigEditor() {
     document.getElementById('p-desc').value = document.getElementById('big-editor-area').value;
     closeModal('modal-big-editor');
 }
+
 
 // ==========================================
 // 10. CARRITO Y PAGOS
