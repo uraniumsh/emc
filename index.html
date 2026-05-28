@@ -2,203 +2,211 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Uranium Trade - Pro Platform</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>URANIUM DIGITAL | Apple Style</title>
+    <link rel="stylesheet" href="ecss.css">
 </head>
 <body>
 
-    <!-- ADVERTENCIA DE ROTACIÓN -->
-    <div id="rotate-screen">
-        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="margin-bottom:20px; animation: rotatePhone 2s infinite;">
-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-            <path d="M12 18h.01"></path>
-        </svg>
-        <h2 style="font-size: 18px;">Por favor, gira tu dispositivo</h2>
-        <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">Plataforma optimizada para vista horizontal.</p>
+    <div id="toast-container"></div>
+
+    <!-- HEADER APPLE STYLE (GLASSMORPHISM) -->
+    <header class="main-header">
+        <div class="logo" onclick="showView('products')">
+            URANIUM
+        </div>
+        <div class="header-right">
+            <div class="cart-wrapper" onclick="openModal('modal-cart')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                <span id="cart-count" class="cart-badge">0</span>
+            </div>
+            <!-- Botón Hamburguesa -->
+            <div class="header-icon menu-btn" onclick="openMenu()">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- MENÚ HAMBURGUESA DESLIZABLE (FULL SCREEN GLASS) -->
+    <div id="mobile-menu" class="apple-menu hidden">
+        <div class="menu-header">
+            <button class="close-menu" onclick="closeMenu()">✕</button>
+        </div>
+        <div class="menu-content">
+            <div class="menu-profile" onclick="openModal('modal-profile'); closeMenu()">
+                <div class="avatar">👤</div>
+                <div class="user-info">
+                    <h3 id="menu-user-name">Perfil de Usuario</h3>
+                    <p id="menu-user-id">ID: Cargando...</p>
+                </div>
+            </div>
+            <nav class="menu-links">
+                <a href="#" onclick="showView('products'); closeMenu()">Tienda Oficial</a>
+                <a href="#" onclick="showView('foro'); closeMenu()">Comunidad & Foro</a>
+                <!-- Solo visible para Admins -->
+                <a href="#" id="btn-admin-menu" class="hidden admin-link" onclick="showView('dashboard'); closeMenu()">Panel de Control (Admin)</a>
+                <a href="#" id="btn-logout-menu" class="hidden text-danger" onclick="handleLogout()">Cerrar Sesión</a>
+            </nav>
+        </div>
     </div>
 
-    <div id="app-container">
-        <!-- BARRA SUPERIOR -->
-        <header class="topbar">
-            <div class="topbar-left">
-                <div class="menu-btn" onclick="openPanel('panel-portfolio')">≡</div>
-                <div id="tabs-container" style="display: flex; height: 100%; overflow-x: auto;">
-                    <!-- Las pestañas se inyectan vía JS -->
-                </div>
-                <div class="menu-btn" style="border-left: 1px solid var(--border);" onclick="alert('Buscador de activos en desarrollo')">+</div>
+    <main class="content">
+        <!-- TIENDA -->
+        <section id="view-products" class="view-section">
+            <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
+            <div class="product-grid" id="product-grid"></div>
+        </section>
+
+        <!-- DASHBOARD ADMIN APPLE STYLE -->
+        <section id="view-dashboard" class="view-section hidden">
+            <h1 class="section-title">Panel de Control</h1>
+            
+            <div class="admin-actions">
+                <button class="apple-btn-secondary" onclick="openPublishModal()">+ Publicar Producto</button>
+                <button class="apple-btn-secondary" onclick="openModal('modal-add-cat')">+ Crear Categoría</button>
+                <button class="apple-btn-secondary" onclick="openDeleteCatModal()">- Eliminar Categoría</button>
+                <button class="apple-btn-secondary" onclick="openModal('modal-add-balance')">Añadir Saldo</button>
+                <button id="btn-security" class="apple-btn-secondary hidden" onclick="openModal('modal-manage-admins')">Gestión Admins</button>
             </div>
-            <div class="topbar-right">
-                <div class="account-wrapper" onclick="openPanel('panel-account')">
-                    <div class="account-info">
-                        <div class="acc-balance practice" id="header-balance">$10,000.00</div>
-                        <div class="acc-type" id="header-type">PRÁCTICA</div>
-                    </div>
-                    <div class="acc-dropdown-btn">▼</div>
+
+            <div class="admin-card">
+                <h3>Usuarios Registrados</h3>
+                <div class="table-container">
+                    <table class="apple-table">
+                        <thead><tr><th>Usuario</th><th>Saldo</th><th>Acciones</th></tr></thead>
+                        <tbody id="users-table"></tbody>
+                    </table>
                 </div>
-                <button class="btn-deposit" onclick="openPanel('panel-deposit')">Depósito</button>
             </div>
-        </header>
-
-        <!-- LAYOUT PRINCIPAL -->
-        <div class="main-layout">
-            <!-- BARRA LATERAL -->
-            <aside class="sidebar">
-                <div class="side-icon" onclick="openPanel('panel-portfolio')" title="Portafolio">💼</div>
-                <div class="side-icon" onclick="openPanel('panel-history')" title="Historial">📋</div>
-                <div class="side-icon" onclick="openPanel('panel-indicators')" title="Indicadores">📈</div>
-                <div class="side-icon" onclick="openPanel('panel-leaderboard')" title="Torneos">🏆</div>
-                <div class="side-icon" style="margin-top: auto; margin-bottom: 5px;" onclick="openPanel('panel-admin')" title="Ajustes">⚙️</div>
-            </aside>
-
-            <!-- GRÁFICO -->
-            <main class="chart-container">
-                <div class="asset-title-overlay" id="chart-title-overlay">EUR/USD</div>
-                <canvas id="chart"></canvas>
-                <div class="toast-container" id="toast-container"></div>
-            </main>
-
-            <!-- PANEL DERECHO (CONTROLES) -->
-            <aside class="right-panel">
-                <div class="control-group" onclick="openPanel('panel-amount')">
-                    <div>
-                        <span class="control-label">Inversión</span>
-                        <span class="control-value" id="display-amount">$1,000</span>
-                    </div>
-                    <span style="color:var(--text-muted); font-size: 14px;">✎</span>
+            
+            <div class="admin-card">
+                <h3>Registro de Movimientos</h3>
+                <div class="table-container">
+                    <table class="apple-table">
+                        <thead><tr><th>Fecha/Hora</th><th>Acción</th><th>Detalle</th></tr></thead>
+                        <tbody id="log-table"></tbody>
+                    </table>
                 </div>
+            </div>
+        </section>
 
-                <div class="control-group" onclick="openPanel('panel-time')">
-                    <div>
-                        <span class="control-label">Tiempo</span>
-                        <span class="control-value" id="display-time">1 Min</span>
-                    </div>
-                    <span style="color:var(--text-muted); font-size: 14px;">🕒</span>
-                </div>
+        <!-- LISTA DE FOROS -->
+        <section id="view-foro" class="view-section hidden">
+            <div class="forum-header">
+                <h1 class="section-title">Comunidad</h1>
+                <button class="apple-btn" onclick="openForumModal()">Nuevo Debate</button>
+            </div>
+            <div id="forum-feed" class="forum-grid"></div>
+        </section>
 
-                <div class="profit-info">
-                    <span class="control-label">Beneficio</span>
-                    <div class="profit-row">
-                        <span class="profit-amount" id="display-profit-val">+$850.00</span>
-                        <span class="profit-percent" id="display-profit-pct">85%</span>
-                    </div>
-                </div>
-
-                <button class="btn-trade btn-call" onclick="triggerTrade('CALL')">
-                    <span>Sube ↗</span>
+        <!-- DETALLE DEL FORO (ESTILO iMESSAGE/WHATSAPP) -->
+        <section id="view-forum-detail" class="view-section hidden">
+            <div class="chat-header glass-header">
+                <button class="back-btn" onclick="showView('foro')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    Atrás
                 </button>
-                <button class="btn-trade btn-put" onclick="triggerTrade('PUT')">
-                    <span>Baja ↘</span>
-                </button>
-            </aside>
-        </div>
-    </div>
-
-    <!-- OVERLAYS Y MODALES -->
-    <div class="overlay-bg" id="overlay-bg" onclick="closeAllPanels()"></div>
-
-    <!-- Panel Importe -->
-    <div class="slide-panel" id="panel-amount">
-        <div class="panel-header"><span>Importe de Inversión</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div class="numpad-display" id="numpad-display">$1,000</div>
-        <div class="quick-amounts-row">
-            <button class="q-amt-btn" onclick="setAmount(10)">$10</button>
-            <button class="q-amt-btn" onclick="setAmount(50)">$50</button>
-            <button class="q-amt-btn" onclick="setAmount(100)">$100</button>
-            <button class="q-amt-btn" onclick="setAmount(500)">$500</button>
-            <button class="q-amt-btn" onclick="setAmount(1000)">$1,000</button>
-        </div>
-        <div class="numpad-grid">
-            <button class="num-key" onclick="typeNumpad(1)">1</button>
-            <button class="num-key" onclick="typeNumpad(2)">2</button>
-            <button class="num-key" onclick="typeNumpad(3)">3</button>
-            <button class="num-key" onclick="typeNumpad(4)">4</button>
-            <button class="num-key" onclick="typeNumpad(5)">5</button>
-            <button class="num-key" onclick="typeNumpad(6)">6</button>
-            <button class="num-key" onclick="typeNumpad(7)">7</button>
-            <button class="num-key" onclick="typeNumpad(8)">8</button>
-            <button class="num-key" onclick="typeNumpad(9)">9</button>
-            <button class="num-key" onclick="typeNumpad('.')">.</button>
-            <button class="num-key" onclick="typeNumpad(0)">0</button>
-            <button class="num-key" onclick="typeNumpad('del')">⌫</button>
-        </div>
-    </div>
-
-    <!-- Panel Tiempo -->
-    <div class="slide-panel" id="panel-time">
-        <div class="panel-header"><span>Tiempo de Expiración</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div class="list-wrapper">
-            <div class="list-item" onclick="setTime(15, '15 Seg')"><span class="val">15 Segundos</span><span class="prof">Rápido</span></div>
-            <div class="list-item" onclick="setTime(60, '1 Min')"><span class="val">1 Minuto</span><span class="prof dyn-prof">85%</span></div>
-            <div class="list-item" onclick="setTime(120, '2 Min')"><span class="val">2 Minutos</span><span class="prof dyn-prof">85%</span></div>
-            <div class="list-item" onclick="setTime(300, '5 Min')"><span class="val">5 Minutos</span><span class="prof dyn-prof">85%</span></div>
-        </div>
-    </div>
-
-    <!-- Panel Cuentas -->
-    <div class="slide-panel" id="panel-account">
-        <div class="panel-header"><span>Seleccionar Cuenta</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div class="list-wrapper">
-            <div class="list-item" onclick="switchAccount('real')" style="align-items: center;">
-                <div><h4 style="font-size:10px; color:var(--text-muted);">CUENTA REAL</h4><div class="val" style="color:var(--green)" id="pop-real-bal">COL$ 0.00</div></div>
-                <div id="check-real" style="display:none; color:white; font-size:18px;">✓</div>
+                <div class="chat-title-info">
+                    <h3 id="chat-title-display">...</h3>
+                    <span id="chat-status-display" class="chat-status"></span>
+                </div>
             </div>
-            <div class="list-item" onclick="switchAccount('practice')" style="align-items: center;">
-                <div><h4 style="font-size:10px; color:var(--text-muted);">CUENTA DE PRÁCTICA</h4><div class="val" style="color:var(--orange)" id="pop-prac-bal">$10,000.00</div></div>
-                <div id="check-prac" style="color:white; font-size:18px;">✓</div>
+            
+            <!-- Burbujas de chat -->
+            <div id="chat-messages" class="chat-messages"></div>
+            
+            <!-- Input estilo iOS -->
+            <div class="chat-input-area glass-footer">
+                <div id="replying-to-box" class="replying-to hidden">
+                    <span>Respondiendo a: <strong id="reply-to-name"></strong></span>
+                    <button onclick="cancelReply()">✕</button>
+                </div>
+                <div class="input-wrapper">
+                    <input type="text" id="chat-input" placeholder="Mensaje...">
+                    <button class="send-btn" onclick="sendForumReply()">↑</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODALES (Adaptados a estilo tarjeta iOS) -->
+    
+    <!-- Perfil -->
+    <div id="modal-profile" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-profile')">✕</span>
+            <div class="profile-header-modal">
+                <div class="avatar-lg">👤</div>
+                <h2 id="profile-name-display">Usuario</h2>
+                <p id="profile-id" class="text-muted">ID:</p>
+            </div>
+            <div class="wallet-card">
+                <p class="text-muted">Saldo Disponible</p>
+                <h1 id="wallet-balance">$0</h1>
+                <button class="apple-btn" onclick="openUserRecharge()">Recargar Saldo</button>
+            </div>
+            <div id="register-section" class="apple-form hidden">
+                <hr>
+                <p class="text-accent" style="font-weight: 600; text-align: center; margin-bottom: 10px;">Regístrate y gana $5,000 COP</p>
+                <input type="text" id="reg-username" placeholder="Nombre de usuario (Único)">
+                <input type="text" id="reg-name" placeholder="Tu Nombre">
+                <button class="apple-btn" onclick="registerUser()">Completar Registro</button>
             </div>
         </div>
-        <div style="padding: 15px;">
-            <button onclick="reloadPractice()" class="btn-primary" style="background:var(--orange); box-shadow: 0 4px 0 #cc7000;">↻ RECARGAR</button>
+    </div>
+
+    <!-- Detalle Producto (Premium) -->
+    <div id="modal-detail" class="modal hidden">
+        <div class="modal-content ios-card detail-box">
+            <span class="close" onclick="closeModal('modal-detail')">✕</span>
+            <div id="detail-body"></div>
         </div>
     </div>
 
-    <!-- Otros Paneles UI Genéricos -->
-    <div class="slide-panel" id="panel-portfolio">
-        <div class="panel-header"><span>Portafolio Activo</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div class="list-wrapper" id="portfolio-content" style="padding: 10px; font-size: 12px; color: var(--text-muted); text-align:center;">
-            No hay operaciones activas.
-        </div>
-    </div>
-
-    <div class="slide-panel" id="panel-history">
-        <div class="panel-header"><span>Historial Cerrado</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div class="list-wrapper" id="history-content" style="padding: 10px; font-size: 12px; color: var(--text-muted); text-align:center;">
-            Aún no has cerrado operaciones.
-        </div>
-    </div>
-
-    <div class="slide-panel" id="panel-deposit">
-        <div class="panel-header"><span>Depósito (Simulado)</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div style="padding: 20px;">
-            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Recarga tu cuenta real para operar en vivo.</p>
-            <button onclick="depositReal(50000)" class="btn-primary" style="background:var(--green); box-shadow: 0 4px 0 #1e9938; margin-bottom: 10px;">Depositar COL$ 50,000</button>
-            <button onclick="depositReal(100000)" class="btn-primary" style="background:var(--green); box-shadow: 0 4px 0 #1e9938;">Depositar COL$ 100,000</button>
-        </div>
-    </div>
-
-    <div class="slide-panel" id="panel-indicators">
-        <div class="panel-header"><span>Indicadores Técnicos</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div class="list-wrapper">
-            <div class="list-item" onclick="toggleIndicator('RSI')"><span class="val">RSI (Relative Strength)</span><span class="prof" style="color:var(--text-muted)">Añadir</span></div>
-            <div class="list-item" onclick="toggleIndicator('MACD')"><span class="val">MACD</span><span class="prof" style="color:var(--text-muted)">Añadir</span></div>
-            <div class="list-item" onclick="toggleIndicator('Bollinger')"><span class="val">Bandas de Bollinger</span><span class="prof" style="color:var(--text-muted)">Añadir</span></div>
-        </div>
-    </div>
-
-    <!-- Configuración Admin Básica -->
-    <div class="slide-panel" id="panel-admin">
-        <div class="panel-header"><span>Configuración</span><div class="close-btn" onclick="closeAllPanels()">✕</div></div>
-        <div style="padding: 20px;">
-            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Interfaz de Trading</p>
-            <div class="list-item" style="border:1px solid var(--border); border-radius:4px; margin-bottom:10px;" onclick="showToast('Tema Oscuro Aplicado', true, 'info')">
-                <span class="val">Tema</span><span class="prof" style="color:var(--text-main)">Oscuro</span>
+    <!-- Crear Debate -->
+    <div id="modal-forum" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-forum')">✕</span>
+            <h2>Nuevo Debate</h2>
+            <div class="apple-form">
+                <input type="text" id="f-title" placeholder="Asunto o Tema">
+                <select id="f-type" onchange="toggleForumPassword()">
+                    <option value="publico">Público</option>
+                    <option value="vip">Solo VIP</option>
+                    <option value="clave">Con Clave</option>
+                    <option value="cerrado">Cerrado (Solo lectura)</option>
+                </select>
+                <input type="password" id="f-password" class="hidden" placeholder="Establecer Clave">
+                <textarea id="f-content" placeholder="Escribe el mensaje principal..." style="height: 100px;"></textarea>
+                <button class="apple-btn" onclick="saveForumPost()">Publicar</button>
             </div>
-            <button onclick="alert('Función de Cierre de Sesión en desarrollo')" class="btn-primary" style="background:var(--border-light);">Cerrar Sesión</button>
         </div>
     </div>
 
-    <!-- Script principal -->
-    <script src="emc.js"></script>
+    <!-- Gestión de Admins -->
+    <div id="modal-manage-admins" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-manage-admins')">✕</span>
+            <h2>Agregar Sub-Admin</h2>
+            <p class="text-muted" style="font-size: 12px; margin-bottom:15px;">Solo el usuario con el ID especificado podrá acceder.</p>
+            <div class="apple-form">
+                <input type="text" id="new-admin-id" placeholder="ID del Usuario">
+                <button class="apple-btn" onclick="addSubAdmin()">Conceder Permisos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demás modales simplificados para no hacer el código gigante (Mantienen sus IDs originales de tu JS pero con clases de Apple) -->
+    <div id="modal-cart" class="modal hidden"><div class="modal-content ios-card cart-tall"><span class="close" onclick="closeModal('modal-cart')">✕</span><h2>Carrito</h2><div id="cart-list" class="cart-list-scroll"></div><div class="total-box">Total: <span id="cart-total">$0</span></div><button class="apple-btn" onclick="goToWalletPayment()">Pagar con Billetera</button><button class="apple-btn-secondary" style="margin-top:10px;" onclick="goToPayment()">Pagar con Nequi</button></div></div>
+    <div id="modal-wallet-confirm" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span><h2>Confirmar Compra</h2><div id="wallet-form" class="apple-form"><input type="text" id="w-pay-name" placeholder="Tus Nombres"><input type="number" id="w-pay-phone" placeholder="WhatsApp"><div class="pay-sum">Total: <strong id="w-pay-val"></strong></div><button class="apple-btn" onclick="processWalletPayment()">Confirmar</button></div></div></div>
+    <div id="modal-nequi" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-nequi')">✕</span><h2>Pago Nequi</h2><div id="nequi-form" class="apple-form"><input type="text" id="pay-name" placeholder="Tus Nombres"><input type="number" id="pay-phone" placeholder="WhatsApp"><div class="pay-sum">Total: <strong id="pay-val"></strong></div><button class="apple-btn" style="background:#da0081;" onclick="processPayment()">Generar Orden</button></div><div id="nequi-processing" class="hidden" style="text-align:center;"><div class="spinner"></div></div></div></div>
+    <div id="modal-user-recharge" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-user-recharge')">✕</span><h2>Recargar Saldo</h2><div id="recharge-form" class="apple-form"><input type="text" id="r-name" placeholder="Tus Nombres"><input type="number" id="r-phone" placeholder="WhatsApp"><input type="number" id="r-amount" placeholder="Monto ($)"><button class="apple-btn" onclick="processRecharge()">Continuar</button></div></div></div>
+    <div id="modal-receipt" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-receipt')">✕</span><h3>Comprobante</h3><p id="receipt-instructions" class="text-muted"></p><div id="receipt-form" class="apple-form"><div class="upload-zone" onclick="document.getElementById('receipt-file-input').click()"><span id="receipt-upload-label">Subir Foto</span><img id="receipt-preview" class="hidden"></div><input type="file" id="receipt-file-input" accept="image/*" class="hidden" onchange="previewReceipt()"><button class="apple-btn" onclick="submitReceipt()">Enviar</button></div></div></div>
+
+    <!-- Scripts de Firebase y el tuyo -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
