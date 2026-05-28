@@ -73,8 +73,6 @@ async function initSession() {
     myUserId = localStorage.getItem('u_id') || originalId;
     localStorage.setItem('u_id', myUserId);
 
-    isAdmin = localStorage.getItem('u_admin') === 'true';
-
     escucharDatos(); 
 
     const userRef = db.collection("usuarios").doc(myUserId);
@@ -92,19 +90,38 @@ async function initSession() {
     } else {
         currentUser = userDoc.data();
         if(currentUser.banned === true && myUserId !== "170125") {
-            document.body.innerHTML = `<div style="background:black; color:red; height:100vh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
+            document.body.innerHTML = `<div style="background:black; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
             return; 
         }
         await userRef.update({ lastActive: rightNow });
     }
 
-    isAdmin = currentUser.role === 'superadmin' || currentUser.role === 'admin';
-    localStorage.setItem('u_admin', isAdmin); 
+    // LÓGICA ESTRICTA DE ADMIN: 
+    // Tiene el permiso en BD Y metió la clave correctamente (admin_auth)
+    const hasAdminRole = currentUser.role === 'superadmin' || currentUser.role === 'admin';
+    const hasAuth = localStorage.getItem('admin_auth') === 'true';
+    
+    isAdmin = hasAdminRole && hasAuth;
 
+    // 1. Forzar a que la tuerca y el botón de publicar estén ocultos al cargar
+    const gear = document.getElementById('btn-login-gear');
+    const addBtn = document.getElementById('btn-add-post-header');
+    if(gear) gear.classList.add('hidden');
+    if(addBtn) addBtn.classList.add('hidden');
+
+    // 2. Si es Admin en la base de datos, le mostramos la tuerquita
+    if (hasAdminRole) {
+        if (gear) gear.classList.remove('hidden');
+    }
+
+    // 3. Si ya metió la contraseña correctamente, le habilitamos todo
     if (isAdmin) {
         activateAdminUI();
-        if(categories.length > 0) renderAll(); else renderGrid(); 
+        if (addBtn) addBtn.classList.remove('hidden');
     }
+    
+    // Pinta la tienda
+    if(categories.length > 0) renderAll(); else renderGrid(); 
     
     updateProfileUI();
 }
@@ -213,44 +230,34 @@ async function handleLogin() {
     if(!em || !pa) return showToast("INGRESA DATOS");
 
     try {
-        const usersSnap = await db.collection("usuarios").where("adminEmail", "==", em).where("adminPass", "==", pa).get();
+        const usersSnap = await db.collection("usuarios")
+            .where("adminEmail", "==", em)
+            .where("adminPass", "==", pa)
+            .get();
 
         if(!usersSnap.empty) {
             const adminDoc = usersSnap.docs[0];
             myUserId = adminDoc.id; 
             localStorage.setItem('u_id', myUserId);
-            currentUser = adminDoc.data();
-            isAdmin = true;
             
-            activateAdminUI(); 
-            closeModal('modal-settings'); 
+            // ESTA LÍNEA ES LA MAGIA: Confirma que metió la clave bien
+            localStorage.setItem('admin_auth', 'true'); 
+            
             showToast("SESIÓN DE ADMIN INICIADA");
-            location.reload(); 
-        } else { showToast("CREDENCIALES INCORRECTAS"); }
+            setTimeout(() => location.reload(), 500); 
+        } else { 
+            showToast("CREDENCIALES INCORRECTAS"); 
+        }
     } catch (error) { showToast("ERROR DE ACCESO"); }
 }
 
-function activateAdminUI() {
-    document.getElementById('btn-login-header')?.classList.add('hidden');
-    document.getElementById('login-box')?.classList.add('hidden');
-    document.getElementById('logout-box')?.classList.remove('hidden');
-
-    if(currentUser) {
-        if(currentUser.role === 'superadmin') {
-            document.getElementById('btn-security')?.classList.remove('hidden');
-            document.getElementById('admin-list-container')?.classList.remove('hidden');
-            cargarAdminsEnDashboard(); 
-        }
-        cargarUsuariosEnDashboard();
-    }
-}
-
 async function handleLogout() {
-    localStorage.setItem('u_admin', 'false');
+    localStorage.setItem('admin_auth', 'false'); // Le quitamos el permiso de sesión
     let originalId = localStorage.getItem('original_uid');
     if (originalId) { myUserId = originalId; localStorage.setItem('u_id', originalId); }
     location.reload(); 
 }
+
 
 function cargarUsuariosEnDashboard() {
     const tbody = document.getElementById('users-table');
