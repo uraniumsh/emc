@@ -67,13 +67,14 @@
         <section id="view-dashboard" class="view-section hidden">
             <h1 class="section-title">Panel de Control</h1>
             
-            <div style="display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap;">
-                <button class="apple-btn-secondary" style="width: auto; background: #28a745; color: white;" onclick="openModal('modal-add-balance')">+ Añadir Saldo Manual</button>
-                <button class="apple-btn-secondary" style="width: auto; background: var(--accent); color: white;" onclick="openModal('modal-add-cat')">+ Crear Categoría</button>
-                <button class="apple-btn-secondary" style="width: auto; background: var(--danger); color: white;" onclick="openDeleteCatModal()">- Eliminar Categoría</button>
-                <button class="apple-btn-secondary" style="width: auto;" onclick="openModal('modal-manage-admins')">Gestión Admins</button>
-                <button id="btn-security" class="apple-btn-secondary hidden" style="width: auto; background: #ffcc00; color: black;" onclick="openModal('modal-security')">🔐 Seguridad Súper Admin</button>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 20px 0;">
+                <button class="apple-btn-secondary" style="background: #28a745; color: white; margin:0;" onclick="openModal('modal-add-balance')">+ Saldo Manual</button>
+                <button class="apple-btn-secondary" style="background: var(--accent); color: white; margin:0;" onclick="openModal('modal-add-cat')">+ Crear Categoría</button>
+                <button class="apple-btn-secondary" style="background: var(--danger); color: white; margin:0;" onclick="openDeleteCatModal()">- Eliminar Categoría</button>
+                <button class="apple-btn-secondary" style="margin:0;" onclick="openModal('modal-manage-admins')">Gestión Admins</button>
+                <button id="btn-security" class="apple-btn-secondary hidden" style="background: #ffcc00; color: black; margin:0;" onclick="openModal('modal-security')">🔐 Seguridad</button>
             </div>
+
             
             <div id="admin-list-container" class="admin-card hidden">
                 <h3>Administradores Activos</h3>
