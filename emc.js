@@ -858,17 +858,20 @@ function addLog(action, item) {
     if(log) log.innerHTML = `<tr><td>${new Date().toLocaleTimeString()}</td><td>${action}</td><td>${item}</td></tr>` + log.innerHTML;
 }
 // ==========================================
-// 11. COMUNIDAD Y FORO (ESTILO iMESSAGE CON IMÁGENES)
+// 11. COMUNIDAD Y FORO (ESTILO iMESSAGE CON VIP)
 // ==========================================
 function openForumModal() {
     if(!currentUser || !currentUser.registered) return showToast("DEBES REGISTRAR TU PERFIL PARA CREAR UN DEBATE");
-    
     document.getElementById('f-title').value = "";
     document.getElementById('f-content').value = "";
     document.getElementById('f-password').value = "";
     document.getElementById('f-type').value = "publico";
     
-    // Limpieza segura de la imagen
+    const vipPriceInput = document.getElementById('f-vip-price');
+    const vipPhoneInput = document.getElementById('f-vip-phone');
+    if(vipPriceInput) vipPriceInput.value = "";
+    if(vipPhoneInput) vipPhoneInput.value = "";
+    
     currentForumImg = "";
     const preview = document.getElementById('f-preview');
     if(preview) {
@@ -887,42 +890,11 @@ function toggleForumPassword() {
     const pwdInput = document.getElementById('f-password');
     const vipOptions = document.getElementById('f-vip-options');
     
-    pwdInput.classList.add('hidden');
-    vipOptions.classList.add('hidden');
+    if(pwdInput) pwdInput.classList.add('hidden');
+    if(vipOptions) vipOptions.classList.add('hidden');
     
-    if(type === 'clave') pwdInput.classList.remove('hidden');
-    if(type === 'vip') vipOptions.classList.remove('hidden');
-}
-
-async function saveForumPost() {
-    const title = document.getElementById('f-title').value.trim();
-    const content = document.getElementById('f-content').value.trim();
-    const type = document.getElementById('f-type').value;
-    const password = document.getElementById('f-password').value.trim();
-    
-    if(!title || !content) return showToast("FALTAN DATOS");
-    if(type === 'clave' && !password) return showToast("DEBES ESTABLECER UNA CLAVE");
-
-    let vipPrice = 0, vipPhone = "";
-    if(type === 'vip') {
-        vipPrice = parseInt(document.getElementById('f-vip-price').value);
-        vipPhone = document.getElementById('f-vip-phone').value.trim();
-        if(!vipPrice || !vipPhone) return showToast("DEBES PONER EL PRECIO Y TU WHATSAPP");
-    }
-
-    await db.collection("foro").add({
-        authorId: myUserId, authorName: currentUser.name, title: title, content: content, 
-        img: currentForumImg, type: type, password: password, 
-        vipPrice: vipPrice, vipPhone: vipPhone, accessList: [myUserId], // El creador siempre tiene acceso
-        replies: [], timestamp: new Date().toISOString()
-    });
-
-    currentForumImg = ""; 
-    document.getElementById('f-preview').src = "";
-    document.getElementById('f-preview').classList.add('hidden');
-    document.getElementById('f-upload-label').classList.remove('hidden');
-
-    closeModal('modal-forum'); showToast("¡DEBATE PUBLICADO!");
+    if(type === 'clave' && pwdInput) pwdInput.classList.remove('hidden');
+    if(type === 'vip' && vipOptions) vipOptions.classList.remove('hidden');
 }
 
 function previewForumImage() {
@@ -947,12 +919,35 @@ async function saveForumPost() {
     if(!title || !content) return showToast("FALTAN DATOS");
     if(type === 'clave' && !password) return showToast("DEBES ESTABLECER UNA CLAVE");
 
+    let vipPrice = 0;
+    let vipPhone = "";
+    if(type === 'vip') {
+        const priceInput = document.getElementById('f-vip-price');
+        const phoneInput = document.getElementById('f-vip-phone');
+        if(priceInput && phoneInput) {
+            vipPrice = parseInt(priceInput.value);
+            vipPhone = phoneInput.value.trim();
+        }
+        if(!vipPrice || !vipPhone) return showToast("DEBES PONER EL PRECIO Y TU WHATSAPP");
+    }
+
     await db.collection("foro").add({
-        authorId: myUserId, authorName: currentUser.name, title: title, content: content, 
-        img: currentForumImg, type: type, password: password, replies: [], timestamp: new Date().toISOString()
+        authorId: myUserId, 
+        authorName: currentUser.name || "Invitado", 
+        title: title, 
+        content: content, 
+        img: currentForumImg, 
+        type: type, 
+        password: password, 
+        vipPrice: vipPrice, 
+        vipPhone: vipPhone, 
+        accessList: [myUserId], // El autor entra gratis
+        replies: [], 
+        timestamp: new Date().toISOString()
     });
 
-    closeModal('modal-forum'); showToast("¡DEBATE PUBLICADO!");
+    closeModal('modal-forum'); 
+    showToast("¡DEBATE PUBLICADO!");
 }
 
 function renderForum() {
@@ -988,10 +983,11 @@ async function openForumThread(postId) {
     if (post.type === 'vip' && !isAdmin) {
         if (!post.accessList || !post.accessList.includes(myUserId)) {
             pendingVipPost = post; 
+            const priceFormat = post.vipPrice ? post.vipPrice.toLocaleString() : "0";
             document.getElementById('vip-buy-title').innerText = post.title;
-            document.getElementById('vip-buy-price').innerText = "$" + (post.vipPrice || 0).toLocaleString();
+            document.getElementById('vip-buy-price').innerText = "$" + priceFormat;
             openModal('modal-buy-vip');
-            return; // Bloquea la entrada
+            return; 
         }
     }
 
@@ -1014,19 +1010,17 @@ async function openForumThread(postId) {
     
     const inputArea = document.querySelector('.chat-input-area');
     if(post.type === 'cerrado' && !isAdmin) {
-        inputArea.classList.add('hidden'); 
+        if(inputArea) inputArea.classList.add('hidden'); 
     } else {
-        inputArea.classList.remove('hidden');
+        if(inputArea) inputArea.classList.remove('hidden');
     }
 
     renderChatMessages(post);
 }
 
-
 function renderChatMessages(post) {
     const container = document.getElementById('chat-messages');
     
-    // Mensaje Principal (Autor)
     let html = `
     <div class="chat-bubble other">
         <div class="sender-name" style="color:var(--accent);">${post.authorName} (Autor)</div>
@@ -1036,7 +1030,6 @@ function renderChatMessages(post) {
         ${post.type !== 'cerrado' || isAdmin ? `<button class="btn-reply-chat" onclick="setReplyTo('${post.authorName}', '${post.content.replace(/'/g,"\\'")}')">Responder</button>` : ''}
     </div>`;
 
-    // Respuestas (Hilo)
     (post.replies || []).forEach(r => {
         const isMe = r.authorId === myUserId;
         const refHtml = r.replyToText ? `<div class="reply-reference"><em>${r.replyToText.substring(0, 40)}${r.replyToText.length>40?'...':''}</em></div>` : '';
@@ -1052,7 +1045,7 @@ function renderChatMessages(post) {
     });
     
     container.innerHTML = html;
-    setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50); // Auto-scroll al fondo
+    setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50); 
 }
 
 function setReplyTo(name, textSnippet) {
@@ -1091,6 +1084,57 @@ async function deleteForumPost(id) {
         showView('foro'); 
         showToast("DEBATE ELIMINADO");
     }
+}
+
+// ==========================================
+// 12. PAGOS DE ACCESO VIP
+// ==========================================
+async function processVipWallet() {
+    if(!pendingVipPost) return;
+    const price = pendingVipPost.vipPrice || 0;
+    
+    if(currentUser.balance < price) return showToast("SALDO INSUFICIENTE EN BILLETERA");
+
+    closeModal('modal-buy-vip');
+    showToast("Procesando acceso...");
+
+    await db.collection("usuarios").doc(myUserId).update({ 
+        balance: firebase.firestore.FieldValue.increment(-price) 
+    });
+    
+    await db.collection("foro").doc(pendingVipPost.id).update({
+        accessList: firebase.firestore.FieldValue.arrayUnion(myUserId)
+    });
+
+    const gananciaCreador = price * 0.7;
+    const gananciaUranium = price * 0.3;
+    const phoneFormat = pendingVipPost.vipPhone || "Desconocido";
+
+    let tgMsg = `💎 *ACCESO VIP VENDIDO (BILLETERA)* 💎\n\n*Debate:* ${pendingVipPost.title}\n*Comprador ID:* #${myUserId}\n*Creador ID:* #${pendingVipPost.authorId}\n*Precio Pagado:* $${price}\n\n⚠️ *ACCIÓN REQUERIDA:*\nTransfiere $${gananciaCreador} al creador (WA: ${phoneFormat})\nTu ganancia libre: $${gananciaUranium}`;
+    sendTelegramNotification(tgMsg);
+
+    setTimeout(() => { 
+        showToast("¡ACCESO CONCEDIDO!");
+        openForumThread(pendingVipPost.id); 
+    }, 1500);
+}
+
+function processVipNequi() {
+    if(!pendingVipPost) return;
+    closeModal('modal-buy-vip');
+    
+    const price = pendingVipPost.vipPrice || 0;
+
+    currentReceiptContext = {
+        type: 'vip_access', 
+        postId: pendingVipPost.id,
+        title: pendingVipPost.title,
+        authorPhone: pendingVipPost.vipPhone || "Desconocido",
+        amount: price,
+        token: "VIP-" + Math.random().toString(36).substr(2,5).toUpperCase()
+    };
+    
+    showReceiptModal(`Envía $${price.toLocaleString()} al NEQUI 3137084357 para entrar al debate VIP.\nUna vez verificado, un admin te dará acceso.`);
 }
 // ==========================================
 // LÓGICA DE PAGOS VIP (BILLETERA Y NEQUI)
