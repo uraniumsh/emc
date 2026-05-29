@@ -10,12 +10,11 @@
 
     <div id="toast-container"></div>
 
-    <!-- HEADER APPLE STYLE (GLASSMORPHISM) -->
-        <header class="main-header">
+    <header class="main-header">
         <div class="logo" onclick="showView('products')">
             URANIUM
         </div>
-                <div class="header-right">
+        <div class="header-right">
             <div class="header-icon hidden" id="btn-add-post-header" onclick="openPublishModal()" style="font-size: 20px;">➕</div>
             
             <div class="header-icon" id="btn-login-gear" onclick="openModal('modal-settings')" style="font-size: 22px;">⚙️</div>
@@ -28,10 +27,8 @@
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </div>
         </div>
-
     </header>
 
-    <!-- MENÚ HAMBURGUESA DESLIZABLE -->
     <div id="mobile-menu" class="apple-menu hidden">
         <div class="menu-header">
             <button class="close-menu" onclick="closeMenu()">✕</button>
@@ -47,7 +44,6 @@
             <nav class="menu-links">
                 <a href="#" onclick="showView('products'); closeMenu()">Tienda Oficial</a>
                 <a href="#" onclick="showView('foro'); closeMenu()">Comunidad & Foro</a>
-                <!-- Opciones que solo verá el Admin -->
                 <a href="#" id="btn-admin-menu" class="hidden text-accent" onclick="showView('dashboard'); closeMenu()">Panel de Control (Admin)</a>
                 <a href="#" id="btn-logout-menu" class="hidden text-danger" onclick="handleLogout()">Cerrar Sesión</a>
             </nav>
@@ -55,13 +51,11 @@
     </div>
 
     <main class="content">
-        <!-- VISTA DE PRODUCTOS -->
         <section id="view-products" class="view-section">
             <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
             <div class="product-grid" id="product-grid"></div>
         </section>
 
-        <!-- VISTA DASHBOARD ADMIN -->
         <section id="view-dashboard" class="view-section hidden">
             <h1 class="section-title">Panel de Control</h1>
             
@@ -73,7 +67,6 @@
                 <button id="btn-security" class="apple-btn-secondary hidden" style="background: #ffcc00; color: black; margin:0;" onclick="openModal('modal-security')">🔐 Seguridad</button>
             </div>
 
-            
             <div id="admin-list-container" class="admin-card hidden">
                 <h3>Administradores Activos</h3>
                 <div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
@@ -100,7 +93,6 @@
             </div>
         </section>
 
-        <!-- VISTA FORO / COMUNIDAD -->
         <section id="view-foro" class="view-section hidden">
             <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h1 class="section-title" style="margin: 0;">Comunidad 💬</h1>
@@ -109,7 +101,6 @@
             <div id="forum-feed" class="forum-grid"></div>
         </section>
 
-        <!-- VISTA DETALLE DEL FORO (ESTILO iMESSAGE) -->
         <section id="view-forum-detail" class="view-section hidden">
             <div class="chat-header glass-header">
                 <button class="back-btn" onclick="showView('foro')">
@@ -122,10 +113,8 @@
                 </div>
             </div>
             
-            <!-- Aquí se inyectan las burbujas desde JS -->
             <div id="chat-messages" class="chat-messages"></div>
             
-            <!-- Input fijado estilo Apple -->
             <div class="chat-input-area glass-footer">
                 <div id="replying-to-box" class="replying-to hidden">
                     <span>Respondiendo a: <strong id="reply-to-name"></strong></span>
@@ -139,11 +128,6 @@
         </section>
     </main>
 
-    <!-- ========================================= -->
-    <!-- MODALES COMPLETOS CON CLASES APPLE        -->
-    <!-- ========================================= -->
-
-    <!-- PAGO BILLETERA -->
     <div id="modal-wallet-confirm" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span>
@@ -161,30 +145,41 @@
         </div>
     </div>
 
-    <!-- PERFIL Y REGISTRO -->
     <div id="modal-profile" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-profile')">✕</span>
+            
             <div class="profile-header-modal" style="text-align: center;">
                 <div class="avatar-lg" style="font-size: 50px;">👤</div>
                 <h2 id="profile-name-display" style="margin-top: 10px;">Usuario</h2>
                 <p class="text-muted">ID: <span id="profile-id"></span></p>
             </div>
+            
             <div class="wallet-card" style="background: var(--surface-elevated); padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;">
                 <p class="text-muted" style="font-size: 12px;">SALDO DISPONIBLE</p>
                 <h1 id="wallet-balance" style="margin: 5px 0;">$0</h1>
                 <button class="apple-btn" style="background: #28a745; margin-top: 10px; padding: 10px;" onclick="openUserRecharge()">Recargar Mi Saldo</button>
             </div>
+            
             <div id="register-section" class="apple-form" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
                 <p class="text-accent" style="font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: center;">REGÍSTRATE Y GANA $5,000 COP</p>
                 <input type="text" id="reg-username" placeholder="@Usuario (Único)">
                 <input type="text" id="reg-name" placeholder="Nombre Mostrado">
+                
+                <input type="password" id="reg-pass" placeholder="Crea un PIN o Clave (Ej: 1234)">
+                
                 <button class="apple-btn" onclick="registerUser()">Guardar Perfil</button>
+
+                <div id="recover-section" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <p class="text-muted" style="font-size: 13px; margin-bottom: 10px; text-align: center; font-weight: bold;">¿Ya tienes cuenta o cambiaste de equipo?</p>
+                    <input type="text" id="rec-id" placeholder="Escribe tu ID (Ej: 555555)">
+                    <input type="password" id="rec-pass" placeholder="Tu PIN o Clave">
+                    <button class="apple-btn" style="background: #333;" onclick="recoverAccount()">Recuperar mi cuenta</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- RECARGAR SALDO -->
     <div id="modal-user-recharge" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-user-recharge')">✕</span>
@@ -199,7 +194,6 @@
         </div>
     </div>
 
-    <!-- COMPROBANTE -->
     <div id="modal-receipt" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-receipt')">✕</span>
@@ -217,7 +211,6 @@
         </div>
     </div>
 
-    <!-- GESTIÓN ADMINS -->
     <div id="modal-manage-admins" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-manage-admins')">✕</span>
@@ -232,7 +225,6 @@
         </div>
     </div>
 
-    <!-- AÑADIR SALDO MANUAL -->
     <div id="modal-add-balance" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-add-balance')">✕</span>
@@ -245,7 +237,6 @@
         </div>
     </div>
 
-    <!-- CREAR Y ELIMINAR CATEGORÍA -->
     <div id="modal-add-cat" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-add-cat')">✕</span>
@@ -268,7 +259,6 @@
         </div>
     </div>
 
-    <!-- PUBLICAR PRODUCTO (CON EDITOR GRANDE) -->
     <div id="modal-publish" class="modal hidden">
         <div class="modal-content ios-card" style="max-width: 500px;">
             <span class="close" onclick="closeModal('modal-publish')">✕</span>
@@ -301,7 +291,6 @@
         </div>
     </div>
 
-    <!-- EDITOR GRANDE -->
     <div id="modal-big-editor" class="modal hidden">
         <div class="modal-content ios-card" style="width: 95%; max-width: 800px;">
             <span class="close" onclick="closeBigEditor()">✕</span>
@@ -312,7 +301,6 @@
         </div>
     </div>
 
-    <!-- DETALLE DEL PRODUCTO (VISTA CLIENTE) -->
     <div id="modal-detail" class="modal hidden">
         <div class="modal-content ios-card detail-box" style="max-width: 800px;">
             <span class="close" onclick="closeModal('modal-detail')">✕</span>
@@ -320,7 +308,6 @@
         </div>
     </div>
 
-    <!-- CARRITO DE COMPRAS -->
     <div id="modal-cart" class="modal hidden">
         <div class="modal-content ios-card cart-tall" style="height: 85vh; display: flex; flex-direction: column;">
             <span class="close" onclick="closeModal('modal-cart')">✕</span>
@@ -336,7 +323,6 @@
         </div>
     </div>
 
-    <!-- PAGO NEQUI -->
     <div id="modal-nequi" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-nequi')">✕</span>
@@ -353,7 +339,6 @@
         </div>
     </div>
 
-    <!-- ACCESO Y CONFIGURACIÓN -->
     <div id="modal-settings" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-settings')">✕</span>
@@ -372,7 +357,6 @@
         </div>
     </div>
 
-    <!-- SEGURIDAD SUPER ADMIN -->
     <div id="modal-security" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-security')">✕</span>
@@ -385,7 +369,6 @@
         </div>
     </div>
 
-        <!-- CREAR DEBATE -->
     <div id="modal-forum" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-forum')">✕</span>
@@ -405,7 +388,6 @@
                     <option value="cerrado">Cerrado (Solo lectura)</option>
                 </select>
                 
-                <!-- Campos dinámicos de seguridad/cobro -->
                 <input type="password" id="f-password" class="hidden" placeholder="Establecer Clave">
                 <div id="f-vip-options" class="hidden">
                     <input type="number" id="f-vip-price" placeholder="Precio de entrada ($)">
@@ -419,7 +401,6 @@
         </div>
     </div>
 
-        <!-- MODAL DE COMPRA VIP -->
     <div id="modal-buy-vip" class="modal hidden">
         <div class="modal-content ios-card" style="text-align:center;">
             <span class="close" onclick="closeModal('modal-buy-vip')">✕</span>
@@ -436,10 +417,101 @@
     </div>
 
 
-    <!-- SCRIPTS -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="emc.js"></script>
+
+    <script>
+        // 1. REGISTRO MEJORADO CON CONTRASEÑA
+        async function registerUser() {
+            try {
+                const user = document.getElementById('reg-username')?.value.trim();
+                const name = document.getElementById('reg-name')?.value.trim();
+                const pass = document.getElementById('reg-pass')?.value.trim();
+                
+                if(!user || !name || !pass) return showToast("LLENA TODOS LOS DATOS Y CREA UNA CLAVE");
+                
+                const snapshot = await db.collection("usuarios").where("username", "==", user).get();
+                if (!snapshot.empty) {
+                    if (snapshot.docs[0].id !== myUserId) {
+                        return showToast("EL USUARIO YA EXISTE, ELIGE OTRO");
+                    }
+                }
+
+                await db.collection("usuarios").doc(myUserId).update({
+                    username: user, 
+                    name: name, 
+                    password: pass, 
+                    registered: true, 
+                    balance: firebase.firestore.FieldValue.increment(5000)
+                });
+                
+                showToast("¡REGISTRO EXITOSO! +$5000 AÑADIDOS");
+                closeModal('modal-profile'); 
+                
+                // Actualiza visualmente el perfil al instante
+                if(typeof updateProfileUI === 'function') updateProfileUI();
+                
+            } catch (error) {
+                showToast("⚠️ ERROR: " + error.message);
+            }
+        }
+
+        // 2. RECUPERACIÓN DE CUENTA (EN VIVO SIN RECARGAR)
+        async function recoverAccount() {
+            try {
+                const recId = document.getElementById('rec-id')?.value.trim();
+                const recPass = document.getElementById('rec-pass')?.value.trim();
+
+                if(!recId || !recPass) return showToast("INGRESA TU ID Y TU CLAVE");
+
+                const userDoc = await db.collection("usuarios").doc(recId).get();
+
+                if(!userDoc.exists) return showToast("ESE ID NO EXISTE EN LA BASE DE DATOS");
+
+                const userData = userDoc.data();
+
+                if(!userData.password) {
+                    return showToast("ESTA CUENTA ES ANTIGUA Y NO TIENE CLAVE. HABLA CON SOPORTE.");
+                }
+
+                if(userData.password !== recPass) {
+                    return showToast("CONTRASEÑA INCORRECTA ❌");
+                }
+
+                // 1. Inyecta el ID recuperado a la memoria del celular/PC
+                myUserId = recId;
+                localStorage.setItem('u_id', myUserId);
+                localStorage.setItem('original_uid', myUserId);
+
+                // 2. Transfiere los datos a la variable global actual
+                currentUser = userData;
+
+                // 3. Actualiza el nombre, ID y Saldo visualmente al instante
+                if(typeof updateProfileUI === 'function') updateProfileUI();
+                
+                // 4. Si la cuenta recuperada es de un Admin, le enciende el panel de control
+                if(currentUser.role === 'superadmin' || currentUser.role === 'admin') {
+                    if(typeof activateAdminUI === 'function') activateAdminUI();
+                }
+
+                // 5. Cierra el modal y avisa del éxito
+                showToast("¡CUENTA RECUPERADA CON ÉXITO! 🟢");
+                closeModal('modal-profile');
+
+                // 6. Reconecta el "escuchador en tiempo real" de Firebase para el nuevo ID
+                db.collection("usuarios").doc(myUserId).onSnapshot(doc => {
+                    if (doc.exists) {
+                        currentUser = doc.data();
+                        if(typeof updateProfileUI === 'function') updateProfileUI();
+                    }
+                });
+
+            } catch (error) {
+                showToast("⚠️ ERROR: " + error.message);
+            }
+        }
+    </script>
 </body>
 </html>
