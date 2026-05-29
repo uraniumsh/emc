@@ -588,19 +588,33 @@ function previewImage() {
 }
 
 async function handleSaveProduct() {
-    const name = document.getElementById('p-name').value.trim();
-    const price = document.getElementById('p-price').value;
+    const nameInput = document.getElementById('p-name');
+    const priceInput = document.getElementById('p-price');
+    
+    if(!nameInput || !priceInput) return showToast("ERROR: Faltan campos básicos");
+    
+    const name = nameInput.value.trim();
+    const price = priceInput.value;
     
     if(!currentImg || !name || !price) return showToast("FOTO, NOMBRE Y PRECIO OBLIGATORIOS");
 
+    // Buscamos los elementos de forma segura. Si no existen en tu HTML, no rompen la página.
+    const shortEl = document.getElementById('p-short');
+    const descEl = document.getElementById('p-desc');
+    const contactEl = document.getElementById('p-contact');
+    const waEl = document.getElementById('p-wa');
+    const catEl = document.getElementById('p-cat-select');
+    const pinEl = document.getElementById('p-pinned');
+
     const data = {
-        name, price: parseFloat(price),
-        short: document.getElementById('p-short').value.trim(),
-        desc: document.getElementById('p-desc').value.trim(),
-        contact: document.getElementById('p-contact').value.trim() || "3128194596",
-        wa: document.getElementById('p-wa').value.trim() || `Hola URANIUM, me interesa ${name}`,
-        catId: document.getElementById('p-cat-select').value,
-        pinned: document.getElementById('p-pinned').checked, 
+        name: name, 
+        price: parseFloat(price),
+        short: shortEl ? shortEl.value.trim() : "",
+        desc: descEl ? descEl.value.trim() : "",
+        contact: contactEl ? contactEl.value.trim() : "3128194596",
+        wa: waEl ? waEl.value.trim() : `Hola URANIUM, me interesa ${name}`,
+        catId: catEl ? catEl.value : "",
+        pinned: pinEl ? pinEl.checked : false, 
         img: currentImg,
     };
 
@@ -610,6 +624,11 @@ async function handleSaveProduct() {
         data.reactions = {}; data.comments = [];
         await db.collection("productos").add(data);
     }
+
+    closeModal('modal-publish'); 
+    showToast(editingId ? "PRODUCTO ACTUALIZADO" : "PRODUCTO PUBLICADO"); 
+}
+
 
     closeModal('modal-publish'); showToast(editingId ? "PRODUCTO ACTUALIZADO" : "PRODUCTO PUBLICADO"); 
 }
