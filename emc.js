@@ -67,6 +67,9 @@ let pendingVipPost = null;
 // 3. INICIALIZACIÓN DE SESIÓN Y SEGURIDAD
 // ==========================================
 async function initSession() {
+    // Activa el CSS :active de inmediato en celulares (para el hover azul)
+    document.body.addEventListener('touchstart', function(){}, {passive: true});
+    
     let originalId = localStorage.getItem('original_uid');
     if (!originalId) {
         originalId = Math.floor(100000 + Math.random() * 900000).toString();
@@ -588,117 +591,19 @@ function previewImage() {
 }
 
 async function handleSaveProduct() {
-    const nameInput = document.getElementById('p-name');
-    const priceInput = document.getElementById('p-price');
-    
-    if(!nameInput || !priceInput) return showToast("ERROR: Faltan campos básicos");
-    
-    const name = nameInput.value.trim();
-// ==========================================
-// 8. CATEGORÍAS Y PRODUCTOS (PUBLICAR/ELIMINAR)
-// ==========================================
-async function saveNewCategory() {
-    const name = document.getElementById('new-cat-name').value.trim();
-    if(name) {
-        await db.collection("categorias").add({ name: name.toUpperCase() });
-        closeModal('modal-add-cat'); showToast("CATEGORÍA CREADA");
-        document.getElementById('new-cat-name').value = "";
-    }
-}
-
-function openDeleteCatModal() {
-    const sel = document.getElementById('d-cat-select');
-    sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    openModal('modal-delete-cat');
-}
-
-async function deleteCategory() {
-    const id = document.getElementById('d-cat-select').value;
-    if(!id) return showToast("SELECCIONA UNA CATEGORÍA");
-    if(confirm("¿Seguro que quieres eliminar esta plataforma de raíz?")) {
-        await db.collection("categorias").doc(id).delete();
-        closeModal('modal-delete-cat');
-        showToast("CATEGORÍA ELIMINADA");
-    }
-}
-
-function openPublishModal(id = null) {
-    editingId = id;
-    if(id) {
-        document.getElementById('pub-title').innerText = "Editar Producto";
-        const p = products.find(prod => prod.id.toString() === id.toString());
-        if(!p) return;
-        
-        document.getElementById('p-name').value = p.name || "";
-        document.getElementById('p-short').value = p.short || "";
-        document.getElementById('p-price').value = p.price || "";
-        document.getElementById('p-cat-select').value = p.catId || "";
-        document.getElementById('p-desc').value = p.desc || "";
-        document.getElementById('p-contact').value = p.contact || "";
-        document.getElementById('p-wa').value = p.wa || "";
-        document.getElementById('p-pinned').checked = p.pinned || false;
-        
-        currentImg = p.img || "";
-        if(currentImg) {
-            document.getElementById('file-preview').src = currentImg;
-            document.getElementById('file-preview').classList.remove('hidden');
-            document.getElementById('upload-label').classList.add('hidden');
-        }
-    } else {
-        document.getElementById('pub-title').innerText = "Nuevo Producto";
-        resetForm();
-    }
-    openModal('modal-publish');
-}
-
-async function deleteProduct(id) {
-    if(confirm("¿Seguro que quieres eliminar este producto de la tienda para siempre?")) {
-        await db.collection("productos").doc(id.toString()).delete();
-        showToast("PRODUCTO ELIMINADO 🗑️");
-    }
-}
-
-function previewImage() {
-    const file = document.getElementById('file-input').files[0];
-    if(file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            currentImg = reader.result;
-            document.getElementById('file-preview').src = reader.result;
-            document.getElementById('file-preview').classList.remove('hidden');
-            document.getElementById('upload-label').classList.add('hidden');
-        }; reader.readAsDataURL(file);
-    }
-}
-
-async function handleSaveProduct() {
-    const nameInput = document.getElementById('p-name');
-    const priceInput = document.getElementById('p-price');
-    
-    if(!nameInput || !priceInput) return showToast("ERROR: Faltan campos básicos");
-    
-    const name = nameInput.value.trim();
-    const price = priceInput.value;
+    const name = document.getElementById('p-name').value.trim();
+    const price = document.getElementById('p-price').value;
     
     if(!currentImg || !name || !price) return showToast("FOTO, NOMBRE Y PRECIO OBLIGATORIOS");
 
-    // Buscamos los elementos de forma segura. Si no existen en tu HTML, no rompen la página.
-    const shortEl = document.getElementById('p-short');
-    const descEl = document.getElementById('p-desc');
-    const contactEl = document.getElementById('p-contact');
-    const waEl = document.getElementById('p-wa');
-    const catEl = document.getElementById('p-cat-select');
-    const pinEl = document.getElementById('p-pinned');
-
     const data = {
-        name: name, 
-        price: parseFloat(price),
-        short: shortEl ? shortEl.value.trim() : "",
-        desc: descEl ? descEl.value.trim() : "",
-        contact: contactEl ? contactEl.value.trim() : "3128194596",
-        wa: waEl ? waEl.value.trim() : `Hola URANIUM, me interesa ${name}`,
-        catId: catEl ? catEl.value : "",
-        pinned: pinEl ? pinEl.checked : false, 
+        name, price: parseFloat(price),
+        short: document.getElementById('p-short').value.trim(),
+        desc: document.getElementById('p-desc').value.trim(),
+        contact: document.getElementById('p-contact').value.trim() || "3128194596",
+        wa: document.getElementById('p-wa').value.trim() || `Hola URANIUM, me interesa ${name}`,
+        catId: document.getElementById('p-cat-select').value,
+        pinned: document.getElementById('p-pinned').checked, 
         img: currentImg,
     };
 
@@ -720,7 +625,6 @@ function resetForm() {
     const ul = document.getElementById('upload-label'); if(ul) ul.classList.remove('hidden');
     currentImg = "";
 }
-
 
 // ==========================================
 // 9. RENDERIZAR INTERFAZ PRINCIPAL (TIENDA Y DETALLES)
@@ -1068,6 +972,15 @@ async function saveForumPost() {
         replies: [], 
         timestamp: new Date().toISOString()
     });
+
+    currentForumImg = ""; 
+    const preview = document.getElementById('f-preview');
+    if(preview) {
+        preview.src = "";
+        preview.classList.add('hidden');
+    }
+    const label = document.getElementById('f-upload-label');
+    if(label) label.classList.remove('hidden');
 
     closeModal('modal-forum'); 
     showToast("¡DEBATE PUBLICADO!");
