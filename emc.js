@@ -493,17 +493,14 @@ async function submitReceipt() {
     let caption = "";
     if(currentReceiptContext.type === 'recharge') {
         caption = `💰 *SOLICITUD DE RECARGA*\n\n*Token:* ${currentReceiptContext.token}\n*Usuario:* ${currentReceiptContext.name}\n*WhatsApp:* ${currentReceiptContext.phone}\n*ID:* #${myUserId}\n*Monto a recargar:* $${currentReceiptContext.amount}\n\n_Revisa el comprobante y recarga la billetera manualmente._`;
-        addLog(`TOKEN: ${currentReceiptContext.token}`, `RECARGA PENDIENTE | $${currentReceiptContext.amount}`);
         
     } else if (currentReceiptContext.type === 'vip_access') {
         const gananciaCreador = currentReceiptContext.amount * 0.7;
         const gananciaUranium = currentReceiptContext.amount * 0.3;
         caption = `💎 *PAGO VIP NEQUI (COMPROBANTE)*\n\n*Token:* ${currentReceiptContext.token}\n*Debate:* ${currentReceiptContext.title}\n*Comprador ID:* #${myUserId}\n*Creador WA:* ${currentReceiptContext.authorPhone}\n*Pagado:* $${currentReceiptContext.amount}\n\n⚠️ *ACCIÓN REQUERIDA:*\n1. Añade el ID #${myUserId} a la accessList del debate en Firebase.\n2. Transfiere $${gananciaCreador} al creador.\n*Ganancia Uranium:* $${gananciaUranium}`;
-        addLog(`TOKEN: ${currentReceiptContext.token}`, `VIP NEQUI | Total: $${currentReceiptContext.amount}`);
         
     } else {
         caption = `🛒 *NUEVA ORDEN (COMPROBANTE)*\n\n*Token:* ${currentReceiptContext.token}\n*Cliente:* ${currentReceiptContext.name}\n*WhatsApp:* ${currentReceiptContext.phone}\n*ID:* #${myUserId}\n*Servicios:* ${currentReceiptContext.details}\n*Total Pagado:* $${currentReceiptContext.amount}`;
-        addLog(`TOKEN: ${currentReceiptContext.token}`, `NEQUI PENDIENTE | Total: $${currentReceiptContext.amount}`);
         cart = {}; updateCartUI(); 
     }
 
@@ -577,45 +574,71 @@ async function deleteProduct(id) {
     }
 }
 
+// NUEVA VERSIÓN: COMPRESOR DE IMÁGENES
 function previewImage() {
     const file = document.getElementById('file-input').files[0];
     if(file) {
         const reader = new FileReader();
-        reader.onloadend = () => {
-            currentImg = reader.result;
-            document.getElementById('file-preview').src = reader.result;
-            document.getElementById('file-preview').classList.remove('hidden');
-            document.getElementById('upload-label').classList.add('hidden');
-        }; reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 600;
+                let scaleSize = MAX_WIDTH / img.width;
+                if(scaleSize > 1) scaleSize = 1; // No agrandar si es pequeña
+                
+                canvas.width = img.width * scaleSize;
+                canvas.height = img.height * scaleSize;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                currentImg = canvas.toDataURL('image/jpeg', 0.7);
+
+                document.getElementById('file-preview').src = currentImg;
+                document.getElementById('file-preview').classList.remove('hidden');
+                document.getElementById('upload-label').classList.add('hidden');
+            };
+            img.src = event.target.result;
+        }; 
+        reader.readAsDataURL(file);
     }
 }
 
+// NUEVA VERSIÓN: BLINDADA CONTRA ERRORES
 async function handleSaveProduct() {
-    const name = document.getElementById('p-name').value.trim();
-    const price = document.getElementById('p-price').value;
-    
-    if(!currentImg || !name || !price) return showToast("FOTO, NOMBRE Y PRECIO OBLIGATORIOS");
+    try {
+        const name = document.getElementById('p-name')?.value.trim();
+        const price = document.getElementById('p-price')?.value;
+        
+        if(!currentImg || !name || !price) return showToast("FOTO, NOMBRE Y PRECIO OBLIGATORIOS");
 
-    const data = {
-        name, price: parseFloat(price),
-        short: document.getElementById('p-short').value.trim(),
-        desc: document.getElementById('p-desc').value.trim(),
-        contact: document.getElementById('p-contact').value.trim() || "3128194596",
-        wa: document.getElementById('p-wa').value.trim() || `Hola URANIUM, me interesa ${name}`,
-        catId: document.getElementById('p-cat-select').value,
-        pinned: document.getElementById('p-pinned').checked, 
-        img: currentImg,
-    };
+        const data = {
+            name: name, 
+            price: parseFloat(price),
+            short: document.getElementById('p-short')?.value.trim() || "",
+            desc: document.getElementById('p-desc')?.value.trim() || "",
+            contact: document.getElementById('p-contact')?.value.trim() || "3137084357",
+            wa: document.getElementById('p-wa')?.value.trim() || `Hola URANIUM, me interesa ${name}`,
+            catId: document.getElementById('p-cat-select')?.value || "",
+            pinned: document.getElementById('p-pinned')?.checked || false, 
+            img: currentImg,
+        };
 
-    if(editingId) {
-        await db.collection("productos").doc(editingId.toString()).update(data);
-    } else {
-        data.reactions = {}; data.comments = [];
-        await db.collection("productos").add(data);
+        if(editingId) {
+            await db.collection("productos").doc(editingId.toString()).update(data);
+        } else {
+            data.reactions = {}; data.comments = [];
+            await db.collection("productos").add(data);
+        }
+
+        closeModal('modal-publish'); 
+        showToast(editingId ? "PRODUCTO ACTUALIZADO" : "PRODUCTO PUBLICADO"); 
+        
+    } catch (error) {
+        console.error("Error al guardar:", error);
+        showToast("⚠️ ERROR: " + error.message);
     }
-
-    closeModal('modal-publish'); 
-    showToast(editingId ? "PRODUCTO ACTUALIZADO" : "PRODUCTO PUBLICADO"); 
 }
 
 function resetForm() {
@@ -726,7 +749,7 @@ function openDetail(id) {
 
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <button class="apple-btn" onclick="addToCart('${p.id}'); closeModal('modal-detail')">Añadir al carrito</button>
-                    <button class="apple-btn-secondary" style="background:#28a745; color:white;" onclick="window.open('https://wa.me/57${p.contact || '3128194596'}?text=${encodeURIComponent(p.wa || 'Hola')}')">Chat WhatsApp</button>
+                    <button class="apple-btn-secondary" style="background:#28a745; color:white;" onclick="window.open('https://wa.me/57${p.contact || '3137084357'}?text=${encodeURIComponent(p.wa || 'Hola')}')">Chat WhatsApp</button>
                     <button class="apple-btn-secondary" style="background:#da0081; color:white;" onclick="buyDirectNequi('${p.id}')">Pago Rápido Nequi</button>
                 </div>
 
@@ -832,7 +855,6 @@ async function processWalletPayment() {
     
     const token = "WAL-" + Math.random().toString(36).substr(2,5).toUpperCase();
     let details = Object.values(cart).map(p => `${p.qty}x ${p.name}`).join(', ');
-    addLog(`TOKEN: ${token}`, `WALLET: ${details} | Total: $${total}`);
     
     let tgMsg = `🟢 *COMPRA (BILLETERA)* 🟢\n\n*Token:* ${token}\n*Cliente:* ${name} (${phone})\n*ID:* #${myUserId}\n*Servicios:* ${details}\n*Total:* $${total}`;
     sendTelegramNotification(tgMsg);
@@ -879,11 +901,6 @@ function processPayment() {
     }, 2000); 
 }
 
-function addLog(action, item) {
-    const log = document.getElementById('log-table');
-    if(log) log.innerHTML = `<tr><td>${new Date().toLocaleTimeString()}</td><td>${action}</td><td>${item}</td></tr>` + log.innerHTML;
-}
-
 // ==========================================
 // 11. COMUNIDAD Y FORO (ESTILO iMESSAGE CON VIP)
 // ==========================================
@@ -928,62 +945,84 @@ function previewForumImage() {
     const file = document.getElementById('f-file-input').files[0];
     if(file) {
         const reader = new FileReader();
-        reader.onloadend = () => {
-            currentForumImg = reader.result;
-            document.getElementById('f-preview').src = reader.result;
-            document.getElementById('f-preview').classList.remove('hidden');
-            document.getElementById('f-upload-label').classList.add('hidden');
-        }; reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 600;
+                let scaleSize = MAX_WIDTH / img.width;
+                if(scaleSize > 1) scaleSize = 1;
+                
+                canvas.width = img.width * scaleSize;
+                canvas.height = img.height * scaleSize;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                currentForumImg = canvas.toDataURL('image/jpeg', 0.7);
+
+                document.getElementById('f-preview').src = currentForumImg;
+                document.getElementById('f-preview').classList.remove('hidden');
+                document.getElementById('f-upload-label').classList.add('hidden');
+            };
+            img.src = event.target.result;
+        }; 
+        reader.readAsDataURL(file);
     }
 }
 
 async function saveForumPost() {
-    const title = document.getElementById('f-title').value.trim();
-    const content = document.getElementById('f-content').value.trim();
-    const type = document.getElementById('f-type').value;
-    const password = document.getElementById('f-password').value.trim();
-    
-    if(!title || !content) return showToast("FALTAN DATOS");
-    if(type === 'clave' && !password) return showToast("DEBES ESTABLECER UNA CLAVE");
+    try {
+        const title = document.getElementById('f-title')?.value.trim();
+        const content = document.getElementById('f-content')?.value.trim();
+        const type = document.getElementById('f-type')?.value;
+        const password = document.getElementById('f-password')?.value.trim() || "";
+        
+        if(!title || !content) return showToast("FALTAN DATOS");
+        if(type === 'clave' && !password) return showToast("DEBES ESTABLECER UNA CLAVE");
 
-    let vipPrice = 0;
-    let vipPhone = "";
-    if(type === 'vip') {
-        const priceInput = document.getElementById('f-vip-price');
-        const phoneInput = document.getElementById('f-vip-phone');
-        if(priceInput && phoneInput) {
-            vipPrice = parseInt(priceInput.value);
-            vipPhone = phoneInput.value.trim();
+        let vipPrice = 0;
+        let vipPhone = "";
+        if(type === 'vip') {
+            const priceInput = document.getElementById('f-vip-price');
+            const phoneInput = document.getElementById('f-vip-phone');
+            if(priceInput && phoneInput) {
+                vipPrice = parseInt(priceInput.value);
+                vipPhone = phoneInput.value.trim();
+            }
+            if(!vipPrice || !vipPhone) return showToast("DEBES PONER EL PRECIO Y TU WHATSAPP");
         }
-        if(!vipPrice || !vipPhone) return showToast("DEBES PONER EL PRECIO Y TU WHATSAPP");
+
+        await db.collection("foro").add({
+            authorId: myUserId, 
+            authorName: currentUser.name || "Invitado", 
+            title: title, 
+            content: content, 
+            img: currentForumImg, 
+            type: type, 
+            password: password, 
+            vipPrice: vipPrice, 
+            vipPhone: vipPhone, 
+            accessList: [myUserId], 
+            replies: [], 
+            timestamp: new Date().toISOString()
+        });
+
+        currentForumImg = ""; 
+        const preview = document.getElementById('f-preview');
+        if(preview) {
+            preview.src = "";
+            preview.classList.add('hidden');
+        }
+        const label = document.getElementById('f-upload-label');
+        if(label) label.classList.remove('hidden');
+
+        closeModal('modal-forum'); 
+        showToast("¡DEBATE PUBLICADO!");
+    } catch (error) {
+        console.error("Error al guardar debate:", error);
+        showToast("⚠️ ERROR: " + error.message);
     }
-
-    await db.collection("foro").add({
-        authorId: myUserId, 
-        authorName: currentUser.name || "Invitado", 
-        title: title, 
-        content: content, 
-        img: currentForumImg, 
-        type: type, 
-        password: password, 
-        vipPrice: vipPrice, 
-        vipPhone: vipPhone, 
-        accessList: [myUserId], 
-        replies: [], 
-        timestamp: new Date().toISOString()
-    });
-
-    currentForumImg = ""; 
-    const preview = document.getElementById('f-preview');
-    if(preview) {
-        preview.src = "";
-        preview.classList.add('hidden');
-    }
-    const label = document.getElementById('f-upload-label');
-    if(label) label.classList.remove('hidden');
-
-    closeModal('modal-forum'); 
-    showToast("¡DEBATE PUBLICADO!");
 }
 
 function renderForum() {
