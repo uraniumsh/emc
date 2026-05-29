@@ -594,6 +594,90 @@ async function handleSaveProduct() {
     if(!nameInput || !priceInput) return showToast("ERROR: Faltan campos básicos");
     
     const name = nameInput.value.trim();
+// ==========================================
+// 8. CATEGORÍAS Y PRODUCTOS (PUBLICAR/ELIMINAR)
+// ==========================================
+async function saveNewCategory() {
+    const name = document.getElementById('new-cat-name').value.trim();
+    if(name) {
+        await db.collection("categorias").add({ name: name.toUpperCase() });
+        closeModal('modal-add-cat'); showToast("CATEGORÍA CREADA");
+        document.getElementById('new-cat-name').value = "";
+    }
+}
+
+function openDeleteCatModal() {
+    const sel = document.getElementById('d-cat-select');
+    sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    openModal('modal-delete-cat');
+}
+
+async function deleteCategory() {
+    const id = document.getElementById('d-cat-select').value;
+    if(!id) return showToast("SELECCIONA UNA CATEGORÍA");
+    if(confirm("¿Seguro que quieres eliminar esta plataforma de raíz?")) {
+        await db.collection("categorias").doc(id).delete();
+        closeModal('modal-delete-cat');
+        showToast("CATEGORÍA ELIMINADA");
+    }
+}
+
+function openPublishModal(id = null) {
+    editingId = id;
+    if(id) {
+        document.getElementById('pub-title').innerText = "Editar Producto";
+        const p = products.find(prod => prod.id.toString() === id.toString());
+        if(!p) return;
+        
+        document.getElementById('p-name').value = p.name || "";
+        document.getElementById('p-short').value = p.short || "";
+        document.getElementById('p-price').value = p.price || "";
+        document.getElementById('p-cat-select').value = p.catId || "";
+        document.getElementById('p-desc').value = p.desc || "";
+        document.getElementById('p-contact').value = p.contact || "";
+        document.getElementById('p-wa').value = p.wa || "";
+        document.getElementById('p-pinned').checked = p.pinned || false;
+        
+        currentImg = p.img || "";
+        if(currentImg) {
+            document.getElementById('file-preview').src = currentImg;
+            document.getElementById('file-preview').classList.remove('hidden');
+            document.getElementById('upload-label').classList.add('hidden');
+        }
+    } else {
+        document.getElementById('pub-title').innerText = "Nuevo Producto";
+        resetForm();
+    }
+    openModal('modal-publish');
+}
+
+async function deleteProduct(id) {
+    if(confirm("¿Seguro que quieres eliminar este producto de la tienda para siempre?")) {
+        await db.collection("productos").doc(id.toString()).delete();
+        showToast("PRODUCTO ELIMINADO 🗑️");
+    }
+}
+
+function previewImage() {
+    const file = document.getElementById('file-input').files[0];
+    if(file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            currentImg = reader.result;
+            document.getElementById('file-preview').src = reader.result;
+            document.getElementById('file-preview').classList.remove('hidden');
+            document.getElementById('upload-label').classList.add('hidden');
+        }; reader.readAsDataURL(file);
+    }
+}
+
+async function handleSaveProduct() {
+    const nameInput = document.getElementById('p-name');
+    const priceInput = document.getElementById('p-price');
+    
+    if(!nameInput || !priceInput) return showToast("ERROR: Faltan campos básicos");
+    
+    const name = nameInput.value.trim();
     const price = priceInput.value;
     
     if(!currentImg || !name || !price) return showToast("FOTO, NOMBRE Y PRECIO OBLIGATORIOS");
@@ -629,10 +713,6 @@ async function handleSaveProduct() {
     showToast(editingId ? "PRODUCTO ACTUALIZADO" : "PRODUCTO PUBLICADO"); 
 }
 
-
-    closeModal('modal-publish'); showToast(editingId ? "PRODUCTO ACTUALIZADO" : "PRODUCTO PUBLICADO"); 
-}
-
 function resetForm() {
     document.querySelectorAll('#modal-publish input[type="text"], #modal-publish input[type="number"], #modal-publish textarea').forEach(i => i.value = "");
     const cb = document.getElementById('p-pinned'); if(cb) cb.checked = false;
@@ -640,6 +720,7 @@ function resetForm() {
     const ul = document.getElementById('upload-label'); if(ul) ul.classList.remove('hidden');
     currentImg = "";
 }
+
 
 // ==========================================
 // 9. RENDERIZAR INTERFAZ PRINCIPAL (TIENDA Y DETALLES)
