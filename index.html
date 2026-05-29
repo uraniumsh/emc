@@ -3,24 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>URANIUM DIGITAL | Store</title>
+    <title>URANIUM DIGITAL</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- ========================================================= -->
+    <!-- CORTINA DE MANTENIMIENTO Y EVENTOS (LIVE-OPS)             -->
+    <!-- ========================================================= -->
+    <div id="maintenance-screen" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100dvh; background: black; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;">
+        <div style="font-size: 60px; margin-bottom: 20px;">🛠️</div>
+        <h1 style="color: var(--accent); margin-bottom: 10px;">En Mantenimiento</h1>
+        <p id="maintenance-msg" style="color: white; font-size: 16px; line-height: 1.5;"></p>
+    </div>
+    <div id="event-html-container" style="position: relative; z-index: 1000;"></div>
+
     <div id="toast-container"></div>
 
+    <!-- HEADER APPLE STYLE -->
     <header class="main-header">
-        <div class="logo" onclick="showView('products')">
-            URANIUM
-        </div>
+        <div class="logo" onclick="navigateTo('/shop')">URANIUM</div>
         <div class="header-right">
             <div class="header-icon hidden" id="btn-add-post-header" onclick="openPublishModal()" style="font-size: 20px;">➕</div>
-            
             <div class="header-icon" id="btn-login-gear" onclick="openModal('modal-settings')" style="font-size: 22px;">⚙️</div>
-            
             <div class="cart-wrapper" onclick="openModal('modal-cart')">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                 <span id="cart-count" class="cart-badge">0</span>
             </div>
             <div class="header-icon menu-btn" onclick="openMenu()">
@@ -29,70 +36,54 @@
         </div>
     </header>
 
+    <!-- MENÚ HAMBURGUESA -->
     <div id="mobile-menu" class="apple-menu hidden">
-        <div class="menu-header">
-            <button class="close-menu" onclick="closeMenu()">✕</button>
-        </div>
+        <div class="menu-header"><button class="close-menu" onclick="closeMenu()">✕</button></div>
         <div class="menu-content">
             <div class="menu-profile" onclick="openModal('modal-profile'); closeMenu()">
                 <div class="avatar">👤</div>
-                <div class="user-info">
-                    <h3 id="menu-user-name">Usuario</h3>
-                    <p id="menu-user-id">ID:</p>
-                </div>
+                <div class="user-info"><h3 id="menu-user-name">Usuario</h3><p id="menu-user-id">ID:</p></div>
             </div>
             <nav class="menu-links">
-                <a href="#" onclick="showView('products'); closeMenu()">Tienda Oficial</a>
-                <a href="#" onclick="showView('foro'); closeMenu()">Comunidad & Foro</a>
-                <a href="#" id="btn-admin-menu" class="hidden text-accent" onclick="showView('dashboard'); closeMenu()">Panel de Control (Admin)</a>
+                <a href="#" onclick="navigateTo('/shop'); closeMenu()">Tienda Oficial</a>
+                <a href="#" onclick="navigateTo('/forum'); closeMenu()">Comunidad & Foro</a>
+                <a href="#" onclick="navigateTo('/guides'); closeMenu()">Guías y Tutoriales 📚</a>
+                <a href="#" id="btn-admin-menu" class="hidden text-accent" onclick="navigateTo('/adminpanel'); closeMenu()">Panel de Control</a>
                 <a href="#" id="btn-logout-menu" class="hidden text-danger" onclick="handleLogout()">Cerrar Sesión</a>
             </nav>
         </div>
     </div>
 
     <main class="content">
+        <!-- VISTA: PRODUCTOS -->
         <section id="view-products" class="view-section">
             <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
             <div class="product-grid" id="product-grid"></div>
         </section>
 
+        <!-- VISTA: DASHBOARD ADMIN -->
         <section id="view-dashboard" class="view-section hidden">
             <h1 class="section-title">Panel de Control</h1>
-            
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 20px 0;">
-                <button class="apple-btn-secondary" style="background: #28a745; color: white; margin:0;" onclick="openModal('modal-add-balance')">+ Saldo Manual</button>
-                <button class="apple-btn-secondary" style="background: var(--accent); color: white; margin:0;" onclick="openModal('modal-add-cat')">+ Crear Categoría</button>
-                <button class="apple-btn-secondary" style="background: var(--danger); color: white; margin:0;" onclick="openDeleteCatModal()">- Eliminar Categoría</button>
-                <button class="apple-btn-secondary" style="margin:0;" onclick="openModal('modal-manage-admins')">Gestión Admins</button>
-                <button id="btn-security" class="apple-btn-secondary hidden" style="background: #ffcc00; color: black; margin:0;" onclick="openModal('modal-security')">🔐 Seguridad</button>
+                <button class="apple-btn-secondary" style="background: #28a745; color: white; margin:0;" onclick="openModal('modal-add-balance')">+ Saldo</button>
+                <button class="apple-btn-secondary" style="background: var(--accent); color: white; margin:0;" onclick="openModal('modal-add-cat')">+ Categoría</button>
+                <button class="apple-btn-secondary" style="background: var(--danger); color: white; margin:0;" onclick="openDeleteCatModal()">- Categoría</button>
+                <button class="apple-btn-secondary" style="margin:0;" onclick="openModal('modal-publish-guide')">📝 Escribir Guía</button>
+                <button class="apple-btn-secondary" style="background: #1c1c1e; color: white; border: 1px solid var(--accent); margin:0;" onclick="openModal('modal-admin-options')">⚙️ Opciones Avanzadas</button>
             </div>
-
+            <!-- Tablas de Admin... -->
             <div id="admin-list-container" class="admin-card hidden">
-                <h3>Administradores Activos</h3>
-                <div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
+                <h3>Administradores Activos</h3><div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
             </div>
-
             <div class="admin-card">
-                <h3>👥 Registro General de Usuarios</h3>
+                <h3>👥 Registro de Usuarios</h3>
                 <div class="table-container" style="max-height: 300px; overflow-y: auto;">
-                    <table class="apple-table">
-                        <thead><tr><th>ID / Usuario</th><th>Saldo</th><th>Estado / Acción</th></tr></thead>
-                        <tbody id="users-table"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="admin-card">
-                <h3>Log de Movimientos</h3>
-                <div class="table-container">
-                    <table class="apple-table">
-                        <thead><tr><th>Hora</th><th>Acción</th><th>Detalle / Valor</th></tr></thead>
-                        <tbody id="log-table"></tbody>
-                    </table>
+                    <table class="apple-table"><thead><tr><th>ID / Usuario</th><th>Saldo</th><th>Acción</th></tr></thead><tbody id="users-table"></tbody></table>
                 </div>
             </div>
         </section>
 
+        <!-- VISTA: FORO GENERAL -->
         <section id="view-foro" class="view-section hidden">
             <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h1 class="section-title" style="margin: 0;">Comunidad 💬</h1>
@@ -101,33 +92,53 @@
             <div id="forum-feed" class="forum-grid"></div>
         </section>
 
+        <!-- VISTA: DETALLE FORO -->
         <section id="view-forum-detail" class="view-section hidden">
             <div class="chat-header glass-header">
-                <button class="back-btn" onclick="showView('foro')">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    Atrás
+                <button class="back-btn" onclick="navigateTo('/forum')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"></polyline></svg> Atrás
                 </button>
                 <div class="chat-title-info">
-                    <h3 id="chat-title-display">...</h3>
-                    <span id="chat-status-display" class="chat-status"></span>
+                    <h3 id="chat-title-display">...</h3><span id="chat-status-display" class="chat-status"></span>
                 </div>
             </div>
-            
             <div id="chat-messages" class="chat-messages"></div>
-            
             <div class="chat-input-area glass-footer">
-                <div id="replying-to-box" class="replying-to hidden">
-                    <span>Respondiendo a: <strong id="reply-to-name"></strong></span>
-                    <button onclick="cancelReply()">✕</button>
-                </div>
-                <div class="input-wrapper">
-                    <input type="text" id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off" name="chat-msg">
-                    <button class="send-btn" onclick="sendForumReply()">↑</button>
-                </div>
+                <div id="replying-to-box" class="replying-to hidden"><span>Respondiendo a: <strong id="reply-to-name"></strong></span><button onclick="cancelReply()">✕</button></div>
+                <div class="input-wrapper"><input type="text" id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off"><button class="send-btn" onclick="sendForumReply()">↑</button></div>
             </div>
         </section>
-    </main>
 
+        <!-- VISTA: GUÍAS ESTÁTICAS -->
+        <section id="view-guides" class="view-section hidden">
+            <h1 class="section-title">Guías y Tutoriales 📚</h1>
+            <p class="text-muted" style="margin-bottom: 20px;">Instrucciones y reglas para usar nuestras plataformas.</p>
+            <div id="guides-list" style="display: flex; flex-direction: column; gap: 15px;"></div>
+        </section>
+
+        <!-- VISTA: LECTURA DE GUÍA -->
+        <section id="view-guide-detail" class="view-section hidden">
+            <button class="back-btn" style="margin-bottom:20px; color:var(--accent); background:none; border:none; font-size:16px;" onclick="navigateTo('/guides')">← Volver a Guías</button>
+            <article id="guide-content-area" style="background:var(--surface-elevated); padding:20px; border-radius:12px; line-height:1.6;"></article>
+        </section>
+
+        <!-- VISTA: EDITOR DE EVENTOS -->
+        <section id="view-event-editor" class="view-section hidden" style="height: 100dvh; display: flex; flex-direction: column; background: #000; padding-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;">
+                <h2 id="editor-event-title" style="margin:0; font-size: 18px; color: var(--accent);">Editando Evento</h2>
+                <button onclick="navigateTo('/adminpanel')" style="background: var(--danger); color: white; border: none; padding: 5px 15px; border-radius: 15px; font-weight: bold;">Cerrar</button>
+            </div>
+            <div style="display: flex; gap: 5px; padding: 0 15px; margin-bottom: 10px;">
+                <button class="tab-btn active" onclick="switchEditorTab('html')">HTML</button>
+                <button class="tab-btn" onclick="switchEditorTab('css')">CSS</button>
+                <button class="tab-btn" onclick="switchEditorTab('js')">JS (Script)</button>
+            </div>
+            <textarea id="editor-html" class="code-editor" placeholder="<!-- Escribe tu HTML -->"></textarea>
+            <textarea id="editor-css" class="code-editor hidden" placeholder="/* Escribe tu CSS */"></textarea>
+            <textarea id="editor-js" class="code-editor hidden" placeholder="// Escribe tu JS"></textarea>
+            <div style="padding: 15px;"><button class="apple-btn" onclick="saveEventCode()">Guardar Código</button></div>
+        </section>
+    </main>
     <div id="modal-wallet-confirm" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span>
@@ -148,28 +159,22 @@
     <div id="modal-profile" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-profile')">✕</span>
-            
             <div class="profile-header-modal" style="text-align: center;">
                 <div class="avatar-lg" style="font-size: 50px;">👤</div>
                 <h2 id="profile-name-display" style="margin-top: 10px;">Usuario</h2>
                 <p class="text-muted">ID: <span id="profile-id"></span></p>
             </div>
-            
             <div class="wallet-card" style="background: var(--surface-elevated); padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;">
                 <p class="text-muted" style="font-size: 12px;">SALDO DISPONIBLE</p>
                 <h1 id="wallet-balance" style="margin: 5px 0;">$0</h1>
                 <button class="apple-btn" style="background: #28a745; margin-top: 10px; padding: 10px;" onclick="openUserRecharge()">Recargar Mi Saldo</button>
             </div>
-            
             <div id="register-section" class="apple-form" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
                 <p class="text-accent" style="font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: center;">REGÍSTRATE Y GANA $5,000 COP</p>
                 <input type="text" id="reg-username" placeholder="@Usuario (Único)">
                 <input type="text" id="reg-name" placeholder="Nombre Mostrado">
-                
                 <input type="password" id="reg-pass" placeholder="Crea un PIN o Clave (Ej: 1234)">
-                
                 <button class="apple-btn" onclick="registerUser()">Guardar Perfil</button>
-
                 <div id="recover-section" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
                     <p class="text-muted" style="font-size: 13px; margin-bottom: 10px; text-align: center; font-weight: bold;">¿Ya tienes cuenta o cambiaste de equipo?</p>
                     <input type="text" id="rec-id" placeholder="Escribe tu ID (Ej: 555555)">
@@ -215,7 +220,6 @@
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-manage-admins')">✕</span>
             <h2>Gestión Admins</h2>
-            <p class="text-muted" style="font-size: 12px; margin-bottom:15px;">El usuario con este ID podrá acceder al panel de control.</p>
             <div class="apple-form">
                 <input type="text" id="new-admin-id" placeholder="ID del Usuario">
                 <input type="email" id="new-admin-email" placeholder="Correo Provisional">
@@ -241,21 +245,14 @@
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-add-cat')">✕</span>
             <h2>Nueva Categoría</h2>
-            <div class="apple-form">
-                <input type="text" id="new-cat-name" placeholder="Nombre de Plataforma">
-                <button class="apple-btn" onclick="saveNewCategory()">Crear Plataforma</button>
-            </div>
+            <div class="apple-form"><input type="text" id="new-cat-name" placeholder="Nombre"><button class="apple-btn" onclick="saveNewCategory()">Crear</button></div>
         </div>
     </div>
-
     <div id="modal-delete-cat" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-delete-cat')">✕</span>
             <h2>Eliminar Categoría</h2>
-            <div class="apple-form" style="margin-top: 15px;">
-                <select id="d-cat-select"></select>
-                <button class="apple-btn" style="background: var(--danger);" onclick="deleteCategory()">🗑️ Eliminar Plataforma</button>
-            </div>
+            <div class="apple-form"><select id="d-cat-select"></select><button class="apple-btn" style="background: var(--danger);" onclick="deleteCategory()">Eliminar</button></div>
         </div>
     </div>
 
@@ -273,20 +270,14 @@
                 <textarea id="p-short" placeholder="Slogan / Info extra" style="display: none;"></textarea>
                 <input type="number" id="p-price" placeholder="Precio ($)">
                 <select id="p-cat-select"></select>
-                
                 <textarea id="p-desc" placeholder="Descripción Detallada"></textarea>
                 <button type="button" class="apple-btn-secondary" style="margin-top:-5px; margin-bottom:10px; padding: 8px;" onclick="openBigEditor()">📝 Abrir Editor Avanzado</button>
-
                 <input type="text" id="p-contact" placeholder="WhatsApp de Contacto">
                 <input type="text" id="p-wa" placeholder="Msj predeterminado WhatsApp">
-                
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                    <input type="checkbox" id="p-pinned" style="width: auto;"> 
-                    <label for="p-pinned">⭐ Fijar publicación al inicio</label>
+                    <input type="checkbox" id="p-pinned" style="width: auto;"> <label for="p-pinned">⭐ Fijar publicación</label>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="apple-btn" onclick="handleSaveProduct()">Guardar</button>
-                </div>
+                <button class="apple-btn" onclick="handleSaveProduct()">Guardar</button>
             </div>
         </div>
     </div>
@@ -295,7 +286,6 @@
         <div class="modal-content ios-card" style="width: 95%; max-width: 800px;">
             <span class="close" onclick="closeBigEditor()">✕</span>
             <h2>Editor Avanzado</h2>
-            <p class="text-muted" style="font-size:12px; margin-bottom:10px;">Usa **negrita**, __cursiva__, >resaltado o =#FF0000color</p>
             <textarea id="big-editor-area" style="height: 300px; width: 100%; background: var(--surface-elevated); color: var(--text-main); border: none; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-family: monospace;"></textarea>
             <button class="apple-btn" onclick="saveBigEditor()">Guardar y Cerrar</button>
         </div>
@@ -322,7 +312,6 @@
             </div>
         </div>
     </div>
-
     <div id="modal-nequi" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-nequi')">✕</span>
@@ -333,9 +322,7 @@
                 <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total: <strong id="pay-val"></strong></div>
                 <button class="apple-btn" style="background: #da0081;" onclick="processPayment()">Generar Orden Segura</button>
             </div>
-            <div id="nequi-processing" class="hidden" style="text-align: center; padding: 20px 0;">
-                <div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3>
-            </div>
+            <div id="nequi-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
         </div>
     </div>
 
@@ -356,16 +343,11 @@
             </div>
         </div>
     </div>
-
     <div id="modal-security" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-security')">✕</span>
-            <h2>Cambiar Credenciales Súper Admin</h2>
-            <div class="apple-form" style="margin-top: 15px;">
-                <input type="email" id="sec-new-email" placeholder="Nuevo Correo">
-                <input type="password" id="sec-new-pass" placeholder="Nueva Contraseña">
-                <button class="apple-btn" style="background: #ffcc00; color: black;" onclick="updateSuperAdminCreds()">Actualizar Datos</button>
-            </div>
+            <h2>Credenciales Súper Admin</h2>
+            <div class="apple-form"><input type="email" id="sec-new-email" placeholder="Nuevo Correo"><input type="password" id="sec-new-pass" placeholder="Nueva Contraseña"><button class="apple-btn" style="background: #ffcc00; color: black;" onclick="updateSuperAdminCreds()">Actualizar</button></div>
         </div>
     </div>
 
@@ -379,28 +361,19 @@
                     <img id="f-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);">
                 </div>
                 <input type="file" id="f-file-input" accept="image/*" class="hidden" onchange="previewForumImage()">
-                
                 <input type="text" id="f-title" placeholder="Asunto o Tema">
                 <select id="f-type" onchange="toggleForumPassword()" style="margin-bottom: 12px;">
-                    <option value="publico">Público</option>
-                    <option value="vip">Solo VIP (Monetizado)</option>
-                    <option value="clave">Con Clave</option>
-                    <option value="cerrado">Cerrado (Solo lectura)</option>
+                    <option value="publico">Público</option><option value="vip">Solo VIP</option><option value="clave">Con Clave</option><option value="cerrado">Cerrado</option>
                 </select>
-                
                 <input type="password" id="f-password" class="hidden" placeholder="Establecer Clave">
                 <div id="f-vip-options" class="hidden">
-                    <input type="number" id="f-vip-price" placeholder="Precio de entrada ($)">
-                    <input type="number" id="f-vip-phone" placeholder="Tu WhatsApp (Para recibir pagos)">
-                    <p class="text-muted" style="font-size:11px; margin-bottom:12px; line-height:1.3;">Uranium retiene el 30%. Recibirás el 70% de cada venta directamente a este número cuando los usuarios paguen.</p>
+                    <input type="number" id="f-vip-price" placeholder="Precio ($)"><input type="number" id="f-vip-phone" placeholder="Tu WhatsApp">
                 </div>
-
                 <textarea id="f-content" placeholder="Escribe tu mensaje aquí..." style="height: 100px; margin-bottom:12px;"></textarea>
-                <button class="apple-btn" onclick="saveForumPost()">Publicar Debate</button>
+                <button class="apple-btn" onclick="saveForumPost()">Publicar</button>
             </div>
         </div>
     </div>
-
     <div id="modal-buy-vip" class="modal hidden">
         <div class="modal-content ios-card" style="text-align:center;">
             <span class="close" onclick="closeModal('modal-buy-vip')">✕</span>
@@ -408,110 +381,502 @@
             <h2>Acceso Exclusivo</h2>
             <p class="text-muted" id="vip-buy-title" style="margin-bottom:15px; font-size:14px;"></p>
             <h1 style="color:var(--accent); margin-bottom:20px;" id="vip-buy-price">$0</h1>
-            
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="apple-btn" style="background:#28a745;" onclick="processVipWallet()">Pagar con Billetera (Instantáneo)</button>
-                <button class="apple-btn" style="background:#da0081;" onclick="processVipNequi()">Pagar con Nequi (Requiere revisión)</button>
+                <button class="apple-btn" style="background:#28a745;" onclick="processVipWallet()">Billetera</button><button class="apple-btn" style="background:#da0081;" onclick="processVipNequi()">Nequi</button>
             </div>
         </div>
     </div>
 
+    <div id="modal-publish-guide" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-publish-guide')">✕</span>
+            <h2>Publicar Guía</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <input type="text" id="g-title" placeholder="Título de la Guía (Ej: Cómo canjear Netflix)">
+                <textarea id="g-content" placeholder="Contenido de la guía (Admite HTML básico)" style="height: 200px;"></textarea>
+                <button class="apple-btn" onclick="saveGuide()">Publicar Guía</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-admin-options" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-admin-options')">✕</span>
+            <h2>Opciones Avanzadas</h2>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                <button class="apple-btn-secondary" style="background: #ffcc00; color: black;" onclick="openMaintenanceModal()">🛠️ Mantenimiento / Update</button>
+                <button class="apple-btn-secondary" style="background: var(--danger); color: white;" onclick="openBlockProductsModal()">🚫 Bloquear Productos (Agotado)</button>
+                <button class="apple-btn-secondary" style="background: var(--accent); color: white;" onclick="openEventsModal()">🎉 Eventos / Live-Ops</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-maintenance" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-maintenance')">✕</span>
+            <h2>Modo Mantenimiento</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <textarea id="maint-desc" placeholder="Mensaje para clientes..." style="height: 100px; margin-bottom: 15px;"></textarea>
+                <div style="display: flex; gap: 10px;">
+                    <button class="apple-btn" style="background: var(--danger);" onclick="toggleMaintenance(true)">Activar</button>
+                    <button class="apple-btn" style="background: #28a745;" onclick="toggleMaintenance(false)">Desactivar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-block-products" class="modal hidden">
+        <div class="modal-content ios-card" style="max-height: 80vh; display: flex; flex-direction: column;">
+            <span class="close" onclick="closeModal('modal-block-products')">✕</span>
+            <h2>Gestión de Stock</h2>
+            <div id="block-product-list" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top:15px;"></div>
+        </div>
+    </div>
+
+    <div id="modal-events" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-events')">✕</span>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin:0;">Eventos</h2>
+                <button class="apple-btn" style="width: auto; padding: 5px 15px; font-size: 12px;" onclick="openAddEventModal()">+ Crear</button>
+            </div>
+            <div id="events-list" style="margin-top: 15px; max-height: 300px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <div id="modal-add-event" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-add-event')">✕</span>
+            <h2 id="ev-modal-title">Configurar Evento</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <input type="text" id="ev-name" placeholder="Nombre">
+                <textarea id="ev-desc" placeholder="Descripción breve" style="height: 60px;"></textarea>
+                <label class="text-muted" style="font-size: 12px; margin-top: 10px; display: block;">Inicia:</label>
+                <input type="datetime-local" id="ev-start" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--surface-elevated); color: white; border: none; margin-bottom: 10px;">
+                <label class="text-muted" style="font-size: 12px; display: block;">Termina:</label>
+                <input type="datetime-local" id="ev-end" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--surface-elevated); color: white; border: none; margin-bottom: 15px;">
+                <button class="apple-btn" onclick="saveEventConfig()">Guardar y Continuar al Código</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .code-editor { width: 100%; flex-grow: 1; background: #1e1e1e; color: #00ff00; font-family: monospace; border: none; padding: 15px; border-radius: 10px; resize: none; font-size: 14px; outline: none; }
+        .tab-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; }
+        .tab-btn.active { background: var(--accent); font-weight: bold; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--danger); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .agotado-tag { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,59,48,0.9); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; z-index: 5; border: 2px solid white;}
+        .product-card.disabled img { filter: grayscale(100%) opacity(0.5); }
+        
+        /* ⚠️ APLICADO: HACE QUE EL FORO RESPETE SALTOS DE LÍNEA */
+        .chat-bubble { white-space: pre-wrap; } 
+    </style>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="emc.js"></script>
-
+    
     <script>
-        // 1. REGISTRO MEJORADO CON CONTRASEÑA
+        // --- CONFIG FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6Jj3SLC5I0seRbGvXXAHau0nWRnsj98U",
+            authDomain: "uraniumsh.firebaseapp.com",
+            projectId: "uraniumsh",
+            storageBucket: "uraniumsh.firebasestorage.app",
+            messagingSenderId: "401612582595",
+            appId: "1:401612582595:web:fa9611083116e7038dfc76"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const TELEGRAM_BOT_TOKEN = "8776046886:AAERDniNNcDSNEJonVc32JJBawFuWSyiMTQ";
+        const TELEGRAM_ADMIN_ID = "7056557759";
+
+        // --- GLOBALES ---
+        let products = [], categories = [], cart = {}, cartCooldowns = {};
+        let currentUser = null, isAdmin = false, myUserId = localStorage.getItem('u_id');
+        let currentImg = "", editingId = null;
+        let forumPosts = [], currentThreadId = null, replyingTo = null, currentForumImg = "", pendingVipPost = null;
+        let currentReceiptFile = null, currentReceiptContext = {};
+        let globalEvents = [], editingEventId = null;
+        let guidesData = [];
+
+        // --- 1. ENRUTADOR MÁGICO (URL LIMPIAS) ---
+        function navigateTo(path) {
+            window.history.pushState({}, "", path);
+            handleRoute();
+        }
+
+        function handleRoute() {
+            const path = window.location.pathname;
+            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+            
+            if (path === '/shop' || path === '/') {
+                document.getElementById('view-products').classList.remove('hidden');
+            } else if (path === '/forum') {
+                document.getElementById('view-foro').classList.remove('hidden');
+            } else if (path.startsWith('/forum/')) {
+                const parts = path.split('/');
+                if(parts.length >= 3 && parts[2]) {
+                    // Si trae el ID del post, lo abre al instante
+                    setTimeout(() => openForumThread(parts[2]), 500); 
+                } else {
+                    document.getElementById('view-foro').classList.remove('hidden');
+                }
+            } else if (path === '/adminpanel') {
+                if(isAdmin) document.getElementById('view-dashboard').classList.remove('hidden');
+                else navigateTo('/shop');
+            } else if (path === '/guides') {
+                document.getElementById('view-guides').classList.remove('hidden');
+            } else {
+                document.getElementById('view-products').classList.remove('hidden');
+            }
+        }
+        window.addEventListener('popstate', handleRoute);
+
+        // Utils Telegram
+        function sendTelegramNotification(msg) {
+            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: TELEGRAM_ADMIN_ID, text: msg, parse_mode: 'Markdown' })
+            }).catch(e => console.error(e));
+        }
+
+        // --- INICIALIZACIÓN ---
+        async function initSession() {
+            document.body.addEventListener('touchstart', function(){}, {passive: true});
+            let originalId = localStorage.getItem('original_uid');
+            if (!originalId) {
+                originalId = Math.floor(100000 + Math.random() * 900000).toString();
+                localStorage.setItem('original_uid', originalId);
+            }
+            myUserId = localStorage.getItem('u_id') || originalId;
+            localStorage.setItem('u_id', myUserId);
+
+            escucharDatos(); 
+
+            const userRef = db.collection("usuarios").doc(myUserId);
+            const userDoc = await userRef.get();
+            const rightNow = new Date().toISOString();
+
+            if (!userDoc.exists) {
+                currentUser = { role: myUserId === "170125" ? 'superadmin' : 'user', balance: 0, registered: false, username: '', name: '', id: myUserId, banned: false, lastActive: rightNow };
+                await userRef.set(currentUser);
+            } else {
+                currentUser = userDoc.data();
+                if(currentUser.banned === true && myUserId !== "170125") {
+                    document.body.innerHTML = `<div style="background:black; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center;"><h1>🚫 BANEADO</h1></div>`; return; 
+                }
+                userRef.update({ lastActive: rightNow });
+            }
+
+            isAdmin = (currentUser.role === 'superadmin' || currentUser.role === 'admin') && localStorage.getItem('admin_auth') === 'true';
+            
+            if (isAdmin) {
+                document.getElementById('btn-login-gear').classList.add('hidden');
+                document.getElementById('btn-add-post-header').classList.remove('hidden');
+                document.getElementById('btn-admin-menu').classList.remove('hidden');
+                document.getElementById('btn-logout-menu').classList.remove('hidden');
+                if(currentUser.role === 'superadmin') {
+                    document.getElementById('btn-security').classList.remove('hidden');
+                    document.getElementById('admin-list-container').classList.remove('hidden');
+                }
+            }
+            updateProfileUI();
+            
+            // Ejecuta el enrutador para leer el link con el que entró
+            setTimeout(handleRoute, 100);
+        }
+        window.onload = initSession;
+
+        // --- ESCUCHADORES ---
+        function escucharDatos() {
+            db.collection("productos").onSnapshot(snap => {
+                products = []; snap.forEach(d => products.push({ id: d.id, ...d.data() })); renderAll();
+            });
+            db.collection("categorias").onSnapshot(snap => {
+                categories = []; snap.forEach(d => categories.push({ id: d.id, ...d.data() })); renderAll();
+            });
+            db.collection("foro").orderBy("timestamp", "desc").onSnapshot(snap => {
+                forumPosts = []; snap.forEach(d => forumPosts.push({ id: d.id, ...d.data() })); renderForum();
+                if(currentThreadId) { const p = forumPosts.find(x => x.id === currentThreadId); if(p) renderChatMessages(p); }
+            });
+            db.collection("guias").orderBy("timestamp", "desc").onSnapshot(snap => {
+                guidesData = []; snap.forEach(d => guidesData.push({ id: d.id, ...d.data() })); renderGuides();
+            });
+            db.collection("usuarios").doc(myUserId).onSnapshot(doc => {
+                if (doc.exists) { currentUser = doc.data(); updateProfileUI(); }
+            });
+            
+            // Mantenimiento en vivo
+            db.collection("configuracion").doc("general").onSnapshot(doc => {
+                if(doc.exists) {
+                    const data = doc.data();
+                    const screen = document.getElementById('maintenance-screen');
+                    if(data.maintenance && !isAdmin) {
+                        document.getElementById('maintenance-msg').innerText = data.maintenanceMsg;
+                        screen.classList.remove('hidden'); document.body.style.overflow = 'hidden'; 
+                    } else { screen.classList.add('hidden'); document.body.style.overflow = 'auto'; }
+                }
+            });
+            
+            // Log Admin y Admin List
+            if(localStorage.getItem('admin_auth')==='true') {
+                db.collection("usuarios").orderBy("lastActive", "desc").onSnapshot(snap => {
+                    const tbody = document.getElementById('users-table'); if(tbody) tbody.innerHTML='';
+                    snap.forEach(d => {
+                        const u = d.data(); if(u.id === "170125") return;
+                        if(tbody) tbody.innerHTML += `<tr><td><strong>${u.registered ? u.name : 'Invitado'}</strong><br>#${u.id}</td><td>$${(u.balance||0)}</td><td><button class="btn-sm-danger" onclick="toggleBan('${u.id}', ${!u.banned})">${u.banned ? 'Desbanear' : 'Banear'}</button></td></tr>`;
+                    });
+                });
+            }
+        }
+
+        // --- UTILS UI ---
+        function showToast(msg) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg;
+            c.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+        }
+        function openModal(id) { const el = document.getElementById(id); if(el) el.classList.remove('hidden'); }
+        function closeModal(id) { const el = document.getElementById(id); if(el) { el.classList.add('closing'); setTimeout(() => { el.classList.remove('closing'); el.classList.add('hidden'); }, 200); } }
+        function openMenu() { document.getElementById('mobile-menu').classList.remove('hidden'); document.getElementById('menu-user-name').innerText = currentUser?.registered ? currentUser.name : "Invitado"; document.getElementById('menu-user-id').innerText = `ID: #${myUserId}`; }
+        function closeMenu() { document.getElementById('mobile-menu').classList.add('hidden'); }
+
+        // --- ADMIN LOGIN / SECURITY ---
+        async function handleLogin() {
+            const em = document.getElementById('l-email').value.trim().toLowerCase(), pa = document.getElementById('l-pass').value.trim();
+            if(!em || !pa) return showToast("INGRESA DATOS");
+            const usersSnap = await db.collection("usuarios").where("adminEmail", "==", em).where("adminPass", "==", pa).get();
+            if(!usersSnap.empty) {
+                myUserId = usersSnap.docs[0].id; localStorage.setItem('u_id', myUserId); localStorage.setItem('admin_auth', 'true');
+                showToast("SESIÓN INICIADA"); setTimeout(() => location.reload(), 500); 
+            } else showToast("CREDENCIALES INCORRECTAS"); 
+        }
+        function handleLogout() { localStorage.setItem('admin_auth', 'false'); localStorage.setItem('u_id', localStorage.getItem('original_uid')); location.reload(); }
+        async function toggleBan(id, status) { await db.collection("usuarios").doc(id).update({ banned: status }); showToast(status ? 'BANEADO' : 'DESBANEADO'); }
+        async function addSubAdmin() {
+            try {
+                if(currentUser?.role !== "superadmin") return;
+                const id = document.getElementById('new-admin-id')?.value.trim(), em = document.getElementById('new-admin-email')?.value.trim().toLowerCase(), pa = document.getElementById('new-admin-pass')?.value.trim();
+                if(!id || !em || !pa) return showToast("INCOMPLETOS");
+                await db.collection("usuarios").doc(id).set({ role: 'admin', adminEmail: em, adminPass: pa }, { merge: true });
+                showToast("ADMIN CREADO"); closeModal('modal-manage-admins');
+            } catch (e) { showToast("ERROR"); }
+        }
+
+        // --- PERFIL Y RECUPERACIÓN ---
+        function updateProfileUI() {
+            const pId = document.getElementById('profile-id'), pName = document.getElementById('profile-name-display'), wBal = document.getElementById('wallet-balance'), rSec = document.getElementById('register-section');
+            if(pId) pId.innerText = myUserId;
+            if(pName) pName.innerText = currentUser?.registered ? currentUser.name : "Invitado";
+            if(wBal) wBal.innerText = `$${(currentUser?.balance || 0).toLocaleString()}`;
+            if(rSec) rSec.classList.toggle('hidden', !!currentUser?.registered);
+        }
         async function registerUser() {
             try {
-                const user = document.getElementById('reg-username')?.value.trim();
-                const name = document.getElementById('reg-name')?.value.trim();
-                const pass = document.getElementById('reg-pass')?.value.trim();
-                
-                if(!user || !name || !pass) return showToast("LLENA TODOS LOS DATOS Y CREA UNA CLAVE");
-                
-                const snapshot = await db.collection("usuarios").where("username", "==", user).get();
-                if (!snapshot.empty) {
-                    if (snapshot.docs[0].id !== myUserId) {
-                        return showToast("EL USUARIO YA EXISTE, ELIGE OTRO");
-                    }
-                }
-
-                await db.collection("usuarios").doc(myUserId).update({
-                    username: user, 
-                    name: name, 
-                    password: pass, 
-                    registered: true, 
-                    balance: firebase.firestore.FieldValue.increment(5000)
-                });
-                
-                showToast("¡REGISTRO EXITOSO! +$5000 AÑADIDOS");
-                closeModal('modal-profile'); 
-                
-                // Actualiza visualmente el perfil al instante
-                if(typeof updateProfileUI === 'function') updateProfileUI();
-                
-            } catch (error) {
-                showToast("⚠️ ERROR: " + error.message);
-            }
+                const u = document.getElementById('reg-username')?.value.trim(), n = document.getElementById('reg-name')?.value.trim(), p = document.getElementById('reg-pass')?.value.trim();
+                if(!u || !n || !p) return showToast("LLENA DATOS Y CLAVE");
+                const snap = await db.collection("usuarios").where("username", "==", u).get();
+                if (!snap.empty && snap.docs[0].id !== myUserId) return showToast("USUARIO EXISTE");
+                await db.collection("usuarios").doc(myUserId).update({ username: u, name: n, password: p, registered: true, balance: firebase.firestore.FieldValue.increment(5000) });
+                showToast("REGISTRO EXITOSO"); closeModal('modal-profile'); updateProfileUI();
+            } catch (e) { showToast("ERROR"); }
         }
-
-        // 2. RECUPERACIÓN DE CUENTA (EN VIVO SIN RECARGAR)
         async function recoverAccount() {
             try {
-                const recId = document.getElementById('rec-id')?.value.trim();
-                const recPass = document.getElementById('rec-pass')?.value.trim();
-
-                if(!recId || !recPass) return showToast("INGRESA TU ID Y TU CLAVE");
-
-                const userDoc = await db.collection("usuarios").doc(recId).get();
-
-                if(!userDoc.exists) return showToast("ESE ID NO EXISTE EN LA BASE DE DATOS");
-
-                const userData = userDoc.data();
-
-                if(!userData.password) {
-                    return showToast("ESTA CUENTA ES ANTIGUA Y NO TIENE CLAVE. HABLA CON SOPORTE.");
-                }
-
-                if(userData.password !== recPass) {
-                    return showToast("CONTRASEÑA INCORRECTA ❌");
-                }
-
-                // 1. Inyecta el ID recuperado a la memoria del celular/PC
-                myUserId = recId;
-                localStorage.setItem('u_id', myUserId);
-                localStorage.setItem('original_uid', myUserId);
-
-                // 2. Transfiere los datos a la variable global actual
-                currentUser = userData;
-
-                // 3. Actualiza el nombre, ID y Saldo visualmente al instante
-                if(typeof updateProfileUI === 'function') updateProfileUI();
+                const id = document.getElementById('rec-id')?.value.trim(), p = document.getElementById('rec-pass')?.value.trim();
+                if(!id || !p) return showToast("INGRESA ID Y CLAVE");
+                const doc = await db.collection("usuarios").doc(id).get();
+                if(!doc.exists) return showToast("NO EXISTE");
+                if(doc.data().password !== p) return showToast("CLAVE INCORRECTA");
                 
-                // 4. Si la cuenta recuperada es de un Admin, le enciende el panel de control
-                if(currentUser.role === 'superadmin' || currentUser.role === 'admin') {
-                    if(typeof activateAdminUI === 'function') activateAdminUI();
-                }
+                myUserId = id; localStorage.setItem('u_id', myUserId); localStorage.setItem('original_uid', myUserId);
+                currentUser = doc.data(); updateProfileUI();
+                showToast("CUENTA RECUPERADA"); closeModal('modal-profile');
+                db.collection("usuarios").doc(myUserId).onSnapshot(d => { if(d.exists) { currentUser = d.data(); updateProfileUI(); } });
+            } catch (e) { showToast("ERROR"); }
+        }
 
-                // 5. Cierra el modal y avisa del éxito
-                showToast("¡CUENTA RECUPERADA CON ÉXITO! 🟢");
-                closeModal('modal-profile');
-
-                // 6. Reconecta el "escuchador en tiempo real" de Firebase para el nuevo ID
-                db.collection("usuarios").doc(myUserId).onSnapshot(doc => {
-                    if (doc.exists) {
-                        currentUser = doc.data();
-                        if(typeof updateProfileUI === 'function') updateProfileUI();
-                    }
-                });
-
-            } catch (error) {
-                showToast("⚠️ ERROR: " + error.message);
+        // --- PUBLICAR PRODUCTOS Y STOCK ---
+        function previewImage() {
+            const file = document.getElementById('file-input').files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas'); const maxW = 600;
+                        let scale = maxW / img.width; if(scale > 1) scale = 1;
+                        canvas.width = img.width * scale; canvas.height = img.height * scale;
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        currentImg = canvas.toDataURL('image/jpeg', 0.7);
+                        document.getElementById('file-preview').src = currentImg; document.getElementById('file-preview').classList.remove('hidden'); document.getElementById('upload-label').classList.add('hidden');
+                    }; img.src = e.target.result;
+                }; reader.readAsDataURL(file);
             }
         }
+        async function handleSaveProduct() {
+            try {
+                const n = document.getElementById('p-name')?.value.trim(), p = document.getElementById('p-price')?.value;
+                if(!currentImg || !n || !p) return showToast("FOTO, NOMBRE, PRECIO OBLIGATORIOS");
+                const data = {
+                    name: n, price: parseFloat(p), short: document.getElementById('p-short')?.value.trim() || "", desc: document.getElementById('p-desc')?.value.trim() || "",
+                    contact: document.getElementById('p-contact')?.value.trim() || "3137084357", wa: document.getElementById('p-wa')?.value.trim() || `Hola URANIUM`,
+                    catId: document.getElementById('p-cat-select')?.value || "", pinned: document.getElementById('p-pinned')?.checked || false, img: currentImg, agotado: false
+                };
+                if(editingId) await db.collection("productos").doc(editingId.toString()).update(data);
+                else { data.reactions = {}; data.comments = []; await db.collection("productos").add(data); }
+                closeModal('modal-publish'); showToast("GUARDADO"); 
+            } catch (e) { showToast("ERROR AL GUARDAR"); }
+        }
+        function renderAll() {
+            const sel = document.getElementById('p-cat-select'); if(sel) sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            const mNav = document.getElementById('mobile-nav-cats'); if(mNav) mNav.innerHTML = `<button class="active" onclick="setActiveCat(this, 'all')">Todas</button>` + categories.map(c => `<button onclick="setActiveCat(this, '${c.id}')">${c.name}</button>`).join('');
+            renderGrid();
+        }
+        function renderGrid(catId = 'all') {
+            const grid = document.getElementById('product-grid'); if(!grid) return; grid.innerHTML = '';
+            let f = products.filter(p => catId === 'all' || p.catId === catId); f.sort((a, b) => (b.pinned === true) - (a.pinned === true));
+            f.forEach(p => {
+                const c = document.createElement('div'); c.className = `product-card ${p.agotado ? 'disabled' : ''}`; c.onclick = () => openDetail(p.id);
+                c.innerHTML = `
+                    ${isAdmin ? `<div style="position:absolute; top:8px; right:8px; z-index:10; display:flex; gap:5px;"><button onclick="event.stopPropagation(); editingId='${p.id}'; openModal('modal-publish')" style="background:var(--accent); color:white; border:none; border-radius:50%; width:24px; height:24px;">✏️</button></div>` : ''}
+                    <div class="card-img"><div class="price-tag">$${parseFloat(p.price).toLocaleString()}</div>${p.agotado ? '<div class="agotado-tag">AGOTADO</div>' : ''}<img src="${p.img}"></div>
+                    <div class="card-product-name">${p.name}</div>`;
+                grid.appendChild(c);
+            });
+        }
+        function openDetail(id) {
+            const p = products.find(x => x.id === id); if(!p) return;
+            const b = document.getElementById('detail-body');
+            b.innerHTML = `
+                <div class="detail-layout">
+                    <div class="detail-img-container" style="position:relative;">${p.agotado ? '<div class="agotado-tag" style="font-size:20px;">AGOTADO</div>' : ''}<img src="${p.img}" style="${p.agotado ? 'filter: grayscale(100%); opacity:0.5;' : ''}"></div>
+                    <div class="detail-info">
+                        <h2>${p.name}</h2><h3 style="color:var(--accent); margin-bottom:15px;">$${parseFloat(p.price).toLocaleString()}</h3>
+                        <p style="font-size:14px; flex-grow:1; line-height:1.6;">${p.desc.replace(/\n/g, '<br>')}</p>
+                        <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+                            <button class="apple-btn" onclick="addToCart('${p.id}'); closeModal('modal-detail')" ${p.agotado ? 'disabled style="background:gray;"' : ''}>${p.agotado ? 'Sin Stock' : 'Añadir al carrito'}</button>
+                            <button class="apple-btn-secondary" style="background:#da0081; color:white;" onclick="buyDirectNequi('${p.id}')" ${p.agotado ? 'disabled style="background:gray;"' : ''}>${p.agotado ? 'Sin Stock' : 'Pago Nequi'}</button>
+                        </div>
+                    </div>
+                </div>`; openModal('modal-detail');
+        }
+        function openBlockProductsModal() {
+            closeModal('modal-admin-options');
+            document.getElementById('block-product-list').innerHTML = products.map(p => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-elevated); padding:10px; border-radius:8px;">
+                    <div>${p.name} <br><span style="color:var(--accent); font-size:12px;">$${p.price.toLocaleString()}</span></div>
+                    <label class="switch"><input type="checkbox" onchange="toggleAgotado('${p.id}', this.checked)" ${p.agotado ? 'checked' : ''}><span class="slider"></span></label>
+                </div>`).join('');
+            openModal('modal-block-products');
+        }
+        async function toggleAgotado(id, status) { await db.collection("productos").doc(id.toString()).update({ agotado: status }); }
+
+        // --- CARRITO ---
+        function addToCart(id) {
+            const p = products.find(x => x.id === id); if(!p || p.agotado) return;
+            if(cart[id]) cart[id].qty++; else cart[id] = {...p, qty: 1};
+            updateCartUI(); showToast("AÑADIDO AL CARRITO");
+        }
+        function updateCartUI() {
+            let t = 0, c = 0; document.getElementById('cart-list').innerHTML = Object.values(cart).map(p => { t += (p.price * p.qty); c += p.qty; return `<div style="background:var(--surface-elevated); padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between;"><div><strong>${p.name} (x${p.qty})</strong><br><span style="color:var(--accent);">$${(p.price * p.qty).toLocaleString()}</span></div><button onclick="delete cart['${p.id}']; updateCartUI();" style="background:var(--danger); border:none; border-radius:50%; width:24px; height:24px; color:white;">✕</button></div>`; }).join('');
+            document.getElementById('cart-count').innerText = c; document.getElementById('cart-total').innerText = `$${t.toLocaleString()}`;
+        }
+
+        // --- FORO ---
+        function renderForum() {
+            const feed = document.getElementById('forum-feed'); if(!feed) return;
+            feed.innerHTML = forumPosts.map(p => `<div class="forum-thread-card" onclick="navigateTo('/forum/${p.id}')"><div><h3 style="margin-bottom:5px;">${p.title}</h3><span class="text-muted" style="font-size:12px;">Por ${p.authorName} • ${(p.replies||[]).length} msjs</span></div></div>`).join('');
+        }
+        async function openForumThread(id) {
+            const p = forumPosts.find(x => x.id === id); if(!p) { navigateTo('/forum'); return; }
+            if (p.type === 'vip' && !isAdmin && (!p.accessList || !p.accessList.includes(myUserId))) {
+                pendingVipPost = p; document.getElementById('vip-buy-title').innerText = p.title; document.getElementById('vip-buy-price').innerText = "$" + (p.vipPrice||0).toLocaleString(); openModal('modal-buy-vip'); return; 
+            }
+            currentThreadId = id;
+            
+            // Actualiza la URL para que se vea bonita (/forum/ID) sin recargar
+            if(window.location.pathname !== `/forum/${id}`) { window.history.pushState({}, "", `/forum/${id}`); }
+            
+            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+            document.getElementById('view-forum-detail').classList.remove('hidden');
+            document.getElementById('chat-title-display').innerText = p.title;
+            renderChatMessages(p);
+        }
+        function renderChatMessages(p) {
+            document.getElementById('chat-messages').innerHTML = `<div class="chat-bubble other"><div style="color:var(--accent);">${p.authorName}</div>${p.content}</div>` + (p.replies || []).map(r => `<div class="chat-bubble ${r.authorId===myUserId?'me':'other'}">${r.authorId!==myUserId?`<div style="font-size:12px; color:gray;">${r.authorName}</div>`:''}${r.text}</div>`).join('');
+            const c = document.getElementById('chat-messages'); setTimeout(() => { c.scrollTop = c.scrollHeight; }, 50); 
+        }
+
+        // --- GUÍAS ESTÁTICAS ---
+        async function saveGuide() {
+            const title = document.getElementById('g-title').value.trim();
+            const content = document.getElementById('g-content').value.trim();
+            if(!title || !content) return showToast("LLENA LOS DATOS");
+            await db.collection("guias").add({ title, content, timestamp: new Date().toISOString() });
+            closeModal('modal-publish-guide'); showToast("GUÍA PUBLICADA");
+        }
+        function renderGuides() {
+            const list = document.getElementById('guides-list'); if(!list) return;
+            list.innerHTML = guidesData.map(g => `<div class="forum-thread-card" onclick="openGuide('${g.id}')"><h3>📖 ${g.title}</h3></div>`).join('');
+        }
+        function openGuide(id) {
+            const g = guidesData.find(x => x.id === id); if(!g) return;
+            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+            document.getElementById('view-guide-detail').classList.remove('hidden');
+            document.getElementById('guide-content-area').innerHTML = `<h1>${g.title}</h1><br>${g.content.replace(/\n/g, '<br>')}`;
+        }
+
+        // --- LIVE-OPS Y EVENTOS (EDITOR JS/CSS/HTML) ---
+        function openEventsModal() {
+            closeModal('modal-admin-options'); openModal('modal-events');
+            db.collection("eventos").onSnapshot(snap => {
+                globalEvents = []; const list = document.getElementById('events-list'); list.innerHTML = "";
+                snap.forEach(d => {
+                    const ev = {id: d.id, ...d.data()}; globalEvents.push(ev);
+                    const isAct = new Date().getTime() >= new Date(ev.start).getTime() && new Date().getTime() <= new Date(ev.end).getTime();
+                    list.innerHTML += `<div style="background:var(--surface-elevated); padding:10px; border-radius:8px; margin-bottom:10px;"><strong>${isAct?'🟢':'⚪'} ${ev.name}</strong><br><button class="apple-btn" style="margin-top:10px; padding:5px; font-size:12px;" onclick="openCodeEditor('${ev.id}')">👨‍💻 Código</button></div>`;
+                }); runLiveInjector();
+            });
+        }
+        function openAddEventModal() { editingEventId = null; openModal('modal-add-event'); }
+        async function saveEventConfig() {
+            const name = document.getElementById('ev-name').value, start = document.getElementById('ev-start').value, end = document.getElementById('ev-end').value;
+            if(!name || !start || !end) return;
+            const ref = await db.collection("eventos").add({ name, start, end, html:"", css:"", js:"" });
+            closeModal('modal-add-event'); openCodeEditor(ref.id);
+        }
+        function openCodeEditor(id) {
+            const ev = globalEvents.find(e => e.id === id); if(!ev) return; editingEventId = id;
+            closeModal('modal-events'); document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden')); document.getElementById('view-event-editor').classList.remove('hidden');
+            document.getElementById('editor-event-title').innerText = `Evento: ${ev.name}`;
+            document.getElementById('editor-html').value = ev.html||""; document.getElementById('editor-css').value = ev.css||""; document.getElementById('editor-js').value = ev.js||"";
+            switchEditorTab('html');
+        }
+        function switchEditorTab(t) { document.querySelectorAll('.code-editor').forEach(e => e.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(`editor-${t}`).classList.remove('hidden'); event.target.classList.add('active'); }
+        async function saveEventCode() {
+            if(!editingEventId) return;
+            await db.collection("eventos").doc(editingEventId).update({ html: document.getElementById('editor-html').value, css: document.getElementById('editor-css').value, js: document.getElementById('editor-js').value });
+            showToast("CÓDIGO GUARDADO (Se inyectará si la fecha aplica)");
+        }
+        function runLiveInjector() {
+            const now = new Date().getTime(); let cHTML = "", cCSS = "", cJS = "";
+            globalEvents.forEach(ev => {
+                if(now >= new Date(ev.start).getTime() && now <= new Date(ev.end).getTime()) {
+                    if(ev.html) cHTML += ev.html + "\n"; if(ev.css) cCSS += ev.css + "\n"; if(ev.js) cJS += ev.js + "\n";
+                }
+            });
+            document.getElementById('event-html-container').innerHTML = cHTML;
+            let dStyle = document.getElementById('ev-dyn-css'); if(!dStyle) { dStyle = document.createElement('style'); dStyle.id = 'ev-dyn-css'; document.head.appendChild(dStyle); }
+            dStyle.innerHTML = cCSS;
+            if(cJS.trim() !== "") setTimeout(() => { try { eval(cJS); } catch (e) { console.error("Error JS Evento:", e); } }, 100);
+        }
+        setInterval(runLiveInjector, 60000);
     </script>
 </body>
 </html>
