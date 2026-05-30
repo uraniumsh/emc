@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>URANIUM DIGITAL</title>
-    <!-- SOLUCIÓN DE CONFLICTO: Ruta absoluta (/) -->
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-    <!-- ========================================================= -->
-    <!-- CORTINA DE MANTENIMIENTO Y EVENTOS (LIVE-OPS)             -->
-    <!-- ========================================================= -->
     <div id="maintenance-screen" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100dvh; background: black; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;">
         <div style="font-size: 60px; margin-bottom: 20px;">🛠️</div>
         <h1 style="color: var(--accent); margin-bottom: 10px;">En Mantenimiento</h1>
@@ -21,9 +17,6 @@
 
     <div id="toast-container"></div>
 
-    <!-- ========================================================= -->
-    <!-- HEADER APPLE STYLE                                        -->
-    <!-- ========================================================= -->
     <header class="main-header">
         <div class="logo" onclick="navigateTo('/shop')">URANIUM</div>
         <div class="header-right">
@@ -39,9 +32,6 @@
         </div>
     </header>
 
-    <!-- ========================================================= -->
-    <!-- MENÚ HAMBURGUESA                                          -->
-    <!-- ========================================================= -->
     <div id="mobile-menu" class="apple-menu hidden">
         <div class="menu-header"><button class="close-menu" onclick="closeMenu()">✕</button></div>
         <div class="menu-content">
@@ -59,17 +49,12 @@
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- CONTENIDO PRINCIPAL (VISTAS DEL ENRUTADOR)                -->
-    <!-- ========================================================= -->
     <main class="content">
-        <!-- VISTA: PRODUCTOS -->
         <section id="view-products" class="view-section">
             <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
             <div class="product-grid" id="product-grid"></div>
         </section>
 
-        <!-- VISTA: DASHBOARD ADMIN -->
         <section id="view-dashboard" class="view-section hidden">
             <h1 class="section-title">Panel de Control</h1>
             
@@ -97,7 +82,6 @@
             </div>
         </section>
 
-        <!-- VISTA: FORO GENERAL -->
         <section id="view-foro" class="view-section hidden">
             <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h1 class="section-title" style="margin: 0;">Comunidad 💬</h1>
@@ -106,7 +90,6 @@
             <div id="forum-feed" class="forum-grid"></div>
         </section>
 
-        <!-- VISTA: DETALLE FORO -->
         <section id="view-forum-detail" class="view-section hidden">
             <div class="chat-header glass-header">
                 <button class="back-btn" onclick="navigateTo('/forum')">
@@ -123,20 +106,17 @@
             </div>
         </section>
 
-        <!-- VISTA: GUÍAS ESTÁTICAS -->
         <section id="view-guides" class="view-section hidden">
             <h1 class="section-title">Guías y Tutoriales 📚</h1>
             <p class="text-muted" style="margin-bottom: 20px;">Instrucciones y reglas para usar nuestras plataformas.</p>
             <div id="guides-list" style="display: flex; flex-direction: column; gap: 15px;"></div>
         </section>
 
-        <!-- VISTA: LECTURA DE GUÍA -->
         <section id="view-guide-detail" class="view-section hidden">
             <button class="back-btn" style="margin-bottom:20px; color:var(--accent); background:none; border:none; font-size:16px;" onclick="navigateTo('/guides')">← Volver a Guías</button>
             <article id="guide-content-area" style="background:var(--surface-elevated); padding:20px; border-radius:12px; line-height:1.6;"></article>
         </section>
 
-        <!-- VISTA: EDITOR DE EVENTOS -->
         <section id="view-event-editor" class="view-section hidden" style="height: 100dvh; display: flex; flex-direction: column; background: #000; padding-top: 10px;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;">
                 <h2 id="editor-event-title" style="margin:0; font-size: 18px; color: var(--accent);">Editando Evento</h2>
@@ -147,16 +127,13 @@
                 <button class="tab-btn" onclick="switchEditorTab('css')">CSS</button>
                 <button class="tab-btn" onclick="switchEditorTab('js')">JS (Script)</button>
             </div>
-            <textarea id="editor-html" class="code-editor" placeholder="<!-- Escribe tu HTML -->"></textarea>
+            <textarea id="editor-html" class="code-editor" placeholder=""></textarea>
             <textarea id="editor-css" class="code-editor hidden" placeholder="/* Escribe tu CSS */"></textarea>
             <textarea id="editor-js" class="code-editor hidden" placeholder="// Escribe tu JS"></textarea>
             <div style="padding: 15px;"><button class="apple-btn" onclick="saveEventCode()">Guardar Código</button></div>
         </section>
     </main>
 
-    <!-- ========================================================= -->
-    <!-- ZONA DE MODALES COMPLETOS                                 -->
-    <!-- ========================================================= -->
     <div id="modal-wallet-confirm" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span>
@@ -424,7 +401,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE PUBLICAR GUÍA ACTUALIZADO -->
     <div id="modal-publish-guide" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-publish-guide')">✕</span>
@@ -504,9 +480,6 @@
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- ESTILOS INTERNOS                                          -->
-    <!-- ========================================================= -->
     <style>
         .code-editor { width: 100%; flex-grow: 1; background: #1e1e1e; color: #00ff00; font-family: monospace; border: none; padding: 15px; border-radius: 10px; resize: none; font-size: 14px; outline: none; }
         .tab-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; }
@@ -521,23 +494,17 @@
         .product-card.disabled img { filter: grayscale(100%) opacity(0.5); }
     </style>
 
-    <!-- ========================================================= -->
-    <!-- LIBRERÍAS Y SCRIPT ORIGINAL                               -->
-    <!-- ========================================================= -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
     <script src="/emc.js"></script>
-
-    <!-- ========================================================= -->
-    <!-- LÓGICA DE ACTUALIZACIÓN                                   -->
-    <!-- ========================================================= -->
     <script>
         let globalEvents = []; 
         let editingEventId = null;
         let guidesData = [];
         let currentGuideImg = "";
 
-        // --- SISTEMA DE RUTAS ---
+        // 1. SISTEMA DE ENRUTADOR (URLs bonitas)
         function navigateTo(path) {
             window.history.pushState({}, "", path);
             handleRoute();
@@ -576,7 +543,7 @@
         }
         window.addEventListener('popstate', handleRoute);
 
-        // --- SOBRESCRIBIR LA FUNCIÓN DEL FORO ---
+        // 2. SOBRESCRIBIR LA FUNCIÓN DEL FORO PARA LA URL
         async function openForumThread(postId) {
             const post = forumPosts.find(p => p.id === postId);
             if(!post) return;
@@ -625,13 +592,13 @@
             renderChatMessages(post);
         }
 
-        // --- MANTENIMIENTO ---
+        // 3. MANTENIMIENTO
         function openMaintenanceModal() {
             if(typeof closeModal === 'function') closeModal('modal-admin-options');
             if(typeof openModal === 'function') openModal('modal-maintenance');
             db.collection("configuracion").doc("general").get().then(doc => {
                 if(doc.exists) document.getElementById('maint-desc').value = doc.data().maintenanceMsg || "";
-            }).catch(e => console.error(e));
+            }).catch(e => alert("Error Firebase al cargar config: " + e.message));
         }
 
         async function toggleMaintenance(status) {
@@ -645,7 +612,7 @@
             }
         }
 
-        // --- PRODUCTOS AGOTADOS ---
+        // 4. PRODUCTOS AGOTADOS
         function openBlockProductsModal() {
             if(typeof closeModal === 'function') closeModal('modal-admin-options');
             document.getElementById('block-product-list').innerHTML = products.map(p => `
@@ -657,11 +624,14 @@
         }
 
         async function toggleAgotado(id, status) {
-            try { await db.collection("productos").doc(id.toString()).update({ agotado: status }); } 
-            catch (e) { alert("🚨 Error actualizando stock: " + e.message); }
+            try {
+                await db.collection("productos").doc(id.toString()).update({ agotado: status });
+            } catch (e) {
+                alert("🚨 Error actualizando stock: " + e.message);
+            }
         }
 
-        // --- NUEVO SISTEMA DE GUÍAS CON IMÁGENES ---
+        // 5. GUÍAS
         function previewGuideImage() {
             const file = document.getElementById('g-file-input').files[0];
             if(file) {
@@ -682,7 +652,7 @@
                         document.getElementById('g-preview').classList.remove('hidden');
                         document.getElementById('g-upload-label').classList.add('hidden');
                     };
-                    img.src = e.target.result;
+                    img.src = event.target.result;
                 }; 
                 reader.readAsDataURL(file);
             }
@@ -708,7 +678,6 @@
                     timestamp: new Date().toISOString() 
                 });
                 
-                // Limpiar modal
                 document.getElementById('g-title').value = "";
                 document.getElementById('g-content').value = "";
                 currentGuideImg = "";
@@ -750,15 +719,10 @@
         function formatGuideContent(text) {
             if(!text) return "";
             let f = text.replace(/\n/g, '<br>');
-            
-            // Reemplaza URLs directas de imagenes (.jpg, .png, etc)
             const imgRegex = /(https?:\/\/[^\s"'<>]+?\.(?:jpg|jpeg|gif|png|webp))/gi;
             f = f.replace(imgRegex, '<img src="$1" style="max-width:100%; border-radius:10px; margin:15px 0; display:block; box-shadow:0 5px 15px rgba(0,0,0,0.3);">');
-            
-            // Reemplaza el formato manual [img]link[/img]
             const customImgRegex = /\[img\](.*?)\[\/img\]/gi;
             f = f.replace(customImgRegex, '<img src="$1" style="max-width:100%; border-radius:10px; margin:15px 0; display:block; box-shadow:0 5px 15px rgba(0,0,0,0.3);">');
-
             return f;
         }
 
@@ -782,7 +746,7 @@
             `;
         }
 
-        // --- EVENTOS (LIVE-OPS) ---
+        // 6. EVENTOS (LIVE-OPS)
         function openEventsModal() {
             if(typeof closeModal === 'function') closeModal('modal-admin-options'); 
             if(typeof openModal === 'function') openModal('modal-events');
@@ -877,7 +841,7 @@
             }
         }
 
-        // --- ARRANQUE SEGURO ---
+        // 7. INICIAR LECTURA DE LAS NUEVAS COLECCIONES
         window.addEventListener('load', () => {
             setTimeout(handleRoute, 100);
 
