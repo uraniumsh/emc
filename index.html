@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>URANIUM DIGITAL</title>
+    <!-- SU CSS EXTERNO INTACTO -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- ========================================================= -->
+    <!-- CORTINA DE MANTENIMIENTO Y EVENTOS (LIVE-OPS)             -->
+    <!-- ========================================================= -->
     <div id="maintenance-screen" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100dvh; background: black; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;">
         <div style="font-size: 60px; margin-bottom: 20px;">🛠️</div>
         <h1 style="color: var(--accent); margin-bottom: 10px;">En Mantenimiento</h1>
@@ -17,6 +21,9 @@
 
     <div id="toast-container"></div>
 
+    <!-- ========================================================= -->
+    <!-- HEADER APPLE STYLE                                        -->
+    <!-- ========================================================= -->
     <header class="main-header">
         <div class="logo" onclick="navigateTo('/shop')">URANIUM</div>
         <div class="header-right">
@@ -32,6 +39,9 @@
         </div>
     </header>
 
+    <!-- ========================================================= -->
+    <!-- MENÚ HAMBURGUESA                                          -->
+    <!-- ========================================================= -->
     <div id="mobile-menu" class="apple-menu hidden">
         <div class="menu-header"><button class="close-menu" onclick="closeMenu()">✕</button></div>
         <div class="menu-content">
@@ -49,24 +59,39 @@
         </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- CONTENIDO PRINCIPAL (VISTAS DEL ENRUTADOR)                -->
+    <!-- ========================================================= -->
     <main class="content">
+        <!-- VISTA: PRODUCTOS -->
         <section id="view-products" class="view-section">
             <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
             <div class="product-grid" id="product-grid"></div>
         </section>
 
+        <!-- VISTA: DASHBOARD ADMIN -->
         <section id="view-dashboard" class="view-section hidden">
             <h1 class="section-title">Panel de Control</h1>
+            
+            <!-- BOTONES DE GESTIÓN (RESTAURADOS TODOS) -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 20px 0;">
-                <button class="apple-btn-secondary" style="background: #28a745; color: white; margin:0;" onclick="openModal('modal-add-balance')">+ Saldo</button>
-                <button class="apple-btn-secondary" style="background: var(--accent); color: white; margin:0;" onclick="openModal('modal-add-cat')">+ Categoría</button>
-                <button class="apple-btn-secondary" style="background: var(--danger); color: white; margin:0;" onclick="openDeleteCatModal()">- Categoría</button>
-                <button class="apple-btn-secondary" style="margin:0;" onclick="openModal('modal-publish-guide')">📝 Escribir Guía</button>
+                <button class="apple-btn-secondary" style="background: #28a745; color: white; margin:0;" onclick="openModal('modal-add-balance')">💰 + Saldo</button>
+                <button class="apple-btn-secondary" style="background: var(--accent); color: white; margin:0;" onclick="openModal('modal-add-cat')">📁 + Categoría</button>
+                <button class="apple-btn-secondary" style="background: var(--danger); color: white; margin:0;" onclick="openDeleteCatModal()">🗑️ - Categoría</button>
+                
+                <button class="apple-btn-secondary" style="background: #007aff; color: white; margin:0;" onclick="openModal('modal-publish-guide')">📝 Escribir Guía</button>
                 <button class="apple-btn-secondary" style="background: #1c1c1e; color: white; border: 1px solid var(--accent); margin:0;" onclick="openModal('modal-admin-options')">⚙️ Opciones Avanzadas</button>
+                
+                <!-- BOTONES QUE LE HABÍA ELIMINADO -->
+                <button class="apple-btn-secondary" style="background: #8e8e93; color: white; margin:0;" onclick="openModal('modal-manage-admins')">👨‍💻 Gestionar Admins</button>
+                <button id="btn-security" class="apple-btn-secondary hidden" style="background: #ffcc00; color: black; margin:0;" onclick="openModal('modal-security')">🔑 Seguridad S.A.</button>
             </div>
+
             <div id="admin-list-container" class="admin-card hidden">
-                <h3>Administradores Activos</h3><div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
+                <h3>Administradores Activos</h3>
+                <div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
             </div>
+            
             <div class="admin-card">
                 <h3>👥 Registro de Usuarios</h3>
                 <div class="table-container" style="max-height: 300px; overflow-y: auto;">
@@ -75,6 +100,7 @@
             </div>
         </section>
 
+        <!-- VISTA: FORO GENERAL -->
         <section id="view-foro" class="view-section hidden">
             <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h1 class="section-title" style="margin: 0;">Comunidad 💬</h1>
@@ -83,6 +109,7 @@
             <div id="forum-feed" class="forum-grid"></div>
         </section>
 
+        <!-- VISTA: DETALLE FORO -->
         <section id="view-forum-detail" class="view-section hidden">
             <div class="chat-header glass-header">
                 <button class="back-btn" onclick="navigateTo('/forum')">
@@ -99,17 +126,20 @@
             </div>
         </section>
 
+        <!-- VISTA: GUÍAS ESTÁTICAS -->
         <section id="view-guides" class="view-section hidden">
             <h1 class="section-title">Guías y Tutoriales 📚</h1>
             <p class="text-muted" style="margin-bottom: 20px;">Instrucciones y reglas para usar nuestras plataformas.</p>
             <div id="guides-list" style="display: flex; flex-direction: column; gap: 15px;"></div>
         </section>
 
+        <!-- VISTA: LECTURA DE GUÍA -->
         <section id="view-guide-detail" class="view-section hidden">
             <button class="back-btn" style="margin-bottom:20px; color:var(--accent); background:none; border:none; font-size:16px;" onclick="navigateTo('/guides')">← Volver a Guías</button>
             <article id="guide-content-area" style="background:var(--surface-elevated); padding:20px; border-radius:12px; line-height:1.6;"></article>
         </section>
 
+        <!-- VISTA: EDITOR DE EVENTOS -->
         <section id="view-event-editor" class="view-section hidden" style="height: 100dvh; display: flex; flex-direction: column; background: #000; padding-top: 10px;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;">
                 <h2 id="editor-event-title" style="margin:0; font-size: 18px; color: var(--accent);">Editando Evento</h2>
@@ -120,13 +150,16 @@
                 <button class="tab-btn" onclick="switchEditorTab('css')">CSS</button>
                 <button class="tab-btn" onclick="switchEditorTab('js')">JS (Script)</button>
             </div>
-            <textarea id="editor-html" class="code-editor" placeholder=""></textarea>
+            <textarea id="editor-html" class="code-editor" placeholder="<!-- Escribe tu HTML -->"></textarea>
             <textarea id="editor-css" class="code-editor hidden" placeholder="/* Escribe tu CSS */"></textarea>
             <textarea id="editor-js" class="code-editor hidden" placeholder="// Escribe tu JS"></textarea>
             <div style="padding: 15px;"><button class="apple-btn" onclick="saveEventCode()">Guardar Código</button></div>
         </section>
     </main>
 
+    <!-- ========================================================= -->
+    <!-- ZONA DE MODALES ORIGINALES                                -->
+    <!-- ========================================================= -->
     <div id="modal-wallet-confirm" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span>
@@ -467,6 +500,9 @@
         </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- ESTILOS INTERNOS EXTRA (PARA LAS FUNCIONES NUEVAS)        -->
+    <!-- ========================================================= -->
     <style>
         .code-editor { width: 100%; flex-grow: 1; background: #1e1e1e; color: #00ff00; font-family: monospace; border: none; padding: 15px; border-radius: 10px; resize: none; font-size: 14px; outline: none; }
         .tab-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; }
@@ -481,18 +517,22 @@
         .product-card.disabled img { filter: grayscale(100%) opacity(0.5); }
     </style>
 
+    <!-- ========================================================= -->
+    <!-- FIREBASE Y LÓGICA EXTERNA (SU ARCHIVO INTACTO)            -->
+    <!-- ========================================================= -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
     <script src="emc.js"></script>
 
+    <!-- ========================================================= -->
+    <!-- LÓGICA DE EXPANSIÓN (EVITANDO CONFLICTOS CON EMC.JS)      -->
+    <!-- ========================================================= -->
     <script>
-        // Variables que no están en su emc.js
         let globalEvents = []; 
         let editingEventId = null;
         let guidesData = [];
 
-        // --- SISTEMA DE RUTAS ---
+        // 1. SISTEMA DE ENRUTADOR (URLs bonitas)
         function navigateTo(path) {
             window.history.pushState({}, "", path);
             handleRoute();
@@ -509,77 +549,145 @@
             } else if (path.startsWith('/forum/')) {
                 const parts = path.split('/');
                 if(parts.length >= 3 && parts[2]) {
-                    setTimeout(() => { if(typeof openForumThread === 'function') openForumThread(parts[2]); }, 500); 
+                    setTimeout(() => { if(typeof openForumThread === 'function') openForumThread(parts[2]); }, 800); 
                 } else {
                     document.getElementById('view-foro').classList.remove('hidden');
                 }
             } else if (path === '/adminpanel') {
-                if(isAdmin) document.getElementById('view-dashboard').classList.remove('hidden');
+                if(typeof isAdmin !== 'undefined' && isAdmin) document.getElementById('view-dashboard').classList.remove('hidden');
                 else navigateTo('/shop');
             } else if (path === '/guides') {
                 document.getElementById('view-guides').classList.remove('hidden');
+            } else if (path.startsWith('/guides/')) {
+                const parts = path.split('/');
+                if(parts.length >= 3 && parts[2]) {
+                    setTimeout(() => { if(typeof openGuide === 'function') openGuide(parts[2]); }, 800); 
+                } else {
+                    document.getElementById('view-guides').classList.remove('hidden');
+                }
             } else {
                 document.getElementById('view-products').classList.remove('hidden');
             }
         }
         window.addEventListener('popstate', handleRoute);
 
-        // --- MANTENIMIENTO ---
+        // 2. SOBRESCRIBIR LA FUNCIÓN DEL FORO PARA LA URL
+        async function openForumThread(postId) {
+            const post = forumPosts.find(p => p.id === postId);
+            if(!post) return;
+            
+            if (post.type === 'vip' && !isAdmin) {
+                if (!post.accessList || !post.accessList.includes(myUserId)) {
+                    pendingVipPost = post; 
+                    const priceFormat = post.vipPrice ? post.vipPrice.toLocaleString() : "0";
+                    document.getElementById('vip-buy-title').innerText = post.title;
+                    document.getElementById('vip-buy-price').innerText = "$" + priceFormat;
+                    openModal('modal-buy-vip');
+                    return; 
+                }
+            }
+
+            if (post.type === 'clave' && !isAdmin) {
+                const guess = prompt("Este debate requiere contraseña:");
+                if (guess !== post.password) {
+                    if(typeof showToast === 'function') showToast("CONTRASEÑA INCORRECTA");
+                    return;
+                }
+            }
+
+            currentThreadId = postId;
+            
+            if(window.location.pathname !== `/forum/${postId}`) { 
+                window.history.pushState({}, "", `/forum/${postId}`); 
+            }
+
+            showView('forum-detail');
+            document.getElementById('chat-title-display').innerText = post.title;
+            
+            let statusHtml = post.type === 'cerrado' ? 'Debate cerrado' : `Activo`;
+            if (isAdmin) {
+                statusHtml += ` &nbsp;|&nbsp; <button onclick="deleteForumPost('${post.id}')" style="background:var(--danger); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:bold;">🗑️ ELIMINAR</button>`;
+            }
+            document.getElementById('chat-status-display').innerHTML = statusHtml;
+            
+            const inputArea = document.querySelector('.chat-input-area');
+            if(post.type === 'cerrado' && !isAdmin) {
+                if(inputArea) inputArea.classList.add('hidden'); 
+            } else {
+                if(inputArea) inputArea.classList.remove('hidden');
+            }
+
+            renderChatMessages(post);
+        }
+
+        // 3. MANTENIMIENTO
         function openMaintenanceModal() {
-            closeModal('modal-admin-options');
-            openModal('modal-maintenance');
-            db.collection("configuracion").doc("general").get().then(doc => {
+            if(typeof closeModal === 'function') closeModal('modal-admin-options');
+            if(typeof openModal === 'function') openModal('modal-maintenance');
+            firebase.firestore().collection("configuracion").doc("general").get().then(doc => {
                 if(doc.exists) document.getElementById('maint-desc').value = doc.data().maintenanceMsg || "";
             });
         }
 
         async function toggleMaintenance(status) {
             const msg = document.getElementById('maint-desc').value.trim();
-            await db.collection("configuracion").doc("general").set({ maintenance: status, maintenanceMsg: msg }, {merge: true});
-            showToast(status ? "MANTENIMIENTO ACTIVADO" : "MANTENIMIENTO DESACTIVADO");
-            closeModal('modal-maintenance');
+            await firebase.firestore().collection("configuracion").doc("general").set({ maintenance: status, maintenanceMsg: msg }, {merge: true});
+            if(typeof showToast === 'function') showToast(status ? "MANTENIMIENTO ACTIVADO" : "MANTENIMIENTO DESACTIVADO");
+            if(typeof closeModal === 'function') closeModal('modal-maintenance');
         }
 
-        // --- PRODUCTOS AGOTADOS ---
+        // 4. PRODUCTOS AGOTADOS
         function openBlockProductsModal() {
-            closeModal('modal-admin-options');
+            if(typeof closeModal === 'function') closeModal('modal-admin-options');
             document.getElementById('block-product-list').innerHTML = products.map(p => `
                 <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-elevated); padding:10px; border-radius:8px;">
                     <div>${p.name} <br><span style="color:var(--accent); font-size:12px;">$${p.price.toLocaleString()}</span></div>
                     <label class="switch"><input type="checkbox" onchange="toggleAgotado('${p.id}', this.checked)" ${p.agotado ? 'checked' : ''}><span class="slider"></span></label>
                 </div>`).join('');
-            openModal('modal-block-products');
+            if(typeof openModal === 'function') openModal('modal-block-products');
         }
 
         async function toggleAgotado(id, status) {
-            await db.collection("productos").doc(id.toString()).update({ agotado: status });
+            await firebase.firestore().collection("productos").doc(id.toString()).update({ agotado: status });
         }
 
-        // --- GUÍAS ---
+        // 5. GUÍAS
         async function saveGuide() {
             const title = document.getElementById('g-title').value.trim();
             const content = document.getElementById('g-content').value.trim();
-            if(!title || !content) return showToast("LLENA LOS DATOS");
-            await db.collection("guias").add({ title, content, timestamp: new Date().toISOString() });
-            closeModal('modal-publish-guide'); showToast("GUÍA PUBLICADA");
+            if(!title || !content) {
+                if(typeof showToast === 'function') showToast("LLENA LOS DATOS");
+                return;
+            }
+            const ref = await firebase.firestore().collection("guias").add({ title, content, timestamp: new Date().toISOString() });
+            if(typeof closeModal === 'function') closeModal('modal-publish-guide'); 
+            if(typeof showToast === 'function') showToast("GUÍA PUBLICADA");
+            
+            guidesData.unshift({ id: ref.id, title, content, timestamp: new Date().toISOString() });
+            renderGuides();
         }
 
         function renderGuides() {
             const list = document.getElementById('guides-list'); if(!list) return;
-            list.innerHTML = guidesData.map(g => `<div class="forum-thread-card" onclick="openGuide('${g.id}')"><h3>📖 ${g.title}</h3></div>`).join('');
+            list.innerHTML = guidesData.map(g => `<div class="forum-thread-card" onclick="openGuide('${g.id}')"><h3 style="margin:0;">📖 ${g.title}</h3></div>`).join('');
         }
 
         function openGuide(id) {
             const g = guidesData.find(x => x.id === id); if(!g) return;
+            
+            if(window.location.pathname !== `/guides/${id}`) { 
+                window.history.pushState({}, "", `/guides/${id}`); 
+            }
+            
             document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
             document.getElementById('view-guide-detail').classList.remove('hidden');
             document.getElementById('guide-content-area').innerHTML = `<h1>${g.title}</h1><br>${g.content.replace(/\n/g, '<br>')}`;
         }
 
-        // --- EVENTOS (LIVE-OPS) ---
+        // 6. EVENTOS (LIVE-OPS)
         function openEventsModal() {
-            closeModal('modal-admin-options'); 
-            openModal('modal-events');
+            if(typeof closeModal === 'function') closeModal('modal-admin-options'); 
+            if(typeof openModal === 'function') openModal('modal-events');
             renderEventsList();
         }
 
@@ -594,21 +702,25 @@
             });
         }
 
-        function openAddEventModal() { editingEventId = null; openModal('modal-add-event'); }
+        function openAddEventModal() { editingEventId = null; if(typeof openModal === 'function') openModal('modal-add-event'); }
 
         async function saveEventConfig() {
             const name = document.getElementById('ev-name').value;
             const start = document.getElementById('ev-start').value;
             const end = document.getElementById('ev-end').value;
-            if(!name || !start || !end) return showToast("FALTAN DATOS DEL EVENTO");
-            const ref = await db.collection("eventos").add({ name, start, end, html:"", css:"", js:"" });
-            closeModal('modal-add-event'); openCodeEditor(ref.id);
+            if(!name || !start || !end) {
+                if(typeof showToast === 'function') showToast("FALTAN DATOS DEL EVENTO");
+                return;
+            }
+            const ref = await firebase.firestore().collection("eventos").add({ name, start, end, html:"", css:"", js:"" });
+            if(typeof closeModal === 'function') closeModal('modal-add-event'); 
+            openCodeEditor(ref.id);
         }
 
         function openCodeEditor(id) {
             const ev = globalEvents.find(e => e.id === id); if(!ev) return; 
             editingEventId = id;
-            closeModal('modal-events'); 
+            if(typeof closeModal === 'function') closeModal('modal-events'); 
             document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden')); 
             document.getElementById('view-event-editor').classList.remove('hidden');
             document.getElementById('editor-event-title').innerText = `Evento: ${ev.name}`;
@@ -627,12 +739,12 @@
 
         async function saveEventCode() {
             if(!editingEventId) return;
-            await db.collection("eventos").doc(editingEventId).update({ 
+            await firebase.firestore().collection("eventos").doc(editingEventId).update({ 
                 html: document.getElementById('editor-html').value, 
                 css: document.getElementById('editor-css').value, 
                 js: document.getElementById('editor-js').value 
             });
-            showToast("CÓDIGO DE EVENTO GUARDADO");
+            if(typeof showToast === 'function') showToast("CÓDIGO DE EVENTO GUARDADO");
         }
 
         function runLiveInjector() {
@@ -654,15 +766,16 @@
             }
         }
 
-        // --- ARRANQUE SEGURO DE ESTOS SISTEMAS ---
+        // 7. INICIAR LECTURA DE LAS NUEVAS COLECCIONES
         window.addEventListener('load', () => {
             setTimeout(handleRoute, 100);
 
-            db.collection("configuracion").doc("general").onSnapshot(doc => {
+            firebase.firestore().collection("configuracion").doc("general").onSnapshot(doc => {
                 if(doc.exists) {
                     const data = doc.data();
                     const screen = document.getElementById('maintenance-screen');
-                    if(data.maintenance && !isAdmin) {
+                    // isAdmin viene de su emc.js
+                    if(data.maintenance && (typeof isAdmin === 'undefined' || !isAdmin)) {
                         document.getElementById('maintenance-msg').innerText = data.maintenanceMsg;
                         screen.classList.remove('hidden'); document.body.style.overflow = 'hidden'; 
                     } else { 
@@ -671,13 +784,13 @@
                 }
             });
 
-            db.collection("guias").orderBy("timestamp", "desc").onSnapshot(snap => {
+            firebase.firestore().collection("guias").orderBy("timestamp", "desc").onSnapshot(snap => {
                 guidesData = []; 
                 snap.forEach(d => guidesData.push({ id: d.id, ...d.data() })); 
                 renderGuides();
             });
 
-            db.collection("eventos").onSnapshot(snap => {
+            firebase.firestore().collection("eventos").onSnapshot(snap => {
                 globalEvents = []; 
                 snap.forEach(d => globalEvents.push({id: d.id, ...d.data()})); 
                 if(!document.getElementById('view-event-editor').classList.contains('hidden') && editingEventId == null){
