@@ -8,9 +8,6 @@
 </head>
 <body>
 
-    <!-- ========================================================= -->
-    <!-- CORTINAS Y ELEMENTOS GLOBALES                             -->
-    <!-- ========================================================= -->
     <div id="maintenance-screen" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100dvh; background: black; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;">
         <div style="font-size: 60px; margin-bottom: 20px;">🛠️</div>
         <h1 style="color: var(--accent); margin-bottom: 10px;">En Mantenimiento</h1>
@@ -19,7 +16,6 @@
     <div id="event-html-container" style="position: relative; z-index: 1000;"></div>
     <div id="toast-container"></div>
     
-    <!-- REPRODUCTOR DE MÚSICA FLOTANTE (Invisible pero funcional) -->
     <div id="music-player-container" class="hidden" style="position:fixed; bottom:20px; left:20px; z-index:9000; background:rgba(28,28,30,0.9); padding:10px 15px; border-radius:20px; backdrop-filter:blur(10px); display:flex; align-items:center; gap:10px; border:1px solid var(--border-color);">
         <span style="font-size:20px;">🎵</span>
         <div style="font-size:12px; font-weight:bold; color:var(--text-main);">Radio Uranium</div>
@@ -27,7 +23,6 @@
         <div id="yt-player-hidden" style="display:none;"></div>
     </div>
 
-    <!-- HEADER APPLE STYLE -->
     <header class="main-header">
         <div class="logo" onclick="navigateTo('/shop')">URANIUM</div>
         <div class="header-right">
@@ -43,7 +38,6 @@
         </div>
     </header>
 
-    <!-- MENÚ HAMBURGUESA -->
     <div id="mobile-menu" class="apple-menu hidden">
         <div class="menu-header"><button class="close-menu" onclick="closeMenu()">✕</button></div>
         <div class="menu-content">
@@ -61,14 +55,12 @@
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="content">
         <section id="view-products" class="view-section">
             <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
             <div class="product-grid" id="product-grid"></div>
         </section>
 
-        <!-- DASHBOARD ADMIN (CON LOS NUEVOS BOTONES) -->
         <section id="view-dashboard" class="view-section hidden">
             <h1 class="section-title">Panel de Control</h1>
             
@@ -94,7 +86,6 @@
             </div>
         </section>
 
-        <!-- DEMÁS VISTAS... -->
         <section id="view-foro" class="view-section hidden">
             <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h1 class="section-title" style="margin: 0;">Comunidad 💬</h1>
@@ -102,9 +93,10 @@
             </div>
             <div id="forum-feed" class="forum-grid"></div>
         </section>
+
         <section id="view-forum-detail" class="view-section hidden">
             <div class="chat-header glass-header">
-                <button class="back-btn" onclick="navigateTo('/forum')"> Atrás</button>
+                <button class="back-btn" onclick="navigateTo('/forum')">← Atrás</button>
                 <div class="chat-title-info"><h3 id="chat-title-display">...</h3><span id="chat-status-display" class="chat-status"></span></div>
             </div>
             <div id="chat-messages" class="chat-messages"></div>
@@ -113,28 +105,35 @@
                 <div class="input-wrapper"><input type="text" id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off"><button class="send-btn" onclick="sendForumReply()">↑</button></div>
             </div>
         </section>
+
         <section id="view-guides" class="view-section hidden">
             <h1 class="section-title">Guías y Tutoriales 📚</h1>
+            <p class="text-muted" style="margin-bottom: 20px;">Instrucciones y reglas para usar nuestras plataformas.</p>
             <div id="guides-list" style="display: flex; flex-direction: column; gap: 15px;"></div>
         </section>
+
         <section id="view-guide-detail" class="view-section hidden">
             <button class="back-btn" style="margin-bottom:20px; color:var(--accent); background:none; border:none; font-size:16px;" onclick="navigateTo('/guides')">← Volver a Guías</button>
             <article id="guide-content-area" style="background:var(--surface-elevated); padding:20px; border-radius:12px; line-height:1.6;"></article>
         </section>
+
         <section id="view-event-editor" class="view-section hidden" style="height: 100dvh; display: flex; flex-direction: column; background: #000; padding-top: 10px;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;">
                 <h2 id="editor-event-title" style="margin:0; font-size: 18px; color: var(--accent);">Editando Evento</h2>
                 <button onclick="navigateTo('/adminpanel')" style="background: var(--danger); color: white; border: none; padding: 5px 15px; border-radius: 15px; font-weight: bold;">Cerrar</button>
             </div>
-            <div style="display: flex; gap: 5px; padding: 0 15px; margin-bottom: 10px;"><button class="tab-btn active" onclick="switchEditorTab('html')">HTML</button><button class="tab-btn" onclick="switchEditorTab('css')">CSS</button><button class="tab-btn" onclick="switchEditorTab('js')">JS (Script)</button></div>
-            <textarea id="editor-html" class="code-editor" placeholder="<!-- Escribe tu HTML -->"></textarea><textarea id="editor-css" class="code-editor hidden" placeholder="/* Escribe tu CSS */"></textarea><textarea id="editor-js" class="code-editor hidden" placeholder="// Escribe tu JS"></textarea>
+            <div style="display: flex; gap: 5px; padding: 0 15px; margin-bottom: 10px;">
+                <button class="tab-btn active" onclick="switchEditorTab('html')">HTML</button>
+                <button class="tab-btn" onclick="switchEditorTab('css')">CSS</button>
+                <button class="tab-btn" onclick="switchEditorTab('js')">JS (Script)</button>
+            </div>
+            <textarea id="editor-html" class="code-editor" placeholder=""></textarea>
+            <textarea id="editor-css" class="code-editor hidden" placeholder="/* Escribe tu CSS */"></textarea>
+            <textarea id="editor-js" class="code-editor hidden" placeholder="// Escribe tu JS"></textarea>
             <div style="padding: 15px;"><button class="apple-btn" onclick="saveEventCode()">Guardar Código</button></div>
         </section>
     </main>
 
-    <!-- ZONA DE MODALES (INCLUYE LOS NUEVOS DE MÚSICA Y RECOMPENSAS) -->
-    <!-- (Mantengo los tuyos resumidos para el espacio y agrego los nuevos) -->
-    
     <div id="modal-admin-options" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-admin-options')">✕</span>
@@ -143,15 +142,12 @@
                 <button class="apple-btn-secondary" style="background: #ffcc00; color: black;" onclick="openMaintenanceModal()">🛠️ Mantenimiento / Update</button>
                 <button class="apple-btn-secondary" style="background: var(--danger); color: white;" onclick="openBlockProductsModal()">🚫 Bloquear Productos (Agotado)</button>
                 <button class="apple-btn-secondary" style="background: var(--accent); color: white;" onclick="openEventsModal()">🎉 Eventos / Live-Ops</button>
-                
-                <!-- LOS BOTONES NUEVOS -->
                 <button class="apple-btn-secondary" style="background: #28a745; color: white;" onclick="openRewardModal()">🎁 Enviar Recompensa a ID</button>
                 <button class="apple-btn-secondary" style="background: #da0081; color: white;" onclick="openMusicModal()">🎵 Configurar Música</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE ENVIAR RECOMPENSAS -->
     <div id="modal-send-reward" class="modal hidden">
         <div class="modal-content ios-card" style="max-height: 80vh; overflow-y: auto;">
             <span class="close" onclick="closeModal('modal-send-reward')">✕</span>
@@ -166,18 +162,15 @@
                     <option value="descuentos">Otorgar Descuento % 📉</option>
                 </select>
 
-                <!-- Div de Saldo -->
                 <div id="rw-saldo-div">
                     <input type="number" id="rw-amount" placeholder="Cantidad de saldo a regalar ($)">
                 </div>
 
-                <!-- Div de Pantallas -->
                 <div id="rw-pantallas-div" class="hidden">
                     <p class="text-muted" style="font-size:12px; margin-bottom:5px;">Selecciona las pantallas a regalar:</p>
                     <div id="rw-pantallas-list" style="background:var(--surface-elevated); padding:10px; border-radius:8px; max-height:150px; overflow-y:auto; margin-bottom:10px;"></div>
                 </div>
 
-                <!-- Div de Descuentos -->
                 <div id="rw-desc-div" class="hidden">
                     <input type="number" id="rw-discount-val" placeholder="Porcentaje de descuento (1 - 100)" min="1" max="100">
                     <p class="text-muted" style="font-size:12px; margin-bottom:5px;">Aplicar descuento a:</p>
@@ -193,7 +186,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE ALERTA DE RECOMPENSA PARA EL USUARIO -->
     <div id="modal-user-reward" class="modal hidden" style="z-index: 99999;">
         <div class="modal-content ios-card" style="text-align:center; background: linear-gradient(135deg, #1c1c1e, #2c2c2e); border: 2px solid var(--accent);">
             <div style="font-size:50px; margin-bottom:10px;">🎁</div>
@@ -204,14 +196,13 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIGURAR MÚSICA -->
     <div id="modal-config-music" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-config-music')">✕</span>
             <h2>🎵 Configurar Música</h2>
             <p class="text-muted" style="font-size:12px; margin-bottom:10px;">Pega links de YouTube (uno por línea). El usuario deberá hacer un clic en la página para que inicie.</p>
             <div class="apple-form">
-                <textarea id="music-links" placeholder="https://youtube.com/watch?v=...nhttps://youtube.com/watch?v=..." style="height: 100px; white-space: nowrap;"></textarea>
+                <textarea id="music-links" placeholder="https://youtube.com/watch?v=...\nhttps://youtube.com/watch?v=..." style="height: 100px; white-space: nowrap;"></textarea>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 0 10px;">
                     <label><input type="checkbox" id="music-loop"> Bucle 🔁</label>
                     <label><input type="checkbox" id="music-random"> Aleatorio 🔀</label>
@@ -221,12 +212,336 @@
         </div>
     </div>
 
-    <!-- EL RESTO DE MODALES NORMALES (PERFIL, CART, PUBLISH, ETC) ... -->
-    <!-- (Asumimos que aquí pegas todos tus modales normales de wallet, publish, detail, etc. que ya teníamos) -->
-    <div id="modal-profile" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-profile')">✕</span><div class="profile-header-modal" style="text-align: center;"><div class="avatar-lg" style="font-size: 50px;">👤</div><h2 id="profile-name-display" style="margin-top: 10px;">Usuario</h2><p class="text-muted">ID: <span id="profile-id"></span></p></div><div class="wallet-card" style="background: var(--surface-elevated); padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"><p class="text-muted" style="font-size: 12px;">SALDO DISPONIBLE</p><h1 id="wallet-balance" style="margin: 5px 0;">$0</h1><button class="apple-btn" style="background: #28a745; margin-top: 10px; padding: 10px;" onclick="openUserRecharge()">Recargar Mi Saldo</button></div><div id="register-section" class="apple-form" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;"><p class="text-accent" style="font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: center;">REGÍSTRATE Y GANA $5,000 COP</p><input type="text" id="reg-username" placeholder="@Usuario (Único)"><input type="text" id="reg-name" placeholder="Nombre Mostrado"><input type="password" id="reg-pass" placeholder="Crea un PIN o Clave (Ej: 1234)"><button class="apple-btn" onclick="registerUser()">Guardar Perfil</button><div id="recover-section" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;"><p class="text-muted" style="font-size: 13px; margin-bottom: 10px; text-align: center; font-weight: bold;">¿Ya tienes cuenta o cambiaste de equipo?</p><input type="text" id="rec-id" placeholder="Escribe tu ID (Ej: 555555)"><input type="password" id="rec-pass" placeholder="Tu PIN o Clave"><button class="apple-btn" style="background: #333;" onclick="recoverAccount()">Recuperar mi cuenta</button></div></div></div></div>
-    <div id="modal-cart" class="modal hidden"><div class="modal-content ios-card cart-tall" style="height: 85vh; display: flex; flex-direction: column;"><span class="close" onclick="closeModal('modal-cart')">✕</span><h2>Carrito</h2><div id="cart-list" style="flex-grow: 1; overflow-y: auto; margin: 15px 0;"></div><div class="total-box" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-bottom: 15px; font-size: 20px; font-weight: bold;">Total: <span id="cart-total">$0</span></div><div style="display:flex; flex-direction:column; gap:10px;"><button class="apple-btn" onclick="goToWalletPayment()">Pagar con Billetera</button><button class="apple-btn" style="background: #da0081;" onclick="goToPayment()">Pagar con Nequi</button></div></div></div>
-    <div id="modal-detail" class="modal hidden"><div class="modal-content ios-card detail-box" style="max-width: 800px;"><span class="close" onclick="closeModal('modal-detail')">✕</span><div id="detail-body"></div></div></div>
-    <!-- ESTILOS INTERNOS EXTRA -->
+    <div id="modal-profile" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-profile')">✕</span>
+            <div class="profile-header-modal" style="text-align: center;">
+                <div class="avatar-lg" style="font-size: 50px;">👤</div>
+                <h2 id="profile-name-display" style="margin-top: 10px;">Usuario</h2>
+                <p class="text-muted">ID: <span id="profile-id"></span></p>
+            </div>
+            <div class="wallet-card" style="background: var(--surface-elevated); padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;">
+                <p class="text-muted" style="font-size: 12px;">SALDO DISPONIBLE</p>
+                <h1 id="wallet-balance" style="margin: 5px 0;">$0</h1>
+                <button class="apple-btn" style="background: #28a745; margin-top: 10px; padding: 10px;" onclick="openUserRecharge()">Recargar Mi Saldo</button>
+            </div>
+            <div id="register-section" class="apple-form" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <p class="text-accent" style="font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: center;">REGÍSTRATE Y GANA $5,000 COP</p>
+                <input type="text" id="reg-username" placeholder="@Usuario (Único)">
+                <input type="text" id="reg-name" placeholder="Nombre Mostrado">
+                <input type="password" id="reg-pass" placeholder="Crea un PIN o Clave (Ej: 1234)">
+                <button class="apple-btn" onclick="registerUser()">Guardar Perfil</button>
+                <div id="recover-section" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <p class="text-muted" style="font-size: 13px; margin-bottom: 10px; text-align: center; font-weight: bold;">¿Ya tienes cuenta o cambiaste de equipo?</p>
+                    <input type="text" id="rec-id" placeholder="Escribe tu ID (Ej: 555555)">
+                    <input type="password" id="rec-pass" placeholder="Tu PIN o Clave">
+                    <button class="apple-btn" style="background: #333;" onclick="recoverAccount()">Recuperar mi cuenta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-cart" class="modal hidden">
+        <div class="modal-content ios-card cart-tall" style="height: 85vh; display: flex; flex-direction: column;">
+            <span class="close" onclick="closeModal('modal-cart')">✕</span>
+            <h2>Carrito</h2>
+            <div id="cart-list" style="flex-grow: 1; overflow-y: auto; margin: 15px 0;"></div>
+            <div class="total-box" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-bottom: 15px; font-size: 20px; font-weight: bold;">
+                Total: <span id="cart-total">$0</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="apple-btn" onclick="goToWalletPayment()">Pagar con Billetera</button>
+                <button class="apple-btn" style="background: #da0081;" onclick="goToPayment()">Pagar con Nequi</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-detail" class="modal hidden">
+        <div class="modal-content ios-card detail-box" style="max-width: 800px;">
+            <span class="close" onclick="closeModal('modal-detail')">✕</span>
+            <div id="detail-body"></div>
+        </div>
+    </div>
+
+    <div id="modal-wallet-confirm" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span>
+            <h2 class="text-accent">Pago Billetera</h2>
+            <p class="text-muted" style="margin-bottom: 15px;">Confirma tu pedido para descontar el saldo.</p>
+            <div id="wallet-form" class="apple-form">
+                <input type="text" id="w-pay-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="w-pay-phone" placeholder="Tu Número de WhatsApp">
+                <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total a descontar: <strong id="w-pay-val"></strong></div>
+                <button class="apple-btn" style="background: #28a745;" onclick="processWalletPayment()">Confirmar Compra</button>
+            </div>
+            <div id="wallet-processing" class="hidden" style="text-align: center; padding: 20px 0;">
+                <div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-user-recharge" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-user-recharge')">✕</span>
+            <h2>Recargar Mi Saldo</h2>
+            <div id="recharge-form" class="apple-form" style="margin-top: 15px;">
+                <input type="text" id="r-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="r-phone" placeholder="Tu Número de WhatsApp">
+                <input type="number" id="r-amount" placeholder="Monto a recargar ($)">
+                <button class="apple-btn" style="background: #28a745;" onclick="processRecharge()">Continuar</button>
+            </div>
+            <div id="recharge-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <div id="modal-receipt" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-receipt')">✕</span>
+            <h3>Adjuntar Comprobante</h3>
+            <p id="receipt-instructions" class="text-accent" style="font-size: 14px; margin-bottom: 15px; font-weight: bold; line-height: 1.4;"></p>
+            <div id="receipt-form" class="apple-form">
+                <div class="upload-zone" onclick="document.getElementById('receipt-file-input').click()" style="height: 200px; border: 2px dashed var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;">
+                    <span id="receipt-upload-label" style="text-align: center; color: var(--accent);">Clic para subir comprobante 📸</span>
+                    <img id="receipt-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute;">
+                </div>
+                <input type="file" id="receipt-file-input" accept="image/*" class="hidden" onchange="previewReceipt()">
+                <button class="apple-btn" onclick="submitReceipt()">Enviar Comprobante</button>
+            </div>
+            <div id="receipt-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
+        </div>
+    </div>
+    <div id="modal-manage-admins" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-manage-admins')">✕</span>
+            <h2>Gestión Admins</h2>
+            <div class="apple-form">
+                <input type="text" id="new-admin-id" placeholder="ID del Usuario">
+                <input type="email" id="new-admin-email" placeholder="Correo Provisional">
+                <input type="password" id="new-admin-pass" placeholder="Clave Provisional">
+                <button class="apple-btn" onclick="addSubAdmin()">Agregar Admin</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-add-balance" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-add-balance')">✕</span>
+            <h2>Recargar Saldo Manual</h2>
+            <div class="apple-form">
+                <input type="text" id="bal-user-id" placeholder="ID del Usuario">
+                <input type="number" id="bal-amount" placeholder="Cantidad ($)">
+                <button class="apple-btn" style="background: #28a745;" onclick="addBalanceToUser()">Recargar Billetera</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-add-cat" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-add-cat')">✕</span>
+            <h2>Nueva Categoría</h2>
+            <div class="apple-form">
+                <input type="text" id="new-cat-name" placeholder="Nombre">
+                <button class="apple-btn" onclick="saveNewCategory()">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-delete-cat" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-delete-cat')">✕</span>
+            <h2>Eliminar Categoría</h2>
+            <div class="apple-form">
+                <select id="d-cat-select"></select>
+                <button class="apple-btn" style="background: var(--danger);" onclick="deleteCategory()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-publish" class="modal hidden">
+        <div class="modal-content ios-card" style="max-width: 500px;">
+            <span class="close" onclick="closeModal('modal-publish')">✕</span>
+            <h2 id="pub-title">Publicar Producto</h2>
+            <div class="apple-form">
+                <div class="upload-zone" onclick="document.getElementById('file-input').click()" style="height: 150px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;">
+                    <span id="upload-label" style="color: var(--text-muted);">Clic para subir imagen *</span>
+                    <img id="file-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute; background: var(--surface-elevated);">
+                </div>
+                <input type="file" id="file-input" accept="image/*" class="hidden" onchange="previewImage()">
+                <input type="text" id="p-name" placeholder="Nombre (Ej: Netflix)">
+                <textarea id="p-short" placeholder="Slogan / Info extra" style="display: none;"></textarea>
+                <input type="number" id="p-price" placeholder="Precio ($)">
+                <select id="p-cat-select"></select>
+                <textarea id="p-desc" placeholder="Descripción Detallada"></textarea>
+                <button type="button" class="apple-btn-secondary" style="margin-top:-5px; margin-bottom:10px; padding: 8px;" onclick="openBigEditor()">📝 Abrir Editor Avanzado</button>
+                <input type="text" id="p-contact" placeholder="WhatsApp de Contacto">
+                <input type="text" id="p-wa" placeholder="Msj predeterminado WhatsApp">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <input type="checkbox" id="p-pinned" style="width: auto;"> <label for="p-pinned">⭐ Fijar publicación</label>
+                </div>
+                <button class="apple-btn" onclick="handleSaveProduct()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-big-editor" class="modal hidden">
+        <div class="modal-content ios-card" style="width: 95%; max-width: 800px;">
+            <span class="close" onclick="closeBigEditor()">✕</span>
+            <h2>Editor Avanzado</h2>
+            <textarea id="big-editor-area" style="height: 300px; width: 100%; background: var(--surface-elevated); color: var(--text-main); border: none; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-family: monospace;"></textarea>
+            <button class="apple-btn" onclick="saveBigEditor()">Guardar y Cerrar</button>
+        </div>
+    </div>
+
+    <div id="modal-nequi" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-nequi')">✕</span>
+            <h2 style="color: #da0081; margin-bottom: 15px;">Pago Nequi</h2>
+            <div id="nequi-form" class="apple-form">
+                <input type="text" id="pay-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="pay-phone" placeholder="Tu Número de WhatsApp">
+                <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total: <strong id="pay-val"></strong></div>
+                <button class="apple-btn" style="background: #da0081;" onclick="processPayment()">Generar Orden Segura</button>
+            </div>
+            <div id="nequi-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <div id="modal-settings" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-settings')">✕</span>
+            <div id="login-box">
+                <h2>Acceso Administrador</h2>
+                <div class="apple-form" style="margin-top: 15px;">
+                    <input type="email" id="l-email" placeholder="Correo Electrónico">
+                    <input type="password" id="l-pass" placeholder="Contraseña">
+                    <button class="apple-btn" onclick="handleLogin()">Entrar</button>
+                </div>
+            </div>
+            <div id="logout-box" class="hidden" style="text-align: center;">
+                <h2>Sesión Iniciada</h2>
+                <button class="apple-btn" style="margin-top: 15px; background: var(--danger);" onclick="handleLogout()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-security" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-security')">✕</span>
+            <h2>Credenciales Súper Admin</h2>
+            <div class="apple-form">
+                <input type="email" id="sec-new-email" placeholder="Nuevo Correo">
+                <input type="password" id="sec-new-pass" placeholder="Nueva Contraseña">
+                <button class="apple-btn" style="background: #ffcc00; color: black;" onclick="updateSuperAdminCreds()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-forum" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-forum')">✕</span>
+            <h2>Nuevo Debate</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <div class="upload-zone" onclick="document.getElementById('f-file-input').click()" style="height: 100px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 12px;">
+                    <span id="f-upload-label" style="color: var(--text-muted);">Adjuntar Imagen 📸</span>
+                    <img id="f-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);">
+                </div>
+                <input type="file" id="f-file-input" accept="image/*" class="hidden" onchange="previewForumImage()">
+                <input type="text" id="f-title" placeholder="Asunto o Tema">
+                <select id="f-type" onchange="toggleForumPassword()" style="margin-bottom: 12px;">
+                    <option value="publico">Público</option><option value="vip">Solo VIP</option><option value="clave">Con Clave</option><option value="cerrado">Cerrado</option>
+                </select>
+                <input type="password" id="f-password" class="hidden" placeholder="Establecer Clave">
+                <div id="f-vip-options" class="hidden">
+                    <input type="number" id="f-vip-price" placeholder="Precio ($)">
+                    <input type="number" id="f-vip-phone" placeholder="Tu WhatsApp">
+                </div>
+                <textarea id="f-content" placeholder="Escribe tu mensaje aquí..." style="height: 100px; margin-bottom:12px;"></textarea>
+                <button class="apple-btn" onclick="saveForumPost()">Publicar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-buy-vip" class="modal hidden">
+        <div class="modal-content ios-card" style="text-align:center;">
+            <span class="close" onclick="closeModal('modal-buy-vip')">✕</span>
+            <div style="font-size:40px; margin-bottom:10px;">💎</div>
+            <h2>Acceso Exclusivo</h2>
+            <p class="text-muted" id="vip-buy-title" style="margin-bottom:15px; font-size:14px;"></p>
+            <h1 style="color:var(--accent); margin-bottom:20px;" id="vip-buy-price">$0</h1>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="apple-btn" style="background:#28a745;" onclick="processVipWallet()">Billetera</button>
+                <button class="apple-btn" style="background:#da0081;" onclick="processVipNequi()">Nequi</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-publish-guide" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-publish-guide')">✕</span>
+            <h2>Publicar Guía</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <div class="upload-zone" onclick="document.getElementById('g-file-input').click()" style="height: 100px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 12px;">
+                    <span id="g-upload-label" style="color: var(--text-muted);">Adjuntar Portada (Opcional) 📸</span>
+                    <img id="g-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);">
+                </div>
+                <input type="file" id="g-file-input" accept="image/*" class="hidden" onchange="previewGuideImage()">
+                
+                <input type="text" id="g-title" placeholder="Título de la Guía (Ej: Cómo canjear Netflix)">
+                <textarea id="g-content" placeholder="Escribe el texto aquí... Si pegas un link terminado en .jpg o .png se volverá imagen. También puedes usar [img]link_aqui[/img]" style="height: 200px;"></textarea>
+                <button class="apple-btn" id="btn-save-guide" onclick="saveGuide()">Publicar Guía</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-maintenance" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-maintenance')">✕</span>
+            <h2>Modo Mantenimiento</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <textarea id="maint-desc" placeholder="Mensaje para clientes..." style="height: 100px; margin-bottom: 15px;"></textarea>
+                <div style="display: flex; gap: 10px;">
+                    <button class="apple-btn" style="background: var(--danger);" onclick="toggleMaintenance(true)">Activar</button>
+                    <button class="apple-btn" style="background: #28a745;" onclick="toggleMaintenance(false)">Desactivar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-block-products" class="modal hidden">
+        <div class="modal-content ios-card" style="max-height: 80vh; display: flex; flex-direction: column;">
+            <span class="close" onclick="closeModal('modal-block-products')">✕</span>
+            <h2>Gestión de Stock</h2>
+            <div id="block-product-list" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top:15px;"></div>
+        </div>
+    </div>
+
+    <div id="modal-events" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-events')">✕</span>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin:0;">Eventos</h2>
+                <button class="apple-btn" style="width: auto; padding: 5px 15px; font-size: 12px;" onclick="openAddEventModal()">+ Crear</button>
+            </div>
+            <div id="events-list" style="margin-top: 15px; max-height: 300px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <div id="modal-add-event" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-add-event')">✕</span>
+            <h2 id="ev-modal-title">Configurar Evento</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <input type="text" id="ev-name" placeholder="Nombre">
+                <textarea id="ev-desc" placeholder="Descripción breve" style="height: 60px;"></textarea>
+                <label class="text-muted" style="font-size: 12px; margin-top: 10px; display: block;">Inicia:</label>
+                <input type="datetime-local" id="ev-start" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--surface-elevated); color: white; border: none; margin-bottom: 10px;">
+                <label class="text-muted" style="font-size: 12px; display: block;">Termina:</label>
+                <input type="datetime-local" id="ev-end" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--surface-elevated); color: white; border: none; margin-bottom: 15px;">
+                <button class="apple-btn" onclick="saveEventConfig()">Guardar y Continuar al Código</button>
+            </div>
+        </div>
+    </div>
+
     <style>
         .code-editor { width: 100%; flex-grow: 1; background: #1e1e1e; color: #00ff00; font-family: monospace; border: none; padding: 15px; border-radius: 10px; resize: none; font-size: 14px; outline: none; }
         .tab-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; }
@@ -243,40 +558,34 @@
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 
-    <!-- FIREBASE Y SU EMC.JS -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script> <!-- API para la música -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="/emc.js"></script>
 
-    <!-- LÓGICA FINAL Y PODEROSA (RECOMPENSAS Y MÚSICA) -->
     <script>
-        // --- 1. VARIABLES GLOBALES NUEVAS ---
         let userPendingReward = null;
-        let activeDiscounts = {}; // Lo lee del perfil del usuario
+        let activeDiscounts = {};
         let musicPlaylist = [];
         let musicConfig = { loop: false, random: false };
         let ytPlayer;
+        let globalEvents = []; 
+        let editingEventId = null;
+        let guidesData = [];
+        let currentGuideImg = "";
 
-        // --- 2. LÓGICA DE PRECIOS CON DESCUENTO ---
-        // Vamos a interceptar cómo se muestran los precios en el Grid y el Detail
+        // SOBRESCRIBIMOS RENDERGRID PARA QUE MUESTRE LOS DESCUENTOS Y LOS BOTONES DE ELIMINAR/EDITAR AL ADMINISTRADOR
         function getPriceWithDiscount(product) {
             let discountPercent = 0;
             if(activeDiscounts["all"]) discountPercent = activeDiscounts["all"];
             else if(activeDiscounts[product.id]) discountPercent = activeDiscounts[product.id];
 
             if(discountPercent > 0) {
-                return { 
-                    original: product.price, 
-                    final: product.price - (product.price * (discountPercent / 100)),
-                    percent: discountPercent
-                };
+                return { original: product.price, final: product.price - (product.price * (discountPercent / 100)), percent: discountPercent };
             }
             return { original: product.price, final: product.price, percent: 0 };
         }
 
-        // Re-escribimos renderGrid para que aplique visualmente los descuentos
-        const originalRenderGrid = renderGrid;
         renderGrid = function(catId = 'all') {
             const grid = document.getElementById('product-grid'); if(!grid) return; grid.innerHTML = '';
             let f = products.filter(p => catId === 'all' || p.catId === catId); f.sort((a, b) => (b.pinned === true) - (a.pinned === true));
@@ -291,8 +600,14 @@
                     tagHtml = `<div class="discount-tag">-${pricing.percent}%</div>`;
                 }
 
+                // AQUI ESTÁN LOS BOTONES DE EDITAR Y ELIMINAR PARA EL ADMIN
                 c.innerHTML = `
-                    ${isAdmin ? `<div style="position:absolute; top:8px; right:8px; z-index:10; display:flex; gap:5px;"><button onclick="event.stopPropagation(); editingId='${p.id}'; openModal('modal-publish')" style="background:var(--accent); color:white; border:none; border-radius:50%; width:24px; height:24px;">✏️</button></div>` : ''}
+                    ${isAdmin ? `
+                    <div style="position:absolute; top:8px; right:8px; z-index:10; display:flex; gap:5px;">
+                        <button onclick="event.stopPropagation(); openPublishModal('${p.id}')" style="background:var(--accent); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✏️</button>
+                        <button onclick="event.stopPropagation(); deleteProduct('${p.id}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✕</button>
+                    </div>
+                    ` : ''}
                     <div class="card-img">
                         ${tagHtml}
                         <div class="price-tag">${priceHtml}</div>
@@ -304,17 +619,101 @@
             });
         };
 
-        // --- 3. RECOMPENSAS: LADO DEL ADMINISTRADOR ---
+        function navigateTo(path) {
+            window.history.pushState({}, "", path);
+            handleRoute();
+        }
+
+        function handleRoute() {
+            const path = window.location.pathname;
+            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+            
+            if (path === '/shop' || path === '/') {
+                document.getElementById('view-products').classList.remove('hidden');
+            } else if (path === '/forum') {
+                document.getElementById('view-foro').classList.remove('hidden');
+            } else if (path.startsWith('/forum/')) {
+                const parts = path.split('/');
+                if(parts.length >= 3 && parts[2]) {
+                    setTimeout(() => { if(typeof openForumThread === 'function') openForumThread(parts[2]); }, 800); 
+                } else {
+                    document.getElementById('view-foro').classList.remove('hidden');
+                }
+            } else if (path === '/adminpanel') {
+                if(typeof isAdmin !== 'undefined' && isAdmin) document.getElementById('view-dashboard').classList.remove('hidden');
+                else navigateTo('/shop');
+            } else if (path === '/guides') {
+                document.getElementById('view-guides').classList.remove('hidden');
+            } else if (path.startsWith('/guides/')) {
+                const parts = path.split('/');
+                if(parts.length >= 3 && parts[2]) {
+                    setTimeout(() => { if(typeof openGuide === 'function') openGuide(parts[2]); }, 800); 
+                } else {
+                    document.getElementById('view-guides').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('view-products').classList.remove('hidden');
+            }
+        }
+        window.addEventListener('popstate', handleRoute);
+
+        async function openForumThread(postId) {
+            const post = forumPosts.find(p => p.id === postId);
+            if(!post) return;
+            
+            if (post.type === 'vip' && !isAdmin) {
+                if (!post.accessList || !post.accessList.includes(myUserId)) {
+                    pendingVipPost = post; 
+                    const priceFormat = post.vipPrice ? post.vipPrice.toLocaleString() : "0";
+                    document.getElementById('vip-buy-title').innerText = post.title;
+                    document.getElementById('vip-buy-price').innerText = "$" + priceFormat;
+                    openModal('modal-buy-vip');
+                    return; 
+                }
+            }
+
+            if (post.type === 'clave' && !isAdmin) {
+                const guess = prompt("Este debate requiere contraseña:");
+                if (guess !== post.password) {
+                    if(typeof showToast === 'function') showToast("CONTRASEÑA INCORRECTA");
+                    return;
+                }
+            }
+
+            currentThreadId = postId;
+            
+            if(window.location.pathname !== `/forum/${postId}`) { 
+                window.history.pushState({}, "", `/forum/${postId}`); 
+            }
+
+            showView('forum-detail');
+            document.getElementById('chat-title-display').innerText = post.title;
+            
+            let statusHtml = post.type === 'cerrado' ? 'Debate cerrado' : `Activo`;
+            if (isAdmin) {
+                // AQUI ESTÁ EL BOTÓN DE ELIMINAR EL DEBATE
+                statusHtml += ` &nbsp;|&nbsp; <button onclick="deleteForumPost('${post.id}')" style="background:var(--danger); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:bold;">🗑️ ELIMINAR</button>`;
+            }
+            document.getElementById('chat-status-display').innerHTML = statusHtml;
+            
+            const inputArea = document.querySelector('.chat-input-area');
+            if(post.type === 'cerrado' && !isAdmin) {
+                if(inputArea) inputArea.classList.add('hidden'); 
+            } else {
+                if(inputArea) inputArea.classList.remove('hidden');
+            }
+
+            renderChatMessages(post);
+        }
+
+        // --- SISTEMA DE RECOMPENSAS ---
         function openRewardModal() {
             closeModal('modal-admin-options');
-            
-            // Llenar checkboxes de pantallas
             const pList = document.getElementById('rw-pantallas-list');
             const dList = document.getElementById('rw-desc-list');
             let html = products.map(p => `<label style="display:flex; align-items:center; gap:10px; margin-bottom:5px;"><input type="checkbox" value="${p.id}" class="rw-prod-cb"> ${p.name}</label>`).join('');
             pList.innerHTML = html;
             dList.innerHTML = html;
-
             openModal('modal-send-reward');
         }
 
@@ -368,7 +767,6 @@
             }
 
             try {
-                // Guardamos la recompensa dentro del documento del usuario para que la reclame al entrar
                 await db.collection("usuarios").doc(userId).update({ pendingReward: rewardData });
                 alert("¡Recompensa enviada al ID " + userId + "!");
                 closeModal('modal-send-reward');
@@ -377,7 +775,6 @@
             }
         }
 
-        // --- 4. RECOMPENSAS: LADO DEL USUARIO ---
         function checkUserRewards() {
             if(!currentUser || !currentUser.pendingReward) return;
             userPendingReward = currentUser.pendingReward;
@@ -401,12 +798,10 @@
                     updates.balance = firebase.firestore.FieldValue.increment(userPendingReward.amount);
                 } 
                 else if(userPendingReward.type === 'descuentos') {
-                    // Mezclamos descuentos nuevos con los que ya tenga
                     let currentDisc = currentUser.activeDiscounts || {};
                     updates.activeDiscounts = { ...currentDisc, ...userPendingReward.descuentos };
                 }
                 else if(userPendingReward.type === 'pantallas') {
-                    // Guarda en un array de "regalos"
                     updates.regalosRecibidos = firebase.firestore.FieldValue.arrayUnion(...userPendingReward.pantallas);
                 }
 
@@ -419,7 +814,100 @@
             }
         }
 
-        // --- 5. REPRODUCTOR DE MÚSICA DE FONDO (YOUTUBE API) ---
+        // --- SISTEMA DE GUÍAS ---
+        function previewGuideImage() {
+            const file = document.getElementById('g-file-input').files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 600;
+                        let scaleSize = MAX_WIDTH / img.width;
+                        if(scaleSize > 1) scaleSize = 1;
+                        canvas.width = img.width * scaleSize;
+                        canvas.height = img.height * scaleSize;
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        currentGuideImg = canvas.toDataURL('image/jpeg', 0.7);
+                        document.getElementById('g-preview').src = currentGuideImg;
+                        document.getElementById('g-preview').classList.remove('hidden');
+                        document.getElementById('g-upload-label').classList.add('hidden');
+                    };
+                    img.src = event.target.result;
+                }; 
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function saveGuide() {
+            try {
+                const title = document.getElementById('g-title').value.trim();
+                const content = document.getElementById('g-content').value.trim();
+                if(!title || !content) { if(typeof showToast === 'function') showToast("LLENA LOS DATOS"); return; }
+
+                const btn = document.getElementById('btn-save-guide');
+                btn.disabled = true; btn.innerText = "Guardando...";
+
+                await db.collection("guias").add({ title: title, content: content, coverImg: currentGuideImg, timestamp: new Date().toISOString() });
+                
+                document.getElementById('g-title').value = ""; document.getElementById('g-content').value = ""; currentGuideImg = "";
+                document.getElementById('g-preview').src = ""; document.getElementById('g-preview').classList.add('hidden'); document.getElementById('g-upload-label').classList.remove('hidden');
+
+                if(typeof closeModal === 'function') closeModal('modal-publish-guide'); 
+                if(typeof showToast === 'function') showToast("GUÍA PUBLICADA");
+                
+                btn.disabled = false; btn.innerText = "Publicar Guía";
+
+            } catch (e) {
+                alert("🚨 Error publicando guía: " + e.message);
+                document.getElementById('btn-save-guide').disabled = false; document.getElementById('btn-save-guide').innerText = "Publicar Guía";
+            }
+        }
+
+        async function deleteGuide(id) {
+            if(confirm("¿Seguro que quieres borrar esta guía permanentemente?")) {
+                await db.collection("guias").doc(id).delete();
+                if(typeof showToast === 'function') showToast("GUÍA ELIMINADA");
+            }
+        }
+
+        function formatGuideContent(text) {
+            if(!text) return "";
+            let f = text.replace(/\n/g, '<br>');
+            const imgRegex = /(https?:\/\/[^\s"'<>]+?\.(?:jpg|jpeg|gif|png|webp))/gi;
+            f = f.replace(imgRegex, '<img src="$1" style="max-width:100%; border-radius:10px; margin:15px 0; display:block; box-shadow:0 5px 15px rgba(0,0,0,0.3);">');
+            const customImgRegex = /\[img\](.*?)\[\/img\]/gi;
+            f = f.replace(customImgRegex, '<img src="$1" style="max-width:100%; border-radius:10px; margin:15px 0; display:block; box-shadow:0 5px 15px rgba(0,0,0,0.3);">');
+            return f;
+        }
+
+        function renderGuides() {
+            const list = document.getElementById('guides-list'); if(!list) return;
+            list.innerHTML = guidesData.map(g => `
+                <div class="forum-thread-card" onclick="openGuide('${g.id}')" style="display:flex; align-items:center; gap:12px;">
+                    ${g.coverImg ? `<img src="${g.coverImg}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">` : `<div style="font-size:30px; line-height:1;">📖</div>`}
+                    <h3 style="margin:0; font-size:15px; flex-grow:1;">${g.title}</h3>
+                    ${(typeof isAdmin !== 'undefined' && isAdmin) ? `<button onclick="event.stopPropagation(); deleteGuide('${g.id}')" style="background:var(--danger); color:white; border:none; padding:6px; border-radius:6px; font-size:12px; font-weight:bold;">✕</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function openGuide(id) {
+            const g = guidesData.find(x => x.id === id); if(!g) return;
+            if(window.location.pathname !== `/guides/${id}`) { window.history.pushState({}, "", `/guides/${id}`); }
+            
+            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+            document.getElementById('view-guide-detail').classList.remove('hidden');
+            
+            let coverHtml = g.coverImg ? `<img src="${g.coverImg}" style="width:100%; height:200px; object-fit:cover; border-radius:12px; margin-bottom:20px; box-shadow:0 5px 15px rgba(0,0,0,0.5);">` : '';
+            let formattedContent = formatGuideContent(g.content);
+
+            document.getElementById('guide-content-area').innerHTML = `${coverHtml}<h1 style="margin-bottom:15px; font-size:24px; color:var(--accent);">${g.title}</h1><div style="font-size:15px; color:var(--text-main); line-height:1.6;">${formattedContent}</div>`;
+        }
+
+        // --- SISTEMA DE MÚSICA ---
         function openMusicModal() {
             closeModal('modal-admin-options');
             openModal('modal-config-music');
@@ -444,13 +932,11 @@
             alert("Música guardada. Se actualizará para todos.");
         }
 
-        // Extraer ID del video de Youtube
         function getYTVideoId(url) {
             const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
             return match ? match[1] : null;
         }
 
-        // Inicializar reproductor oculto
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('yt-player-hidden', {
                 height: '0', width: '0',
@@ -463,7 +949,6 @@
         let currentTrackIndex = 0;
 
         function onPlayerReady(event) {
-            // El reproductor está listo, leer la música de la base de datos
             db.collection("configuracion").doc("musica").onSnapshot(doc => {
                 if(doc.exists) {
                     const data = doc.data();
@@ -486,7 +971,6 @@
 
         function onPlayerStateChange(event) {
             if (event.data == YT.PlayerState.ENDED) {
-                // Siguiente canción
                 if(musicConfig.random) currentTrackIndex = Math.floor(Math.random() * musicPlaylist.length);
                 else currentTrackIndex++;
 
@@ -505,22 +989,142 @@
             else { ytPlayer.playVideo(); btn.innerText = "⏸"; isPlayingMusic = true; }
         }
 
+        // --- SISTEMA DE EVENTOS Y MANTENIMIENTO ---
+        function openMaintenanceModal() {
+            closeModal('modal-admin-options'); openModal('modal-maintenance');
+            db.collection("configuracion").doc("general").get().then(doc => {
+                if(doc.exists) document.getElementById('maint-desc').value = doc.data().maintenanceMsg || "";
+            }).catch(e => console.error(e));
+        }
 
-        // --- 6. ARRANQUE SEGURO DE ESTOS SISTEMAS ---
+        async function toggleMaintenance(status) {
+            try {
+                const msg = document.getElementById('maint-desc').value.trim();
+                await db.collection("configuracion").doc("general").set({ maintenance: status, maintenanceMsg: msg }, {merge: true});
+                if(typeof showToast === 'function') showToast(status ? "MANTENIMIENTO ACTIVADO" : "MANTENIMIENTO DESACTIVADO");
+                closeModal('modal-maintenance');
+            } catch (e) { alert("🚨 Error de Firebase: " + e.message); }
+        }
+
+        function openBlockProductsModal() {
+            closeModal('modal-admin-options');
+            document.getElementById('block-product-list').innerHTML = products.map(p => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-elevated); padding:10px; border-radius:8px;">
+                    <div>${p.name} <br><span style="color:var(--accent); font-size:12px;">$${p.price.toLocaleString()}</span></div>
+                    <label class="switch"><input type="checkbox" onchange="toggleAgotado('${p.id}', this.checked)" ${p.agotado ? 'checked' : ''}><span class="slider"></span></label>
+                </div>`).join('');
+            openModal('modal-block-products');
+        }
+
+        async function toggleAgotado(id, status) {
+            try { await db.collection("productos").doc(id.toString()).update({ agotado: status }); } 
+            catch (e) { alert("🚨 Error actualizando stock: " + e.message); }
+        }
+
+        function openEventsModal() {
+            closeModal('modal-admin-options'); openModal('modal-events'); renderEventsList();
+        }
+
+        function renderEventsList() {
+            const list = document.getElementById('events-list'); if(!list) return; list.innerHTML = "";
+            const now = new Date().getTime();
+            globalEvents.forEach(ev => {
+                const isAct = now >= new Date(ev.start).getTime() && now <= new Date(ev.end).getTime();
+                list.innerHTML += `<div style="background:var(--surface-elevated); padding:10px; border-radius:8px; margin-bottom:10px;"><strong>${isAct?'🟢':'⚪'} ${ev.name}</strong><br><button class="apple-btn" style="margin-top:10px; padding:5px; font-size:12px;" onclick="openCodeEditor('${ev.id}')">👨‍💻 Código</button></div>`;
+            });
+        }
+
+        function openAddEventModal() { editingEventId = null; openModal('modal-add-event'); }
+
+        async function saveEventConfig() {
+            try {
+                const name = document.getElementById('ev-name').value;
+                const start = document.getElementById('ev-start').value;
+                const end = document.getElementById('ev-end').value;
+                if(!name || !start || !end) return alert("FALTAN DATOS DEL EVENTO");
+                const ref = await db.collection("eventos").add({ name, start, end, html:"", css:"", js:"" });
+                closeModal('modal-add-event'); openCodeEditor(ref.id);
+            } catch (e) { alert("🚨 Error guardando evento: " + e.message); }
+        }
+
+        function openCodeEditor(id) {
+            const ev = globalEvents.find(e => e.id === id); if(!ev) return; 
+            editingEventId = id; closeModal('modal-events'); 
+            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden')); 
+            document.getElementById('view-event-editor').classList.remove('hidden');
+            document.getElementById('editor-event-title').innerText = `Evento: ${ev.name}`;
+            document.getElementById('editor-html').value = ev.html||""; document.getElementById('editor-css').value = ev.css||""; document.getElementById('editor-js').value = ev.js||"";
+            switchEditorTab('html');
+        }
+
+        function switchEditorTab(t) { 
+            document.querySelectorAll('.code-editor').forEach(e => e.classList.add('hidden')); 
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
+            document.getElementById(`editor-${t}`).classList.remove('hidden'); 
+            event.target.classList.add('active'); 
+        }
+
+        async function saveEventCode() {
+            try {
+                if(!editingEventId) return;
+                await db.collection("eventos").doc(editingEventId).update({ html: document.getElementById('editor-html').value, css: document.getElementById('editor-css').value, js: document.getElementById('editor-js').value });
+                if(typeof showToast === 'function') showToast("CÓDIGO DE EVENTO GUARDADO");
+            } catch (e) { alert("🚨 Error guardando código: " + e.message); }
+        }
+
+        function runLiveInjector() {
+            const now = new Date().getTime(); let cHTML = "", cCSS = "", cJS = "";
+            globalEvents.forEach(ev => {
+                if(now >= new Date(ev.start).getTime() && now <= new Date(ev.end).getTime()) {
+                    if(ev.html) cHTML += ev.html + "\n"; if(ev.css) cCSS += ev.css + "\n"; if(ev.js) cJS += ev.js + "\n";
+                }
+            });
+            const container = document.getElementById('event-html-container');
+            container.style.position = 'fixed'; container.style.top = '0'; container.style.left = '0'; container.style.width = '100%'; container.style.pointerEvents = 'none'; container.style.zIndex = '9998';
+            container.innerHTML = cHTML;
+            let dStyle = document.getElementById('ev-dyn-css'); if(!dStyle) { dStyle = document.createElement('style'); dStyle.id = 'ev-dyn-css'; document.head.appendChild(dStyle); }
+            dStyle.innerHTML = cCSS;
+            if(cJS.trim() !== "") { setTimeout(() => { try { eval(cJS); } catch (e) { console.error("Error JS Evento:", e); } }, 100); }
+        }
+
+        // --- ARRANQUE GENERAL Y ESCUCHADORES ---
         window.addEventListener('load', () => {
-            // Interceptamos la actualización del usuario para leer descuentos y recompensas
+            setTimeout(handleRoute, 100);
+
+            // Escuchar cambios en el usuario para Recompensas y Descuentos
             db.collection("usuarios").doc(myUserId).onSnapshot(doc => {
                 if(doc.exists) {
                     const u = doc.data();
                     activeDiscounts = u.activeDiscounts || {};
-                    if(u.pendingReward && !document.getElementById('modal-user-reward').classList.contains('hidden') === false) {
-                        // Solo mostramos si no está ya viéndolo
+                    if(u.pendingReward && document.getElementById('modal-user-reward').classList.contains('hidden')) {
                         setTimeout(checkUserRewards, 1000);
                     }
-                    // Refresca la tienda para aplicar descuentos si es necesario
                     if(products.length > 0) renderAll();
                 }
             });
+
+            db.collection("configuracion").doc("general").onSnapshot(doc => {
+                if(doc.exists) {
+                    const data = doc.data();
+                    const screen = document.getElementById('maintenance-screen');
+                    if(data.maintenance && (typeof isAdmin === 'undefined' || !isAdmin)) {
+                        document.getElementById('maintenance-msg').innerText = data.maintenanceMsg;
+                        screen.classList.remove('hidden'); document.body.style.overflow = 'hidden'; 
+                    } else { screen.classList.add('hidden'); document.body.style.overflow = 'auto'; }
+                }
+            });
+
+            db.collection("guias").orderBy("timestamp", "desc").onSnapshot(snap => {
+                guidesData = []; snap.forEach(d => guidesData.push({ id: d.id, ...d.data() })); renderGuides();
+            });
+
+            db.collection("eventos").onSnapshot(snap => {
+                globalEvents = []; snap.forEach(d => globalEvents.push({id: d.id, ...d.data()})); 
+                if(!document.getElementById('view-event-editor').classList.contains('hidden') && editingEventId == null) renderEventsList();
+                runLiveInjector();
+            });
+
+            setInterval(runLiveInjector, 60000);
         });
     </script>
 </body>
