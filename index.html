@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>URANIUM DIGITAL</title>
+    <!-- SOLUCIÓN DE CONFLICTO: Ruta absoluta (/) -->
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
+    <!-- ========================================================= -->
+    <!-- CORTINA DE MANTENIMIENTO Y EVENTOS (LIVE-OPS)             -->
+    <!-- ========================================================= -->
     <div id="maintenance-screen" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100dvh; background: black; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;">
         <div style="font-size: 60px; margin-bottom: 20px;">🛠️</div>
         <h1 style="color: var(--accent); margin-bottom: 10px;">En Mantenimiento</h1>
@@ -17,6 +21,9 @@
 
     <div id="toast-container"></div>
 
+    <!-- ========================================================= -->
+    <!-- HEADER APPLE STYLE                                        -->
+    <!-- ========================================================= -->
     <header class="main-header">
         <div class="logo" onclick="navigateTo('/shop')">URANIUM</div>
         <div class="header-right">
@@ -32,6 +39,9 @@
         </div>
     </header>
 
+    <!-- ========================================================= -->
+    <!-- MENÚ HAMBURGUESA                                          -->
+    <!-- ========================================================= -->
     <div id="mobile-menu" class="apple-menu hidden">
         <div class="menu-header"><button class="close-menu" onclick="closeMenu()">✕</button></div>
         <div class="menu-content">
@@ -49,12 +59,17 @@
         </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- CONTENIDO PRINCIPAL (VISTAS DEL ENRUTADOR)                -->
+    <!-- ========================================================= -->
     <main class="content">
+        <!-- VISTA: PRODUCTOS -->
         <section id="view-products" class="view-section">
             <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
             <div class="product-grid" id="product-grid"></div>
         </section>
 
+        <!-- VISTA: DASHBOARD ADMIN -->
         <section id="view-dashboard" class="view-section hidden">
             <h1 class="section-title">Panel de Control</h1>
             
@@ -71,8 +86,7 @@
             </div>
 
             <div id="admin-list-container" class="admin-card hidden">
-                <h3>Administradores Activos</h3>
-                <div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
+                <h3>Administradores Activos</h3><div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
             </div>
             
             <div class="admin-card">
@@ -83,6 +97,7 @@
             </div>
         </section>
 
+        <!-- VISTA: FORO GENERAL -->
         <section id="view-foro" class="view-section hidden">
             <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h1 class="section-title" style="margin: 0;">Comunidad 💬</h1>
@@ -91,6 +106,7 @@
             <div id="forum-feed" class="forum-grid"></div>
         </section>
 
+        <!-- VISTA: DETALLE FORO -->
         <section id="view-forum-detail" class="view-section hidden">
             <div class="chat-header glass-header">
                 <button class="back-btn" onclick="navigateTo('/forum')">
@@ -107,17 +123,20 @@
             </div>
         </section>
 
+        <!-- VISTA: GUÍAS ESTÁTICAS -->
         <section id="view-guides" class="view-section hidden">
             <h1 class="section-title">Guías y Tutoriales 📚</h1>
             <p class="text-muted" style="margin-bottom: 20px;">Instrucciones y reglas para usar nuestras plataformas.</p>
             <div id="guides-list" style="display: flex; flex-direction: column; gap: 15px;"></div>
         </section>
 
+        <!-- VISTA: LECTURA DE GUÍA -->
         <section id="view-guide-detail" class="view-section hidden">
             <button class="back-btn" style="margin-bottom:20px; color:var(--accent); background:none; border:none; font-size:16px;" onclick="navigateTo('/guides')">← Volver a Guías</button>
             <article id="guide-content-area" style="background:var(--surface-elevated); padding:20px; border-radius:12px; line-height:1.6;"></article>
         </section>
 
+        <!-- VISTA: EDITOR DE EVENTOS -->
         <section id="view-event-editor" class="view-section hidden" style="height: 100dvh; display: flex; flex-direction: column; background: #000; padding-top: 10px;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;">
                 <h2 id="editor-event-title" style="margin:0; font-size: 18px; color: var(--accent);">Editando Evento</h2>
@@ -128,13 +147,16 @@
                 <button class="tab-btn" onclick="switchEditorTab('css')">CSS</button>
                 <button class="tab-btn" onclick="switchEditorTab('js')">JS (Script)</button>
             </div>
-            <textarea id="editor-html" class="code-editor" placeholder=""></textarea>
+            <textarea id="editor-html" class="code-editor" placeholder="<!-- Escribe tu HTML -->"></textarea>
             <textarea id="editor-css" class="code-editor hidden" placeholder="/* Escribe tu CSS */"></textarea>
             <textarea id="editor-js" class="code-editor hidden" placeholder="// Escribe tu JS"></textarea>
             <div style="padding: 15px;"><button class="apple-btn" onclick="saveEventCode()">Guardar Código</button></div>
         </section>
     </main>
 
+    <!-- ========================================================= -->
+    <!-- ZONA DE MODALES COMPLETOS                                 -->
+    <!-- ========================================================= -->
     <div id="modal-wallet-confirm" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span>
@@ -402,14 +424,21 @@
         </div>
     </div>
 
+    <!-- MODAL DE PUBLICAR GUÍA ACTUALIZADO -->
     <div id="modal-publish-guide" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-publish-guide')">✕</span>
             <h2>Publicar Guía</h2>
             <div class="apple-form" style="margin-top: 15px;">
+                <div class="upload-zone" onclick="document.getElementById('g-file-input').click()" style="height: 100px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 12px;">
+                    <span id="g-upload-label" style="color: var(--text-muted);">Adjuntar Portada (Opcional) 📸</span>
+                    <img id="g-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);">
+                </div>
+                <input type="file" id="g-file-input" accept="image/*" class="hidden" onchange="previewGuideImage()">
+                
                 <input type="text" id="g-title" placeholder="Título de la Guía (Ej: Cómo canjear Netflix)">
-                <textarea id="g-content" placeholder="Contenido de la guía (Admite HTML básico)" style="height: 200px;"></textarea>
-                <button class="apple-btn" onclick="saveGuide()">Publicar Guía</button>
+                <textarea id="g-content" placeholder="Escribe el texto aquí... Si pegas un link terminado en .jpg o .png se volverá imagen. También puedes usar [img]link_aqui[/img]" style="height: 200px;"></textarea>
+                <button class="apple-btn" id="btn-save-guide" onclick="saveGuide()">Publicar Guía</button>
             </div>
         </div>
     </div>
@@ -475,6 +504,9 @@
         </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- ESTILOS INTERNOS                                          -->
+    <!-- ========================================================= -->
     <style>
         .code-editor { width: 100%; flex-grow: 1; background: #1e1e1e; color: #00ff00; font-family: monospace; border: none; padding: 15px; border-radius: 10px; resize: none; font-size: 14px; outline: none; }
         .tab-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; }
@@ -489,15 +521,21 @@
         .product-card.disabled img { filter: grayscale(100%) opacity(0.5); }
     </style>
 
+    <!-- ========================================================= -->
+    <!-- LIBRERÍAS Y SCRIPT ORIGINAL                               -->
+    <!-- ========================================================= -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
     <script src="/emc.js"></script>
 
+    <!-- ========================================================= -->
+    <!-- LÓGICA DE ACTUALIZACIÓN                                   -->
+    <!-- ========================================================= -->
     <script>
         let globalEvents = []; 
         let editingEventId = null;
         let guidesData = [];
+        let currentGuideImg = "";
 
         // --- SISTEMA DE RUTAS ---
         function navigateTo(path) {
@@ -538,7 +576,7 @@
         }
         window.addEventListener('popstate', handleRoute);
 
-        // --- SOBRESCRIBIR LA FUNCIÓN DEL FORO PARA LA URL ---
+        // --- SOBRESCRIBIR LA FUNCIÓN DEL FORO ---
         async function openForumThread(postId) {
             const post = forumPosts.find(p => p.id === postId);
             if(!post) return;
@@ -591,129 +629,14 @@
         function openMaintenanceModal() {
             if(typeof closeModal === 'function') closeModal('modal-admin-options');
             if(typeof openModal === 'function') openModal('modal-maintenance');
-            firebase.firestore().collection("configuracion").doc("general").get().then(doc => {
-                if(doc.exists) document.getElementById('maint-desc').value = doc.data().maintenanceMsg || "";
-            }).catch(e => alert("Error Firebase al cargar config: " + e.message));
-        }
-
-        async function toggleMaintenance(status) {
-            try {
-                const msg = document.getElementById('maint-desc').value.trim();
-                await firebase.firestore().collection("configuracion").doc("general").set({ maintenance: status, maintenanceMsg: msg }, {merge: true});
-                if(typeof showToast === 'function') showToast(status ? "MANTENIMIENTO ACTIVADO" : "MANTENIMIENTO DESACTIVADO");
-                if(typeof closeModal === 'function') closeModal('modal-maintenance');
-            } catch (e) {
-                alert("🚨 Error de Firebase: " + e.message + "\nProbablemente le falte permiso de lectura/escritura en las reglas de Firestore.");
-            }
-        }
-
-    <script>
-        let globalEvents = []; 
-        let editingEventId = null;
-        let guidesData = [];
-
-        // --- SISTEMA DE RUTAS ---
-        function navigateTo(path) {
-            window.history.pushState({}, "", path);
-            handleRoute();
-        }
-
-        function handleRoute() {
-            const path = window.location.pathname;
-            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
-            
-            if (path === '/shop' || path === '/') {
-                document.getElementById('view-products').classList.remove('hidden');
-            } else if (path === '/forum') {
-                document.getElementById('view-foro').classList.remove('hidden');
-            } else if (path.startsWith('/forum/')) {
-                const parts = path.split('/');
-                if(parts.length >= 3 && parts[2]) {
-                    setTimeout(() => { if(typeof openForumThread === 'function') openForumThread(parts[2]); }, 800); 
-                } else {
-                    document.getElementById('view-foro').classList.remove('hidden');
-                }
-            } else if (path === '/adminpanel') {
-                if(typeof isAdmin !== 'undefined' && isAdmin) document.getElementById('view-dashboard').classList.remove('hidden');
-                else navigateTo('/shop');
-            } else if (path === '/guides') {
-                document.getElementById('view-guides').classList.remove('hidden');
-            } else if (path.startsWith('/guides/')) {
-                const parts = path.split('/');
-                if(parts.length >= 3 && parts[2]) {
-                    setTimeout(() => { if(typeof openGuide === 'function') openGuide(parts[2]); }, 800); 
-                } else {
-                    document.getElementById('view-guides').classList.remove('hidden');
-                }
-            } else {
-                document.getElementById('view-products').classList.remove('hidden');
-            }
-        }
-        window.addEventListener('popstate', handleRoute);
-
-        // --- SOBRESCRIBIR LA FUNCIÓN DEL FORO PARA LA URL ---
-        async function openForumThread(postId) {
-            const post = forumPosts.find(p => p.id === postId);
-            if(!post) return;
-            
-            if (post.type === 'vip' && !isAdmin) {
-                if (!post.accessList || !post.accessList.includes(myUserId)) {
-                    pendingVipPost = post; 
-                    const priceFormat = post.vipPrice ? post.vipPrice.toLocaleString() : "0";
-                    document.getElementById('vip-buy-title').innerText = post.title;
-                    document.getElementById('vip-buy-price').innerText = "$" + priceFormat;
-                    openModal('modal-buy-vip');
-                    return; 
-                }
-            }
-
-            if (post.type === 'clave' && !isAdmin) {
-                const guess = prompt("Este debate requiere contraseña:");
-                if (guess !== post.password) {
-                    if(typeof showToast === 'function') showToast("CONTRASEÑA INCORRECTA");
-                    return;
-                }
-            }
-
-            currentThreadId = postId;
-            
-            if(window.location.pathname !== `/forum/${postId}`) { 
-                window.history.pushState({}, "", `/forum/${postId}`); 
-            }
-
-            showView('forum-detail');
-            document.getElementById('chat-title-display').innerText = post.title;
-            
-            let statusHtml = post.type === 'cerrado' ? 'Debate cerrado' : `Activo`;
-            if (isAdmin) {
-                statusHtml += ` &nbsp;|&nbsp; <button onclick="deleteForumPost('${post.id}')" style="background:var(--danger); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:bold;">🗑️ ELIMINAR</button>`;
-            }
-            document.getElementById('chat-status-display').innerHTML = statusHtml;
-            
-            const inputArea = document.querySelector('.chat-input-area');
-            if(post.type === 'cerrado' && !isAdmin) {
-                if(inputArea) inputArea.classList.add('hidden'); 
-            } else {
-                if(inputArea) inputArea.classList.remove('hidden');
-            }
-
-            renderChatMessages(post);
-        }
-
-        // --- MANTENIMIENTO ---
-        function openMaintenanceModal() {
-            if(typeof closeModal === 'function') closeModal('modal-admin-options');
-            if(typeof openModal === 'function') openModal('modal-maintenance');
-            // Usamos 'db' directamente
             db.collection("configuracion").doc("general").get().then(doc => {
                 if(doc.exists) document.getElementById('maint-desc').value = doc.data().maintenanceMsg || "";
-            }).catch(e => alert("Error Firebase al cargar config: " + e.message));
+            }).catch(e => console.error(e));
         }
 
         async function toggleMaintenance(status) {
             try {
                 const msg = document.getElementById('maint-desc').value.trim();
-                // Usamos 'db'
                 await db.collection("configuracion").doc("general").set({ maintenance: status, maintenanceMsg: msg }, {merge: true});
                 if(typeof showToast === 'function') showToast(status ? "MANTENIMIENTO ACTIVADO" : "MANTENIMIENTO DESACTIVADO");
                 if(typeof closeModal === 'function') closeModal('modal-maintenance');
@@ -734,15 +657,37 @@
         }
 
         async function toggleAgotado(id, status) {
-            try {
-                // Usamos 'db'
-                await db.collection("productos").doc(id.toString()).update({ agotado: status });
-            } catch (e) {
-                alert("🚨 Error actualizando stock: " + e.message);
+            try { await db.collection("productos").doc(id.toString()).update({ agotado: status }); } 
+            catch (e) { alert("🚨 Error actualizando stock: " + e.message); }
+        }
+
+        // --- NUEVO SISTEMA DE GUÍAS CON IMÁGENES ---
+        function previewGuideImage() {
+            const file = document.getElementById('g-file-input').files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 600;
+                        let scaleSize = MAX_WIDTH / img.width;
+                        if(scaleSize > 1) scaleSize = 1;
+                        canvas.width = img.width * scaleSize;
+                        canvas.height = img.height * scaleSize;
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        currentGuideImg = canvas.toDataURL('image/jpeg', 0.7);
+                        document.getElementById('g-preview').src = currentGuideImg;
+                        document.getElementById('g-preview').classList.remove('hidden');
+                        document.getElementById('g-upload-label').classList.add('hidden');
+                    };
+                    img.src = e.target.result;
+                }; 
+                reader.readAsDataURL(file);
             }
         }
 
-        // --- GUÍAS ---
         async function saveGuide() {
             try {
                 const title = document.getElementById('g-title').value.trim();
@@ -751,21 +696,70 @@
                     if(typeof showToast === 'function') showToast("LLENA LOS DATOS");
                     return;
                 }
-                // Usamos 'db'
-                const ref = await db.collection("guias").add({ title, content, timestamp: new Date().toISOString() });
+
+                const btn = document.getElementById('btn-save-guide');
+                btn.disabled = true;
+                btn.innerText = "Guardando...";
+
+                await db.collection("guias").add({ 
+                    title: title, 
+                    content: content, 
+                    coverImg: currentGuideImg,
+                    timestamp: new Date().toISOString() 
+                });
+                
+                // Limpiar modal
+                document.getElementById('g-title').value = "";
+                document.getElementById('g-content').value = "";
+                currentGuideImg = "";
+                document.getElementById('g-preview').src = "";
+                document.getElementById('g-preview').classList.add('hidden');
+                document.getElementById('g-upload-label').classList.remove('hidden');
+
                 if(typeof closeModal === 'function') closeModal('modal-publish-guide'); 
                 if(typeof showToast === 'function') showToast("GUÍA PUBLICADA");
                 
-                guidesData.unshift({ id: ref.id, title, content, timestamp: new Date().toISOString() });
-                renderGuides();
+                btn.disabled = false;
+                btn.innerText = "Publicar Guía";
+
             } catch (e) {
                 alert("🚨 Error publicando guía: " + e.message);
+                document.getElementById('btn-save-guide').disabled = false;
+                document.getElementById('btn-save-guide').innerText = "Publicar Guía";
+            }
+        }
+
+        async function deleteGuide(id) {
+            if(confirm("¿Seguro que quieres borrar esta guía permanentemente?")) {
+                await db.collection("guias").doc(id).delete();
+                if(typeof showToast === 'function') showToast("GUÍA ELIMINADA");
             }
         }
 
         function renderGuides() {
             const list = document.getElementById('guides-list'); if(!list) return;
-            list.innerHTML = guidesData.map(g => `<div class="forum-thread-card" onclick="openGuide('${g.id}')"><h3 style="margin:0;">📖 ${g.title}</h3></div>`).join('');
+            list.innerHTML = guidesData.map(g => `
+                <div class="forum-thread-card" onclick="openGuide('${g.id}')" style="display:flex; align-items:center; gap:12px;">
+                    ${g.coverImg ? `<img src="${g.coverImg}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">` : `<div style="font-size:30px; line-height:1;">📖</div>`}
+                    <h3 style="margin:0; font-size:15px; flex-grow:1;">${g.title}</h3>
+                    ${(typeof isAdmin !== 'undefined' && isAdmin) ? `<button onclick="event.stopPropagation(); deleteGuide('${g.id}')" style="background:var(--danger); color:white; border:none; padding:6px; border-radius:6px; font-size:12px; font-weight:bold;">✕</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function formatGuideContent(text) {
+            if(!text) return "";
+            let f = text.replace(/\n/g, '<br>');
+            
+            // Reemplaza URLs directas de imagenes (.jpg, .png, etc)
+            const imgRegex = /(https?:\/\/[^\s"'<>]+?\.(?:jpg|jpeg|gif|png|webp))/gi;
+            f = f.replace(imgRegex, '<img src="$1" style="max-width:100%; border-radius:10px; margin:15px 0; display:block; box-shadow:0 5px 15px rgba(0,0,0,0.3);">');
+            
+            // Reemplaza el formato manual [img]link[/img]
+            const customImgRegex = /\[img\](.*?)\[\/img\]/gi;
+            f = f.replace(customImgRegex, '<img src="$1" style="max-width:100%; border-radius:10px; margin:15px 0; display:block; box-shadow:0 5px 15px rgba(0,0,0,0.3);">');
+
+            return f;
         }
 
         function openGuide(id) {
@@ -777,7 +771,15 @@
             
             document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
             document.getElementById('view-guide-detail').classList.remove('hidden');
-            document.getElementById('guide-content-area').innerHTML = `<h1>${g.title}</h1><br>${g.content.replace(/\n/g, '<br>')}`;
+            
+            let coverHtml = g.coverImg ? `<img src="${g.coverImg}" style="width:100%; height:200px; object-fit:cover; border-radius:12px; margin-bottom:20px; box-shadow:0 5px 15px rgba(0,0,0,0.5);">` : '';
+            let formattedContent = formatGuideContent(g.content);
+
+            document.getElementById('guide-content-area').innerHTML = `
+                ${coverHtml}
+                <h1 style="margin-bottom:15px; font-size:24px; color:var(--accent);">${g.title}</h1>
+                <div style="font-size:15px; color:var(--text-main); line-height:1.6;">${formattedContent}</div>
+            `;
         }
 
         // --- EVENTOS (LIVE-OPS) ---
@@ -809,13 +811,10 @@
                     if(typeof showToast === 'function') showToast("FALTAN DATOS DEL EVENTO");
                     return;
                 }
-                // Usamos 'db'
                 const ref = await db.collection("eventos").add({ name, start, end, html:"", css:"", js:"" });
                 if(typeof closeModal === 'function') closeModal('modal-add-event'); 
                 openCodeEditor(ref.id);
-            } catch (e) {
-                alert("🚨 Error guardando evento: " + e.message);
-            }
+            } catch (e) { alert("🚨 Error guardando evento: " + e.message); }
         }
 
         function openCodeEditor(id) {
@@ -841,16 +840,13 @@
         async function saveEventCode() {
             try {
                 if(!editingEventId) return;
-                // Usamos 'db'
                 await db.collection("eventos").doc(editingEventId).update({ 
                     html: document.getElementById('editor-html').value, 
                     css: document.getElementById('editor-css').value, 
                     js: document.getElementById('editor-js').value 
                 });
                 if(typeof showToast === 'function') showToast("CÓDIGO DE EVENTO GUARDADO");
-            } catch (e) {
-                alert("🚨 Error guardando código: " + e.message);
-            }
+            } catch (e) { alert("🚨 Error guardando código: " + e.message); }
         }
 
         function runLiveInjector() {
@@ -863,13 +859,12 @@
                     if(ev.js) cJS += ev.js + "\n";
                 }
             });
-            // El contenedor HTML se asegura de tener un estilo base para sobreponerse sin bloquear el clic por defecto
             const container = document.getElementById('event-html-container');
             container.style.position = 'fixed';
             container.style.top = '0';
             container.style.left = '0';
             container.style.width = '100%';
-            container.style.pointerEvents = 'none'; // Permite hacer clics a través del contenedor
+            container.style.pointerEvents = 'none';
             container.style.zIndex = '9998';
             container.innerHTML = cHTML;
 
@@ -882,11 +877,10 @@
             }
         }
 
-        // --- ARRANQUE SEGURO DE ESTOS SISTEMAS ---
+        // --- ARRANQUE SEGURO ---
         window.addEventListener('load', () => {
             setTimeout(handleRoute, 100);
 
-            // Lectura de configuraciones con 'db'
             db.collection("configuracion").doc("general").onSnapshot(doc => {
                 if(doc.exists) {
                     const data = doc.data();
@@ -918,6 +912,5 @@
             setInterval(runLiveInjector, 60000);
         });
     </script>
-x
 </body>
 </html>
