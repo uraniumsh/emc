@@ -607,6 +607,121 @@
             }
         }
 
+    <script>
+        let globalEvents = []; 
+        let editingEventId = null;
+        let guidesData = [];
+
+        // --- SISTEMA DE RUTAS ---
+        function navigateTo(path) {
+            window.history.pushState({}, "", path);
+            handleRoute();
+        }
+
+        function handleRoute() {
+            const path = window.location.pathname;
+            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+            
+            if (path === '/shop' || path === '/') {
+                document.getElementById('view-products').classList.remove('hidden');
+            } else if (path === '/forum') {
+                document.getElementById('view-foro').classList.remove('hidden');
+            } else if (path.startsWith('/forum/')) {
+                const parts = path.split('/');
+                if(parts.length >= 3 && parts[2]) {
+                    setTimeout(() => { if(typeof openForumThread === 'function') openForumThread(parts[2]); }, 800); 
+                } else {
+                    document.getElementById('view-foro').classList.remove('hidden');
+                }
+            } else if (path === '/adminpanel') {
+                if(typeof isAdmin !== 'undefined' && isAdmin) document.getElementById('view-dashboard').classList.remove('hidden');
+                else navigateTo('/shop');
+            } else if (path === '/guides') {
+                document.getElementById('view-guides').classList.remove('hidden');
+            } else if (path.startsWith('/guides/')) {
+                const parts = path.split('/');
+                if(parts.length >= 3 && parts[2]) {
+                    setTimeout(() => { if(typeof openGuide === 'function') openGuide(parts[2]); }, 800); 
+                } else {
+                    document.getElementById('view-guides').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('view-products').classList.remove('hidden');
+            }
+        }
+        window.addEventListener('popstate', handleRoute);
+
+        // --- SOBRESCRIBIR LA FUNCIÓN DEL FORO PARA LA URL ---
+        async function openForumThread(postId) {
+            const post = forumPosts.find(p => p.id === postId);
+            if(!post) return;
+            
+            if (post.type === 'vip' && !isAdmin) {
+                if (!post.accessList || !post.accessList.includes(myUserId)) {
+                    pendingVipPost = post; 
+                    const priceFormat = post.vipPrice ? post.vipPrice.toLocaleString() : "0";
+                    document.getElementById('vip-buy-title').innerText = post.title;
+                    document.getElementById('vip-buy-price').innerText = "$" + priceFormat;
+                    openModal('modal-buy-vip');
+                    return; 
+                }
+            }
+
+            if (post.type === 'clave' && !isAdmin) {
+                const guess = prompt("Este debate requiere contraseña:");
+                if (guess !== post.password) {
+                    if(typeof showToast === 'function') showToast("CONTRASEÑA INCORRECTA");
+                    return;
+                }
+            }
+
+            currentThreadId = postId;
+            
+            if(window.location.pathname !== `/forum/${postId}`) { 
+                window.history.pushState({}, "", `/forum/${postId}`); 
+            }
+
+            showView('forum-detail');
+            document.getElementById('chat-title-display').innerText = post.title;
+            
+            let statusHtml = post.type === 'cerrado' ? 'Debate cerrado' : `Activo`;
+            if (isAdmin) {
+                statusHtml += ` &nbsp;|&nbsp; <button onclick="deleteForumPost('${post.id}')" style="background:var(--danger); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:bold;">🗑️ ELIMINAR</button>`;
+            }
+            document.getElementById('chat-status-display').innerHTML = statusHtml;
+            
+            const inputArea = document.querySelector('.chat-input-area');
+            if(post.type === 'cerrado' && !isAdmin) {
+                if(inputArea) inputArea.classList.add('hidden'); 
+            } else {
+                if(inputArea) inputArea.classList.remove('hidden');
+            }
+
+            renderChatMessages(post);
+        }
+
+        // --- MANTENIMIENTO ---
+        function openMaintenanceModal() {
+            if(typeof closeModal === 'function') closeModal('modal-admin-options');
+            if(typeof openModal === 'function') openModal('modal-maintenance');
+            // Usamos 'db' directamente
+            db.collection("configuracion").doc("general").get().then(doc => {
+                if(doc.exists) document.getElementById('maint-desc').value = doc.data().maintenanceMsg || "";
+            }).catch(e => alert("Error Firebase al cargar config: " + e.message));
+        }
+
+        async function toggleMaintenance(status) {
+            try {
+                const msg = document.getElementById('maint-desc').value.trim();
+                // Usamos 'db'
+                await db.collection("configuracion").doc("general").set({ maintenance: status, maintenanceMsg: msg }, {merge: true});
+                if(typeof showToast === 'function') showToast(status ? "MANTENIMIENTO ACTIVADO" : "MANTENIMIENTO DESACTIVADO");
+                if(typeof closeModal === 'function') closeModal('modal-maintenance');
+            } catch (e) {
+                alert("🚨 Error de Firebase: " + e.message);
+            }
+        }
+
         // --- PRODUCTOS AGOTADOS ---
         function openBlockProductsModal() {
             if(typeof closeModal === 'function') closeModal('modal-admin-options');
@@ -620,7 +735,8 @@
 
         async function toggleAgotado(id, status) {
             try {
-                await firebase.firestore().collection("productos").doc(id.toString()).update({ agotado: status });
+                // Usamos 'db'
+                await db.collection("productos").doc(id.toString()).update({ agotado: status });
             } catch (e) {
                 alert("🚨 Error actualizando stock: " + e.message);
             }
@@ -635,14 +751,15 @@
                     if(typeof showToast === 'function') showToast("LLENA LOS DATOS");
                     return;
                 }
-                const ref = await firebase.firestore().collection("guias").add({ title, content, timestamp: new Date().toISOString() });
+                // Usamos 'db'
+                const ref = await db.collection("guias").add({ title, content, timestamp: new Date().toISOString() });
                 if(typeof closeModal === 'function') closeModal('modal-publish-guide'); 
                 if(typeof showToast === 'function') showToast("GUÍA PUBLICADA");
                 
                 guidesData.unshift({ id: ref.id, title, content, timestamp: new Date().toISOString() });
                 renderGuides();
             } catch (e) {
-                alert("🚨 Error publicando guía: " + e.message + "\nVerifique sus permisos en Firestore para la colección 'guias'.");
+                alert("🚨 Error publicando guía: " + e.message);
             }
         }
 
@@ -692,7 +809,8 @@
                     if(typeof showToast === 'function') showToast("FALTAN DATOS DEL EVENTO");
                     return;
                 }
-                const ref = await firebase.firestore().collection("eventos").add({ name, start, end, html:"", css:"", js:"" });
+                // Usamos 'db'
+                const ref = await db.collection("eventos").add({ name, start, end, html:"", css:"", js:"" });
                 if(typeof closeModal === 'function') closeModal('modal-add-event'); 
                 openCodeEditor(ref.id);
             } catch (e) {
@@ -723,7 +841,8 @@
         async function saveEventCode() {
             try {
                 if(!editingEventId) return;
-                await firebase.firestore().collection("eventos").doc(editingEventId).update({ 
+                // Usamos 'db'
+                await db.collection("eventos").doc(editingEventId).update({ 
                     html: document.getElementById('editor-html').value, 
                     css: document.getElementById('editor-css').value, 
                     js: document.getElementById('editor-js').value 
@@ -744,20 +863,31 @@
                     if(ev.js) cJS += ev.js + "\n";
                 }
             });
-            document.getElementById('event-html-container').innerHTML = cHTML;
+            // El contenedor HTML se asegura de tener un estilo base para sobreponerse sin bloquear el clic por defecto
+            const container = document.getElementById('event-html-container');
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.width = '100%';
+            container.style.pointerEvents = 'none'; // Permite hacer clics a través del contenedor
+            container.style.zIndex = '9998';
+            container.innerHTML = cHTML;
+
             let dStyle = document.getElementById('ev-dyn-css'); 
             if(!dStyle) { dStyle = document.createElement('style'); dStyle.id = 'ev-dyn-css'; document.head.appendChild(dStyle); }
             dStyle.innerHTML = cCSS;
+
             if(cJS.trim() !== "") {
                 setTimeout(() => { try { eval(cJS); } catch (e) { console.error("Error JS Evento:", e); } }, 100);
             }
         }
 
-        // 7. INICIAR LECTURA DE LAS NUEVAS COLECCIONES
+        // --- ARRANQUE SEGURO DE ESTOS SISTEMAS ---
         window.addEventListener('load', () => {
             setTimeout(handleRoute, 100);
 
-            firebase.firestore().collection("configuracion").doc("general").onSnapshot(doc => {
+            // Lectura de configuraciones con 'db'
+            db.collection("configuracion").doc("general").onSnapshot(doc => {
                 if(doc.exists) {
                     const data = doc.data();
                     const screen = document.getElementById('maintenance-screen');
@@ -770,13 +900,13 @@
                 }
             });
 
-            firebase.firestore().collection("guias").orderBy("timestamp", "desc").onSnapshot(snap => {
+            db.collection("guias").orderBy("timestamp", "desc").onSnapshot(snap => {
                 guidesData = []; 
                 snap.forEach(d => guidesData.push({ id: d.id, ...d.data() })); 
                 renderGuides();
             });
 
-            firebase.firestore().collection("eventos").onSnapshot(snap => {
+            db.collection("eventos").onSnapshot(snap => {
                 globalEvents = []; 
                 snap.forEach(d => globalEvents.push({id: d.id, ...d.data()})); 
                 if(!document.getElementById('view-event-editor').classList.contains('hidden') && editingEventId == null){
@@ -788,5 +918,6 @@
             setInterval(runLiveInjector, 60000);
         });
     </script>
+x
 </body>
 </html>
