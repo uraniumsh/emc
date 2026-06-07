@@ -127,6 +127,11 @@ body {
 }
 
 .card-img { width: 100%; padding-bottom: 100%; position: relative; height: 0; background: var(--surface-elevated); }
+.card-img {
+    position: relative;
+    overflow: hidden; /* Esto evita que las etiquetas se desborden */
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
 .card-img img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
 .product-card.disabled img { filter: grayscale(100%) opacity(0.5); }
 
@@ -254,3 +259,60 @@ input:checked + .slider:before { transform: translateX(20px); }
 }
 .social-bar { display: flex; gap: 15px; margin: 15px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 10px 0; }
 .social-bar button { background: transparent; border: none; font-size: 16px; cursor: pointer; color: var(--text-main); font-weight: 600; display:flex; gap:5px; align-items:center;}
+
+/* Tipografía nativa de Apple */
+@font-face {
+    font-family: 'SF Pro Display';
+    src: local('SF Pro Display'), local('SFProDisplay-Regular');
+    font-weight: 400;
+}
+@font-face {
+    font-family: 'SF Pro Display';
+    src: local('SF Pro Display Bold'), local('SFProDisplay-Bold');
+    font-weight: 700;
+}
+
+* {
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Fix del descuento para que no se salga de la tarjeta */
+
+.discount-tag {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #000;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 12px;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Modales nativos iOS */
+.ios-dialog {
+    background: rgba(30, 30, 30, 0.85);
+    backdrop-filter: saturate(180%) blur(25px);
+    -webkit-backdrop-filter: saturate(180%) blur(25px);
+    border: 1px solid rgba(255,255,255,0.1);
+    width: 280px;
+    border-radius: 18px;
+    text-align: center;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+.ios-dialog-content { padding: 20px; }
+.ios-dialog-title { font-size: 17px; font-weight: 600; color: white; margin-bottom: 5px; }
+.ios-dialog-msg { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.3; }
+.ios-dialog-input { width: 100%; margin-top: 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 12px; border-radius: 8px; outline: none; font-size: 14px; }
+.ios-dialog-actions { display: flex; border-top: 1px solid rgba(255,255,255,0.1); }
+.ios-dialog-btn { flex: 1; padding: 12px; background: transparent; border: none; color: var(--accent); font-size: 17px; cursor: pointer; transition: background 0.2s; }
+.ios-dialog-btn.bold { font-weight: 600; }
+.ios-dialog-btn.danger { color: var(--danger); }
+.ios-dialog-btn:active { background: rgba(255,255,255,0.1); }
+.ios-dialog-btn + .ios-dialog-btn { border-left: 1px solid rgba(255,255,255,0.1); }
