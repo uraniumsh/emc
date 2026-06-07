@@ -41,6 +41,16 @@ async function sendTelegramPhoto(file, caption) {
     }
 }
 
+// ÍCONOS SVG (Estilo iOS 26)
+const ICONS = {
+    edit: `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`,
+    trash: `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+    lock: `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
+    close: `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+    thumbUp: `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`,
+    thumbDown: `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2"></path></svg>`
+};
+
 // ==========================================
 // 2. VARIABLES GLOBALES
 // ==========================================
@@ -62,12 +72,12 @@ let currentThreadId = null;
 let replyingTo = null;
 let currentForumImg = ""; 
 let pendingVipPost = null; 
+let claimContext = null; // Contexto para reclamar pantallas
 
 // ==========================================
 // 3. INICIALIZACIÓN DE SESIÓN Y SEGURIDAD
 // ==========================================
 async function initSession() {
-    // Activa el CSS :active de inmediato en celulares (para el hover azul)
     document.body.addEventListener('touchstart', function(){}, {passive: true});
     
     let originalId = localStorage.getItem('original_uid');
@@ -95,7 +105,7 @@ async function initSession() {
     } else {
         currentUser = userDoc.data();
         if(currentUser.banned === true && myUserId !== "170125") {
-            document.body.innerHTML = `<div style="background:black; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
+            document.body.innerHTML = `<div style="background:#000; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
             return; 
         }
         await userRef.update({ lastActive: rightNow });
@@ -114,14 +124,12 @@ async function initSession() {
     }
     
     if(categories.length > 0) renderAll(); else renderGrid(); 
-    
     updateProfileUI();
 }
-
 window.onload = initSession;
 
 // ==========================================
-// 4. ESCUCHADORES EN TIEMPO REAL (FIREBASE + CACHÉ)
+// 4. ESCUCHADORES EN TIEMPO REAL
 // ==========================================
 function escucharDatos() {
     try {
@@ -156,9 +164,8 @@ function escucharDatos() {
         if (doc.exists) {
             currentUser = doc.data();
             updateProfileUI();
-            
             if(currentUser.banned === true && myUserId !== "170125") {
-                document.body.innerHTML = `<div style="background:black; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
+                document.body.innerHTML = `<div style="background:#000; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
             }
         }
     });
@@ -176,7 +183,7 @@ function escucharDatos() {
 }
 
 // ==========================================
-// 5. UTILIDADES UI Y MENÚ APPLE
+// 5. UTILIDADES UI Y MODALES APPLE
 // ==========================================
 function showToast(msg) {
     const c = document.getElementById('toast-container');
@@ -187,7 +194,10 @@ function showToast(msg) {
 
 function openModal(id) { 
     const el = document.getElementById(id);
-    if(el) el.classList.remove('hidden'); 
+    if(el) {
+        el.classList.remove('hidden'); 
+        el.classList.remove('closing');
+    }
 }
 
 function closeModal(id) {
@@ -203,8 +213,11 @@ function showView(view) {
     if(v) v.classList.remove('hidden');
 }
 
+/* FIX MENÚS APPLE */
 function openMenu() {
-    document.getElementById('mobile-menu').classList.remove('hidden');
+    const menu = document.getElementById('mobile-menu');
+    menu.classList.remove('hidden');
+    menu.style.pointerEvents = 'auto';
     document.getElementById('menu-user-name').innerText = currentUser?.registered ? currentUser.name : "Invitado";
     document.getElementById('menu-user-id').innerText = `ID: #${myUserId}`;
     
@@ -213,7 +226,39 @@ function openMenu() {
         document.getElementById('btn-logout-menu').classList.remove('hidden');
     }
 }
-function closeMenu() { document.getElementById('mobile-menu').classList.add('hidden'); }
+function closeMenu() { 
+    const menu = document.getElementById('mobile-menu');
+    menu.style.pointerEvents = 'none';
+    menu.classList.add('hidden'); 
+}
+
+/* SISTEMA NATIVO DE ALERTAS SIN ALERT/CONFIRM */
+let confirmCallback = null;
+let promptCallback = null;
+
+function iosConfirm(title, message, callback) {
+    document.getElementById('ios-confirm-title').innerText = title;
+    document.getElementById('ios-confirm-msg').innerText = message;
+    confirmCallback = callback;
+    openModal('modal-ios-confirm');
+}
+function executeIosConfirm() {
+    closeModal('modal-ios-confirm');
+    if(confirmCallback) confirmCallback();
+}
+
+function iosPrompt(title, message, callback) {
+    document.getElementById('ios-prompt-title').innerText = title;
+    document.getElementById('ios-prompt-msg').innerText = message;
+    document.getElementById('ios-prompt-input').value = "";
+    promptCallback = callback;
+    openModal('modal-ios-prompt');
+}
+function executeIosPrompt() {
+    const val = document.getElementById('ios-prompt-input').value.trim();
+    closeModal('modal-ios-prompt');
+    if(promptCallback) promptCallback(val);
+}
 
 // ==========================================
 // 6. LOGIN ADMIN Y PANEL DE CONTROL
@@ -233,7 +278,6 @@ async function handleLogin() {
             const adminDoc = usersSnap.docs[0];
             myUserId = adminDoc.id; 
             localStorage.setItem('u_id', myUserId);
-            
             localStorage.setItem('admin_auth', 'true'); 
             
             showToast("SESIÓN DE ADMIN INICIADA");
@@ -247,10 +291,8 @@ async function handleLogin() {
 function activateAdminUI() {
     const loginBox = document.getElementById('login-box');
     if (loginBox) loginBox.classList.add('hidden');
-    
     const logoutBox = document.getElementById('logout-box');
     if (logoutBox) logoutBox.classList.remove('hidden');
-    
     const logoutMenu = document.getElementById('btn-logout-menu');
     if (logoutMenu) logoutMenu.classList.remove('hidden');
 
@@ -258,10 +300,8 @@ function activateAdminUI() {
         if(currentUser.role === 'superadmin') {
             const btnSec = document.getElementById('btn-security');
             if (btnSec) btnSec.classList.remove('hidden');
-            
             const adminList = document.getElementById('admin-list-container');
             if (adminList) adminList.classList.remove('hidden');
-            
             cargarAdminsEnDashboard(); 
         }
         cargarUsuariosEnDashboard();
@@ -306,12 +346,12 @@ async function toggleBan(id, status) {
     showToast(`USUARIO ${status ? 'BANEADO' : 'DESBANEADO'}`);
 }
 
-async function deleteUser(id) {
+function deleteUser(id) {
     if(!isAdmin) return;
-    if(confirm(`¿Estás completamente seguro de eliminar el usuario #${id}? Esto borrará su saldo y todo su acceso permanentemente.`)) {
+    iosConfirm("Eliminar Usuario", `¿Eliminar al usuario #${id} permanentemente? Su saldo y acceso se perderán.`, async () => {
         await db.collection("usuarios").doc(id).delete();
         showToast("USUARIO ELIMINADO");
-    }
+    });
 }
 
 async function addSubAdmin() {
@@ -329,11 +369,11 @@ function cargarAdminsEnDashboard() {
     if(!area) return;
     db.collection("usuarios").where("role", "==", "admin").onSnapshot(snap => {
         area.innerHTML = '';
-        if(snap.empty) { area.innerHTML = '<p class="text-muted">No hay sub-administradores activos.</p>'; return; }
+        if(snap.empty) { area.innerHTML = '<p class="text-muted">No hay sub-admins activos.</p>'; return; }
         snap.forEach(doc => {
             const data = doc.data();
             area.innerHTML += `
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-color); padding: 8px 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 8px 0;">
                 <div><strong>ID:</strong> ${data.id} <br><span class="text-muted">${data.adminEmail}</span></div>
                 <button onclick="deleteAdmin('${doc.id}')" class="btn-sm-danger">Remover</button>
             </div>`;
@@ -341,11 +381,11 @@ function cargarAdminsEnDashboard() {
     });
 }
 
-async function deleteAdmin(docId) {
-    if(confirm("¿Quitar permisos de administrador a este usuario?")) {
+function deleteAdmin(docId) {
+    iosConfirm("Remover Permisos", "¿Quitar permisos de administrador a este usuario?", async () => {
         await db.collection("usuarios").doc(docId).update({ role: 'user', adminEmail: null, adminPass: null });
         showToast("PERMISOS REMOVIDOS");
-    }
+    });
 }
 
 async function updateSuperAdminCreds() {
@@ -367,845 +407,417 @@ async function inicializarSuperAdminSeguro() {
     }
 }
 inicializarSuperAdminSeguro();
-
 // ==========================================
-// 7. PERFIL, SALDO Y COMPROBANTES
+// 7. RENDERIZADO DE PRODUCTOS (ESTILO APPLE)
 // ==========================================
-function updateProfileUI() {
-    const pId = document.getElementById('profile-id');
-    const pName = document.getElementById('profile-name-display');
-    const wBal = document.getElementById('wallet-balance');
-    const rSec = document.getElementById('register-section');
+function renderGrid(filterCat = null) {
+    const grid = document.getElementById('products-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    showView('store');
 
-    if(pId) pId.innerText = myUserId;
-    if(pName) pName.innerText = currentUser?.registered ? currentUser.name : "Invitado";
-    if(wBal) wBal.innerText = `$${(currentUser?.balance || 0).toLocaleString()}`;
-    
-    if(rSec) {
-        if(currentUser?.registered) {
-            rSec.classList.add('hidden');
-        } else {
-            rSec.classList.remove('hidden');
-        }
-    }
-}
-
-async function registerUser() {
-    const user = document.getElementById('reg-username').value.trim();
-    const name = document.getElementById('reg-name').value.trim();
-    
-    if(!user || !name) return showToast("LLENA TODOS LOS DATOS");
-    
-    const snapshot = await db.collection("usuarios").where("username", "==", user).get();
-    if (!snapshot.empty) {
-        if (snapshot.docs[0].id !== myUserId) {
-            return showToast("EL USUARIO YA EXISTE, ELIGE OTRO");
-        }
+    let toShow = products;
+    if (filterCat) {
+        toShow = products.filter(p => p.category === filterCat);
     }
 
-    await db.collection("usuarios").doc(myUserId).update({
-        username: user, 
-        name: name, 
-        registered: true, 
-        balance: firebase.firestore.FieldValue.increment(5000)
-    });
-    
-    showToast("¡REGISTRO EXITOSO! +$5000 AÑADIDOS");
-    closeModal('modal-profile'); 
-}
-
-async function addBalanceToUser() {
-    if(!isAdmin) return;
-    const id = document.getElementById('bal-user-id').value.trim();
-    const amt = parseInt(document.getElementById('bal-amount').value);
-    if(!id || isNaN(amt)) return showToast("DATOS INVÁLIDOS");
-    const doc = await db.collection("usuarios").doc(id).get();
-    if(!doc.exists) return showToast("USUARIO NO ENCONTRADO EN LA BD");
-    await db.collection("usuarios").doc(id).update({ balance: firebase.firestore.FieldValue.increment(amt) });
-    showToast(`$${amt} RECARGADOS AL ID #${id}`); closeModal('modal-add-balance');
-}
-
-function openUserRecharge() {
-    closeModal('modal-profile');
-    document.getElementById('r-name').value = currentUser?.name || "";
-    document.getElementById('r-phone').value = "";
-    document.getElementById('r-amount').value = "";
-    document.getElementById('recharge-form').classList.remove('hidden');
-    document.getElementById('recharge-processing').classList.add('hidden');
-    openModal('modal-user-recharge');
-}
-
-function processRecharge() {
-    const name = document.getElementById('r-name').value.trim();
-    const phone = document.getElementById('r-phone').value.trim();
-    const amount = document.getElementById('r-amount').value;
-    
-    if(!name || !phone || !amount) return showToast("LLENA TODOS LOS DATOS");
-
-    document.getElementById('recharge-form').classList.add('hidden');
-    document.getElementById('recharge-processing').classList.remove('hidden');
-
-    currentReceiptContext = {
-        type: 'recharge', name: name, phone: phone, amount: amount,
-        token: "REC-" + Math.random().toString(36).substr(2,5).toUpperCase()
-    };
-
-    setTimeout(() => {
-        closeModal('modal-user-recharge');
-        showReceiptModal(`Envía $${parseInt(amount).toLocaleString()} al NEQUI 3137084357 para recargar tu saldo.`);
-    }, 1500);
-}
-
-function showReceiptModal(instructionText) {
-    document.getElementById('receipt-instructions').innerText = instructionText + "\nAdjunta el comprobante aquí debajo.";
-    document.getElementById('receipt-file-input').value = "";
-    document.getElementById('receipt-preview').src = "";
-    document.getElementById('receipt-preview').classList.add('hidden');
-    document.getElementById('receipt-upload-label').classList.remove('hidden');
-    currentReceiptFile = null;
-    
-    document.getElementById('receipt-form').classList.remove('hidden');
-    document.getElementById('receipt-processing').classList.add('hidden');
-
-    openModal('modal-receipt');
-}
-
-function previewReceipt() {
-    const file = document.getElementById('receipt-file-input').files[0];
-    if(file) {
-        currentReceiptFile = file;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById('receipt-preview').src = e.target.result;
-            document.getElementById('receipt-preview').classList.remove('hidden');
-            document.getElementById('receipt-upload-label').classList.add('hidden');
-        }
-        reader.readAsDataURL(file);
-    }
-}
-
-async function submitReceipt() {
-    if(!currentReceiptFile) return showToast("DEBES ADJUNTAR EL COMPROBANTE");
-
-    document.getElementById('receipt-form').classList.add('hidden');
-    document.getElementById('receipt-processing').classList.remove('hidden');
-
-    let caption = "";
-    if(currentReceiptContext.type === 'recharge') {
-        caption = `💰 *SOLICITUD DE RECARGA*\n\n*Token:* ${currentReceiptContext.token}\n*Usuario:* ${currentReceiptContext.name}\n*WhatsApp:* ${currentReceiptContext.phone}\n*ID:* #${myUserId}\n*Monto a recargar:* $${currentReceiptContext.amount}\n\n_Revisa el comprobante y recarga la billetera manualmente._`;
+    toShow.forEach(p => {
+        const finalPrice = p.discount > 0 ? (p.price - p.discount) : p.price;
+        const discountTag = p.discount > 0 ? `<div class="discount-tag">-$${p.discount.toLocaleString()}</div>` : '';
         
-    } else if (currentReceiptContext.type === 'vip_access') {
-        const gananciaCreador = currentReceiptContext.amount * 0.7;
-        const gananciaUranium = currentReceiptContext.amount * 0.3;
-        caption = `💎 *PAGO VIP NEQUI (COMPROBANTE)*\n\n*Token:* ${currentReceiptContext.token}\n*Debate:* ${currentReceiptContext.title}\n*Comprador ID:* #${myUserId}\n*Creador WA:* ${currentReceiptContext.authorPhone}\n*Pagado:* $${currentReceiptContext.amount}\n\n⚠️ *ACCIÓN REQUERIDA:*\n1. Añade el ID #${myUserId} a la accessList del debate en Firebase.\n2. Transfiere $${gananciaCreador} al creador.\n*Ganancia Uranium:* $${gananciaUranium}`;
-        
-    } else {
-        caption = `🛒 *NUEVA ORDEN (COMPROBANTE)*\n\n*Token:* ${currentReceiptContext.token}\n*Cliente:* ${currentReceiptContext.name}\n*WhatsApp:* ${currentReceiptContext.phone}\n*ID:* #${myUserId}\n*Servicios:* ${currentReceiptContext.details}\n*Total Pagado:* $${currentReceiptContext.amount}`;
-        cart = {}; updateCartUI(); 
-    }
-
-    await sendTelegramPhoto(currentReceiptFile, caption);
-
-    closeModal('modal-receipt');
-    showToast("¡COMPROBANTE ENVIADO CON ÉXITO! REVISAREMOS TU PAGO PRONTO.");
-}
-
-// ==========================================
-// 8. CATEGORÍAS Y PRODUCTOS (PUBLICAR/ELIMINAR)
-// ==========================================
-async function saveNewCategory() {
-    const name = document.getElementById('new-cat-name').value.trim();
-    if(name) {
-        await db.collection("categorias").add({ name: name.toUpperCase() });
-        closeModal('modal-add-cat'); showToast("CATEGORÍA CREADA");
-        document.getElementById('new-cat-name').value = "";
-    }
-}
-
-function openDeleteCatModal() {
-    const sel = document.getElementById('d-cat-select');
-    sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    openModal('modal-delete-cat');
-}
-
-async function deleteCategory() {
-    const id = document.getElementById('d-cat-select').value;
-    if(!id) return showToast("SELECCIONA UNA CATEGORÍA");
-    if(confirm("¿Seguro que quieres eliminar esta plataforma de raíz?")) {
-        await db.collection("categorias").doc(id).delete();
-        closeModal('modal-delete-cat');
-        showToast("CATEGORÍA ELIMINADA");
-    }
-}
-
-function openPublishModal(id = null) {
-    editingId = id;
-    if(id) {
-        document.getElementById('pub-title').innerText = "Editar Producto";
-        const p = products.find(prod => prod.id.toString() === id.toString());
-        if(!p) return;
-        
-        document.getElementById('p-name').value = p.name || "";
-        document.getElementById('p-short').value = p.short || "";
-        document.getElementById('p-price').value = p.price || "";
-        document.getElementById('p-cat-select').value = p.catId || "";
-        document.getElementById('p-desc').value = p.desc || "";
-        document.getElementById('p-contact').value = p.contact || "";
-        document.getElementById('p-wa').value = p.wa || "";
-        document.getElementById('p-pinned').checked = p.pinned || false;
-        
-        currentImg = p.img || "";
-        if(currentImg) {
-            document.getElementById('file-preview').src = currentImg;
-            document.getElementById('file-preview').classList.remove('hidden');
-            document.getElementById('upload-label').classList.add('hidden');
-        }
-    } else {
-        document.getElementById('pub-title').innerText = "Nuevo Producto";
-        resetForm();
-    }
-    openModal('modal-publish');
-}
-
-async function deleteProduct(id) {
-    if(confirm("¿Seguro que quieres eliminar este producto de la tienda para siempre?")) {
-        await db.collection("productos").doc(id.toString()).delete();
-        showToast("PRODUCTO ELIMINADO 🗑️");
-    }
-}
-
-// NUEVA VERSIÓN: COMPRESOR DE IMÁGENES
-function previewImage() {
-    const file = document.getElementById('file-input').files[0];
-    if(file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 600;
-                let scaleSize = MAX_WIDTH / img.width;
-                if(scaleSize > 1) scaleSize = 1; // No agrandar si es pequeña
-                
-                canvas.width = img.width * scaleSize;
-                canvas.height = img.height * scaleSize;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                currentImg = canvas.toDataURL('image/jpeg', 0.7);
-
-                document.getElementById('file-preview').src = currentImg;
-                document.getElementById('file-preview').classList.remove('hidden');
-                document.getElementById('upload-label').classList.add('hidden');
-            };
-            img.src = event.target.result;
-        }; 
-        reader.readAsDataURL(file);
-    }
-}
-
-// NUEVA VERSIÓN: BLINDADA CONTRA ERRORES
-async function handleSaveProduct() {
-    try {
-        const name = document.getElementById('p-name')?.value.trim();
-        const price = document.getElementById('p-price')?.value;
-        
-        if(!currentImg || !name || !price) return showToast("FOTO, NOMBRE Y PRECIO OBLIGATORIOS");
-
-        const data = {
-            name: name, 
-            price: parseFloat(price),
-            short: document.getElementById('p-short')?.value.trim() || "",
-            desc: document.getElementById('p-desc')?.value.trim() || "",
-            contact: document.getElementById('p-contact')?.value.trim() || "3137084357",
-            wa: document.getElementById('p-wa')?.value.trim() || `Hola URANIUM, me interesa ${name}`,
-            catId: document.getElementById('p-cat-select')?.value || "",
-            pinned: document.getElementById('p-pinned')?.checked || false, 
-            img: currentImg,
-        };
-
-        if(editingId) {
-            await db.collection("productos").doc(editingId.toString()).update(data);
-        } else {
-            data.reactions = {}; data.comments = [];
-            await db.collection("productos").add(data);
-        }
-
-        closeModal('modal-publish'); 
-        showToast(editingId ? "PRODUCTO ACTUALIZADO" : "PRODUCTO PUBLICADO"); 
-        
-    } catch (error) {
-        console.error("Error al guardar:", error);
-        showToast("⚠️ ERROR: " + error.message);
-    }
-}
-
-function resetForm() {
-    document.querySelectorAll('#modal-publish input[type="text"], #modal-publish input[type="number"], #modal-publish textarea').forEach(i => i.value = "");
-    const cb = document.getElementById('p-pinned'); if(cb) cb.checked = false;
-    const fp = document.getElementById('file-preview'); if(fp) fp.classList.add('hidden');
-    const ul = document.getElementById('upload-label'); if(ul) ul.classList.remove('hidden');
-    currentImg = "";
-}
-
-// ==========================================
-// 9. RENDERIZAR INTERFAZ PRINCIPAL (TIENDA Y DETALLES)
-// ==========================================
-function renderGrid(catId = 'all') {
-    const grid = document.getElementById('product-grid');
-    if(!grid) return; grid.innerHTML = '';
-    
-    let filtered = products.filter(p => catId === 'all' || p.catId === catId);
-    filtered.sort((a, b) => (b.pinned === true) - (a.pinned === true));
-    
-    filtered.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.onclick = () => openDetail(p.id);
-        
-        card.innerHTML = `
-            ${isAdmin ? `
-            <div style="position:absolute; top:8px; right:8px; z-index:10; display:flex; gap:5px;">
-                <button onclick="event.stopPropagation(); openPublishModal('${p.id}')" style="background:var(--accent); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✏️</button>
-                <button onclick="event.stopPropagation(); deleteProduct('${p.id}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✕</button>
+        grid.innerHTML += `
+        <div class="card" onclick="verProducto('${p.id}')">
+            <div class="card-img" style="background-image: url('${p.img}')">
+                ${discountTag}
             </div>
-            ` : ''}
-            <div class="card-img">
-                <div class="price-tag">$${parseFloat(p.price).toLocaleString()}</div>
-                <img src="${p.img}">
+            <div class="card-body">
+                <h3>${p.name}</h3>
+                <p class="price" style="${p.discount > 0 ? 'color: var(--danger);' : ''}">
+                    $${finalPrice.toLocaleString()} 
+                    ${p.discount > 0 ? `<span style="text-decoration:line-through; font-size:12px; color:gray; margin-left:5px;">$${p.price.toLocaleString()}</span>` : ''}
+                </p>
+                <button class="apple-btn" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Agregar</button>
             </div>
-            <div class="card-product-name">${p.name}</div>
-        `;
-        grid.appendChild(card);
+        </div>`;
     });
 }
 
 function renderAll() {
-    const navMob = document.getElementById('mobile-nav-cats');
-    const sel = document.getElementById('p-cat-select');
-    const selDel = document.getElementById('d-cat-select');
-    
-    let htmlMob = categories.map(c => `<button onclick="setActiveCat(this, '${c.id}')">${c.name}</button>`).join('');
-    let htmlOptions = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    const container = document.getElementById('all-categories-container');
+    if (!container) return;
+    container.innerHTML = '';
+    showView('store');
 
-    if(navMob) navMob.innerHTML = `<button class="active" onclick="setActiveCat(this, 'all')">Todas</button>` + htmlMob;
-    if(sel) sel.innerHTML = htmlOptions;
-    if(selDel) selDel.innerHTML = htmlOptions;
-    
-    renderGrid();
-}
+    categories.forEach(cat => {
+        const prods = products.filter(p => p.category === cat.id);
+        if (prods.length === 0) return;
 
-function setActiveCat(btn, catId) {
-    document.querySelectorAll('.mobile-cat-nav button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderGrid(catId);
-}
-
-function formatText(text) {
-    if (!text) return "";
-    return String(text)
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/__(.*?)__/g, '<em>$1</em>')
-        .replace(/>(.*?)</g, '<mark style="background:rgba(255,215,0,0.3); color:white; padding:0 4px; border-radius:4px;">$1</mark>')
-        .replace(/=#([0-9A-Fa-f]{6})(.*?)(?=\s|$)/g, '<span style="color:#$1">$2</span>')
-        .replace(/\n/g, '<br>');
-}
-
-function openDetail(id) {
-    const p = products.find(prod => prod.id.toString() === id.toString());
-    if(!p) return;
-    const body = document.getElementById('detail-body');
-    
-    let likes = 0, dislikes = 0;
-    let myReaction = p.reactions ? p.reactions[myUserId] : null;
-    
-    if(p.reactions) {
-        for(let user in p.reactions) {
-            if(p.reactions[user] === 'like') likes++;
-            if(p.reactions[user] === 'dislike') dislikes++;
-        }
-    }
-
-    let commentsHTML = (p.comments || []).map(c => `
-        <div style="border-bottom: 1px solid var(--border-color); padding: 10px 0; font-size: 13px;">
-            <strong style="color:var(--text-muted); font-size:11px;">#${c.userId}</strong><br>
-            ${c.text}
-        </div>
-    `).join('');
-
-    body.innerHTML = `
-        <div class="detail-layout">
-            <div class="detail-img-container"><img src="${p.img}"></div>
-            <div class="detail-info">
-                <h2 style="margin-bottom:5px;">${p.name}</h2>
-                <h3 style="color:var(--accent); margin-bottom:15px;">$${parseFloat(p.price).toLocaleString()}</h3>
-                <p style="font-size:14px; flex-grow:1; line-height:1.6;">${formatText(p.desc || '')}</p>
-                
-                <div class="social-bar">
-                    <button onclick="handleReaction('${p.id}', 'like')" style="color: ${myReaction==='like' ? 'var(--accent)' : 'inherit'}">👍 <span>${likes}</span></button>
-                    <button onclick="handleReaction('${p.id}', 'dislike')" style="color: ${myReaction==='dislike' ? 'var(--danger)' : 'inherit'}">👎 <span>${dislikes}</span></button>
+        let html = `<div class="category-section"><h2 class="category-title">${cat.name}</h2><div class="products-grid">`;
+        prods.forEach(p => {
+            const finalPrice = p.discount > 0 ? (p.price - p.discount) : p.price;
+            const discountTag = p.discount > 0 ? `<div class="discount-tag">-$${p.discount.toLocaleString()}</div>` : '';
+            
+            html += `
+            <div class="card" onclick="verProducto('${p.id}')">
+                <div class="card-img" style="background-image: url('${p.img}')">
+                    ${discountTag}
                 </div>
-
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <button class="apple-btn" onclick="addToCart('${p.id}'); closeModal('modal-detail')">Añadir al carrito</button>
-                    <button class="apple-btn-secondary" style="background:#28a745; color:white;" onclick="window.open('https://wa.me/57${p.contact || '3137084357'}?text=${encodeURIComponent(p.wa || 'Hola')}')">Chat WhatsApp</button>
-                    <button class="apple-btn-secondary" style="background:#da0081; color:white;" onclick="buyDirectNequi('${p.id}')">Pago Rápido Nequi</button>
+                <div class="card-body">
+                    <h3>${p.name}</h3>
+                    <p class="price" style="${p.discount > 0 ? 'color: var(--danger);' : ''}">
+                        $${finalPrice.toLocaleString()}
+                        ${p.discount > 0 ? `<span style="text-decoration:line-through; font-size:12px; color:gray; margin-left:5px;">$${p.price.toLocaleString()}</span>` : ''}
+                    </p>
+                    <button class="apple-btn" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Agregar</button>
                 </div>
-
-                <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top:20px;">
-                    <h4 style="margin-bottom:10px;">Reseñas</h4>
-                    <div style="display:flex; gap:10px; margin-bottom:15px;">
-                        <input type="text" id="com-text-${p.id}" placeholder="Opina sobre esto..." style="flex-grow:1; background:var(--surface-elevated); border:none; padding:10px 15px; border-radius:20px; color:white; outline:none;">
-                        <button class="apple-btn" style="width:auto; padding:10px 20px; border-radius:20px;" onclick="addComment('${p.id}')">Enviar</button>
-                    </div>
-                    <div style="max-height:150px; overflow-y:auto; padding-right:10px;">${commentsHTML || '<p class="text-muted" style="font-size:12px;">Sé el primero en comentar.</p>'}</div>
-                </div>
-            </div>
-        </div>
-    `; 
-    openModal('modal-detail');
-}
-
-async function handleReaction(id, type) {
-    const ref = db.collection("productos").doc(id.toString());
-    const doc = await ref.get();
-    let reactions = doc.data().reactions || {};
-    if(reactions[myUserId] === type) delete reactions[myUserId]; else reactions[myUserId] = type;
-    await ref.update({ reactions });
-    openDetail(id); 
-}
-
-async function addComment(id) {
-    const input = document.getElementById(`com-text-${id}`);
-    if(!input.value) return showToast("ESCRIBE ALGO");
-    await db.collection("productos").doc(id.toString()).update({
-        comments: firebase.firestore.FieldValue.arrayUnion({ userId: myUserId, text: input.value, timestamp: new Date().toISOString() })
-    });
-    input.value = ""; showToast("COMENTARIO ENVIADO"); openDetail(id);
-}
-
-function openBigEditor() {
-    document.getElementById('big-editor-area').value = document.getElementById('p-desc').value;
-    openModal('modal-big-editor');
-}
-function saveBigEditor() {
-    document.getElementById('p-desc').value = document.getElementById('big-editor-area').value;
-    closeModal('modal-big-editor');
-}
-
-// ==========================================
-// 10. CARRITO Y PAGOS
-// ==========================================
-function addToCart(id) {
-    if(cartCooldowns[id] && (Date.now() - cartCooldowns[id] < 1000)) return showToast("ESPERA...");
-    cartCooldowns[id] = Date.now();
-    
-    const productData = products.find(p => p.id.toString() === id.toString());
-    if(!productData) return;
-
-    if(cart[id]) cart[id].qty++; else cart[id] = {...productData, qty: 1};
-    updateCartUI(); showToast("AÑADIDO AL CARRITO");
-}
-
-function removeFromCart(id) { delete cart[id]; updateCartUI(); }
-
-function updateCartUI() {
-    const list = document.getElementById('cart-list'); let total = 0, count = 0;
-    list.innerHTML = Object.values(cart).map(p => {
-        total += (p.price * p.qty); count += p.qty;
-        return `
-        <div style="background:var(--surface-elevated); padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-            <div><strong style="font-size:14px;">${p.name} (x${p.qty})</strong><br><span style="color:var(--accent); font-weight:bold;">$${(p.price * p.qty).toLocaleString()}</span></div>
-            <button onclick="removeFromCart('${p.id}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer;">✕</button>
-        </div>`;
-    }).join('');
-    document.getElementById('cart-count').innerText = count; 
-    document.getElementById('cart-total').innerText = `$${total.toLocaleString()}`; 
-    document.getElementById('pay-val').innerText = `$${total.toLocaleString()}`;
-}
-
-function goToWalletPayment() {
-    const total = Object.values(cart).reduce((sum, p) => sum + (p.price * p.qty), 0);
-    if(total === 0) return showToast("CARRITO VACÍO");
-    if(currentUser.balance < total) return showToast("SALDO INSUFICIENTE. ¡RECARGA!");
-
-    document.getElementById('w-pay-name').value = currentUser?.registered ? currentUser.name : "";
-    document.getElementById('w-pay-phone').value = "";
-    document.getElementById('w-pay-val').innerText = `$${total.toLocaleString()}`;
-    
-    closeModal('modal-cart');
-    document.getElementById('wallet-form').classList.remove('hidden');
-    document.getElementById('wallet-processing').classList.add('hidden');
-    openModal('modal-wallet-confirm');
-}
-
-async function processWalletPayment() {
-    const name = document.getElementById('w-pay-name').value.trim();
-    const phone = document.getElementById('w-pay-phone').value.trim();
-    const total = Object.values(cart).reduce((sum, p) => sum + (p.price * p.qty), 0);
-    
-    if(!name || phone.length < 10) return showToast("DATOS INVÁLIDOS");
-    if(currentUser.balance < total) return showToast("SALDO INSUFICIENTE");
-
-    document.getElementById('wallet-form').classList.add('hidden');
-    document.getElementById('wallet-processing').classList.remove('hidden');
-
-    await db.collection("usuarios").doc(myUserId).update({ balance: firebase.firestore.FieldValue.increment(-total) });
-    
-    const token = "WAL-" + Math.random().toString(36).substr(2,5).toUpperCase();
-    let details = Object.values(cart).map(p => `${p.qty}x ${p.name}`).join(', ');
-    
-    let tgMsg = `🟢 *COMPRA (BILLETERA)* 🟢\n\n*Token:* ${token}\n*Cliente:* ${name} (${phone})\n*ID:* #${myUserId}\n*Servicios:* ${details}\n*Total:* $${total}`;
-    sendTelegramNotification(tgMsg);
-
-    setTimeout(() => {
-        cart = {}; updateCartUI(); closeModal('modal-wallet-confirm'); 
-        showToast("¡COMPRA EXITOSA!");
-    }, 1500);
-}
-
-function goToPayment() {
-    if(Object.keys(cart).length === 0) return showToast("CARRITO VACÍO");
-    closeModal('modal-cart'); openModal('modal-nequi');
-}
-
-function buyDirectNequi(id) {
-    const p = products.find(prod => prod.id.toString() === id.toString()); 
-    if(!p) return;
-    cart = {}; addToCart(id); 
-    closeModal('modal-detail'); openModal('modal-nequi');
-}
-
-function processPayment() {
-    const name = document.getElementById('pay-name').value.trim();
-    const phone = document.getElementById('pay-phone').value.trim();
-    if(!name || phone.length < 10) return showToast("DATOS INVÁLIDOS");
-
-    let total = Object.values(cart).reduce((sum, p) => sum + (p.price * p.qty), 0);
-
-    document.getElementById('nequi-form').classList.add('hidden');
-    document.getElementById('nequi-processing').classList.remove('hidden');
-
-    currentReceiptContext = {
-        type: 'checkout', name: name, phone: phone, amount: total,
-        details: Object.values(cart).map(p => `${p.qty}x ${p.name}`).join(', '),
-        token: "ORD-" + Math.random().toString(36).substr(2,5).toUpperCase()
-    };
-
-    setTimeout(() => {
-        closeModal('modal-nequi');
-        showReceiptModal(`Envía $${total.toLocaleString()} al NEQUI 3137084357 para completar tu orden.`);
-        document.getElementById('nequi-form').classList.remove('hidden');
-        document.getElementById('nequi-processing').classList.add('hidden');
-    }, 2000); 
-}
-
-// ==========================================
-// 11. COMUNIDAD Y FORO (ESTILO iMESSAGE CON VIP)
-// ==========================================
-function openForumModal() {
-    if(!currentUser || !currentUser.registered) return showToast("DEBES REGISTRAR TU PERFIL PARA CREAR UN DEBATE");
-    document.getElementById('f-title').value = "";
-    document.getElementById('f-content').value = "";
-    document.getElementById('f-password').value = "";
-    document.getElementById('f-type').value = "publico";
-    
-    const vipPriceInput = document.getElementById('f-vip-price');
-    const vipPhoneInput = document.getElementById('f-vip-phone');
-    if(vipPriceInput) vipPriceInput.value = "";
-    if(vipPhoneInput) vipPhoneInput.value = "";
-    
-    currentForumImg = "";
-    const preview = document.getElementById('f-preview');
-    if(preview) {
-        preview.src = "";
-        preview.classList.add('hidden');
-    }
-    const label = document.getElementById('f-upload-label');
-    if(label) label.classList.remove('hidden');
-
-    toggleForumPassword();
-    openModal('modal-forum');
-}
-
-function toggleForumPassword() {
-    const type = document.getElementById('f-type').value;
-    const pwdInput = document.getElementById('f-password');
-    const vipOptions = document.getElementById('f-vip-options');
-    
-    if(pwdInput) pwdInput.classList.add('hidden');
-    if(vipOptions) vipOptions.classList.add('hidden');
-    
-    if(type === 'clave' && pwdInput) pwdInput.classList.remove('hidden');
-    if(type === 'vip' && vipOptions) vipOptions.classList.remove('hidden');
-}
-
-function previewForumImage() {
-    const file = document.getElementById('f-file-input').files[0];
-    if(file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 600;
-                let scaleSize = MAX_WIDTH / img.width;
-                if(scaleSize > 1) scaleSize = 1;
-                
-                canvas.width = img.width * scaleSize;
-                canvas.height = img.height * scaleSize;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                currentForumImg = canvas.toDataURL('image/jpeg', 0.7);
-
-                document.getElementById('f-preview').src = currentForumImg;
-                document.getElementById('f-preview').classList.remove('hidden');
-                document.getElementById('f-upload-label').classList.add('hidden');
-            };
-            img.src = event.target.result;
-        }; 
-        reader.readAsDataURL(file);
-    }
-}
-
-async function saveForumPost() {
-    try {
-        const title = document.getElementById('f-title')?.value.trim();
-        const content = document.getElementById('f-content')?.value.trim();
-        const type = document.getElementById('f-type')?.value;
-        const password = document.getElementById('f-password')?.value.trim() || "";
-        
-        if(!title || !content) return showToast("FALTAN DATOS");
-        if(type === 'clave' && !password) return showToast("DEBES ESTABLECER UNA CLAVE");
-
-        let vipPrice = 0;
-        let vipPhone = "";
-        if(type === 'vip') {
-            const priceInput = document.getElementById('f-vip-price');
-            const phoneInput = document.getElementById('f-vip-phone');
-            if(priceInput && phoneInput) {
-                vipPrice = parseInt(priceInput.value);
-                vipPhone = phoneInput.value.trim();
-            }
-            if(!vipPrice || !vipPhone) return showToast("DEBES PONER EL PRECIO Y TU WHATSAPP");
-        }
-
-        await db.collection("foro").add({
-            authorId: myUserId, 
-            authorName: currentUser.name || "Invitado", 
-            title: title, 
-            content: content, 
-            img: currentForumImg, 
-            type: type, 
-            password: password, 
-            vipPrice: vipPrice, 
-            vipPhone: vipPhone, 
-            accessList: [myUserId], 
-            replies: [], 
-            timestamp: new Date().toISOString()
+            </div>`;
         });
+        html += `</div></div>`;
+        container.innerHTML += html;
+    });
+}
 
-        currentForumImg = ""; 
-        const preview = document.getElementById('f-preview');
-        if(preview) {
-            preview.src = "";
-            preview.classList.add('hidden');
+// ==========================================
+// 8. DETALLE DE PRODUCTO Y RECLAMAR PANTALLA
+// ==========================================
+function verProducto(id) {
+    const p = products.find(x => x.id === id);
+    if(!p) return;
+    const finalPrice = p.discount > 0 ? (p.price - p.discount) : p.price;
+    
+    document.getElementById('detail-img').style.backgroundImage = `url('${p.img}')`;
+    document.getElementById('detail-name').innerText = p.name;
+    document.getElementById('detail-desc').innerText = p.desc || 'Sin descripción';
+    
+    document.getElementById('detail-price').innerHTML = `$${finalPrice.toLocaleString()} ` + 
+        (p.discount > 0 ? `<span style="text-decoration:line-through; font-size:14px; color:gray; margin-left:8px;">$${p.price.toLocaleString()}</span>` : '');
+
+    document.getElementById('detail-stock').innerText = `Disponibles: ${p.stock}`;
+    
+    const adminPanel = document.getElementById('detail-admin-actions');
+    if (isAdmin) {
+        adminPanel.classList.remove('hidden');
+        adminPanel.innerHTML = `
+            <button class="apple-btn" onclick="editProduct('${id}')">${ICONS.edit} Editar</button>
+            <button class="apple-btn" style="background:var(--danger); color:white;" onclick="deleteProduct('${id}')">${ICONS.trash} Eliminar</button>
+        `;
+    } else {
+        adminPanel.classList.add('hidden');
+    }
+
+    // Configurar botones de acción de usuario
+    const userActions = document.getElementById('detail-user-actions');
+    userActions.innerHTML = `
+        <button class="apple-btn" style="margin-bottom:10px;" onclick="addToCart('${p.id}', 1)">Agregar al Carrito</button>
+        <button class="apple-btn" style="background:var(--success); color:white;" onclick="abrirClaim('${p.id}')">Reclamar Pantalla Ahora</button>
+    `;
+
+    showView('detail');
+}
+
+function abrirClaim(productId) {
+    claimContext = products.find(p => p.id === productId);
+    if(!claimContext) return;
+    openModal('modal-claim');
+}
+
+function submitClaim() {
+    const name = document.getElementById('claim-name').value.trim();
+    const phone = document.getElementById('claim-phone').value.trim();
+    
+    if(!name || !phone) return showToast("Faltan datos");
+    
+    const msg = `🚨 *NUEVA PANTALLA RECLAMADA* 🚨\n\n` +
+                `👤 *Usuario:* ${name}\n` +
+                `📱 *WhatsApp:* ${phone}\n` +
+                `🛒 *Producto:* ${claimContext.name}\n` +
+                `🆔 *ID del Sistema:* #${myUserId}`;
+    
+    sendTelegramNotification(msg);
+    closeModal('modal-claim');
+    showToast("¡Solicitud enviada! Te contactaremos vía WhatsApp.");
+    document.getElementById('claim-name').value = "";
+    document.getElementById('claim-phone').value = "";
+    claimContext = null;
+}
+
+// ==========================================
+// 9. CARRITO DE COMPRAS (MATEMÁTICAS EXACTAS)
+// ==========================================
+function addToCart(id, qty) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    if (p.stock <= 0) return showToast("AGOTADO");
+
+    if (cartCooldowns[id] && Date.now() - cartCooldowns[id] < 600000) {
+        return showToast("ESPERA 10 MIN PARA AGREGAR OTRA VEZ");
+    }
+
+    cart[id] = (cart[id] || 0) + qty;
+    if (cart[id] > p.stock) cart[id] = p.stock;
+    
+    cartCooldowns[id] = Date.now();
+    updateCartCount();
+    showToast(`"${p.name}" AGREGADO`);
+}
+
+function updateCartCount() {
+    const c = Object.values(cart).reduce((a, b) => a + b, 0);
+    const badge = document.getElementById('cart-count');
+    if (badge) badge.innerText = c;
+}
+
+function toggleCart() {
+    const c = document.getElementById('cart-sidebar');
+    c.classList.toggle('open');
+    if (c.classList.contains('open')) renderCart();
+}
+
+function renderCart() {
+    const items = document.getElementById('cart-items');
+    items.innerHTML = '';
+    let total = 0;
+
+    if (Object.keys(cart).length === 0) {
+        items.innerHTML = '<p class="text-muted" style="text-align:center; margin-top:20px;">Tu carrito está vacío</p>';
+        document.getElementById('cart-total').innerText = '$0';
+        return;
+    }
+
+    for (const [id, qty] of Object.entries(cart)) {
+        const p = products.find(x => x.id === id);
+        if (!p) continue;
+        
+        // APLICANDO EL DESCUENTO A LA MATEMÁTICA DEL CARRITO
+        const finalPrice = p.discount > 0 ? (p.price - p.discount) : p.price;
+        total += finalPrice * qty;
+
+        items.innerHTML += `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px;">
+            <div>
+                <strong style="font-size:15px;">${p.name}</strong><br>
+                <span class="text-muted" style="font-size:13px;">${qty} x $${finalPrice.toLocaleString()}</span>
+            </div>
+            <button class="btn-sm-danger" onclick="delete cart['${id}']; renderCart(); updateCartCount();">${ICONS.close}</button>
+        </div>`;
+    }
+    document.getElementById('cart-total').innerText = `$${total.toLocaleString()}`;
+}
+
+async function payCart(method) {
+    if (Object.keys(cart).length === 0) return showToast("CARRITO VACÍO");
+
+    let total = 0;
+    let itemsText = "";
+    const itemsToUpdate = [];
+
+    // Recalcular el total con descuentos justos antes de pagar
+    for (const [id, qty] of Object.entries(cart)) {
+        const p = products.find(x => x.id === id);
+        if (p) {
+            const finalPrice = p.discount > 0 ? (p.price - p.discount) : p.price;
+            total += finalPrice * qty;
+            itemsText += `- ${qty}x ${p.name} ($${finalPrice.toLocaleString()} c/u)\n`;
+            itemsToUpdate.push({ ref: db.collection("productos").doc(id), newStock: p.stock - qty });
         }
-        const label = document.getElementById('f-upload-label');
-        if(label) label.classList.remove('hidden');
+    }
 
-        closeModal('modal-forum'); 
-        showToast("¡DEBATE PUBLICADO!");
-    } catch (error) {
-        console.error("Error al guardar debate:", error);
-        showToast("⚠️ ERROR: " + error.message);
+    if (method === 'billetera') {
+        if (!currentUser.registered) return showToast("DEBES REGISTRARTE PARA USAR TU BILLETERA");
+        if (currentUser.balance < total) return showToast("SALDO INSUFICIENTE");
+
+        iosConfirm("Pagar con Billetera", `Se descontarán $${total.toLocaleString()} de tu saldo.`, async () => {
+            const newBalance = currentUser.balance - total;
+            await db.collection("usuarios").doc(myUserId).update({ balance: newBalance });
+            
+            for (let item of itemsToUpdate) { await item.ref.update({ stock: item.newStock }); }
+            
+            const msg = `✅ *COMPRA CON BILLETERA*\n\n👤 ID: #${myUserId}\n💵 Total: $${total.toLocaleString()}\n🛒 Artículos:\n${itemsText}`;
+            sendTelegramNotification(msg);
+            
+            cart = {}; updateCartCount(); toggleCart();
+            showToast("¡COMPRA EXITOSA!");
+        });
+    } else if (method === 'nequi') {
+        currentReceiptContext = { total, itemsText, itemsToUpdate, type: 'nequi_cart' };
+        openModal('modal-receipt');
     }
 }
 
-function renderForum() {
-    const feed = document.getElementById('forum-feed');
-    if(!feed) return;
+// ==========================================
+// 10. GESTIÓN DE RECIBOS Y COMPROBANTES
+// ==========================================
+function triggerReceiptInput() { document.getElementById('receipt-input').click(); }
+
+document.getElementById('receipt-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById('receipt-preview').innerText = "Archivo seleccionado: " + file.name;
+    currentReceiptFile = file;
+});
+
+async function sendReceipt() {
+    if (!currentReceiptFile) return showToast("ADJUNTA EL COMPROBANTE");
     
-    feed.innerHTML = forumPosts.map(post => {
-        let tag = '';
-        if(post.type === 'vip') tag = '<span class="tag vip">VIP</span>';
-        if(post.type === 'clave') tag = '<span class="tag locked">🔒 Clave</span>';
-        if(post.type === 'cerrado') tag = '<span class="tag locked">Cerrado</span>';
+    document.getElementById('btn-send-receipt').innerText = "Enviando...";
+    document.getElementById('btn-send-receipt').disabled = true;
+
+    try {
+        const ctx = currentReceiptContext;
+        let msg = `📸 *NUEVO COMPROBANTE*\n\n👤 ID: #${myUserId}\n`;
         
-        return `
-        <div class="forum-thread-card" onclick="openForumThread('${post.id}')" style="position:relative;">
-            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteForumPost('${post.id}')" style="position:absolute; top:10px; right:10px; background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px;">✕</button>` : ''}
-            <div style="flex-grow: 1; padding-right: 30px; display:flex; align-items:center;">
-                ${post.img ? `<img src="${post.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover; margin-right:12px;">` : ''}
-                <div>
-                    <h3 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom:5px;">${post.title}</h3>
-                    <span class="text-muted" style="font-size:12px;">Por ${post.authorName} • ${(post.replies||[]).length} msjs</span>
+        if (ctx.type === 'nequi_cart') {
+            msg += `🛒 *COMPRA CARRITO*\n💵 Total a verificar: $${ctx.total.toLocaleString()}\nArtículos:\n${ctx.itemsText}`;
+            for (let item of ctx.itemsToUpdate) { await item.ref.update({ stock: item.newStock }); }
+            cart = {}; updateCartCount();
+        } else if (ctx.type === 'topup') {
+            msg += `💰 *RECARGA BILLETERA*\n💵 Monto a recargar: $${ctx.amount.toLocaleString()}`;
+        }
+
+        await sendTelegramPhoto(currentReceiptFile, msg);
+        showToast("COMPROBANTE ENVIADO. EN BREVE SE VALIDARÁ.");
+        closeModal('modal-receipt');
+        if(document.getElementById('cart-sidebar').classList.contains('open')) toggleCart();
+        
+    } catch (error) {
+        showToast("ERROR AL ENVIAR");
+    } finally {
+        document.getElementById('btn-send-receipt').innerText = "Enviar a Verificación";
+        document.getElementById('btn-send-receipt').disabled = false;
+        currentReceiptFile = null;
+        document.getElementById('receipt-preview').innerText = "";
+        document.getElementById('receipt-input').value = "";
+    }
+}
+
+// ==========================================
+// 11. SISTEMA DE FORO (CON MODO VIP)
+// ==========================================
+function renderForum() {
+    const c = document.getElementById('forum-posts');
+    if (!c) return;
+    c.innerHTML = '';
+    
+    forumPosts.forEach(p => {
+        const d = new Date(p.timestamp);
+        const vipTag = p.vip ? `<span style="background:var(--accent); color:black; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; margin-left:5px;">VIP</span>` : '';
+        const adminBadge = p.authorRole === 'superadmin' ? `<span style="color:var(--accent); margin-left:5px;">${ICONS.lock} Admin</span>` : '';
+
+        c.innerHTML += `
+        <div class="card" style="margin-bottom:15px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);" onclick="openChat('${p.id}')">
+            <div style="padding:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <strong style="font-size:16px;">${p.title} ${vipTag}</strong>
+                        <div class="text-muted" style="font-size:12px; margin-top:4px;">Por: ${p.authorName} ${adminBadge} • ${d.toLocaleDateString()}</div>
+                    </div>
+                </div>
+                <p style="margin-top:10px; font-size:14px; line-height:1.4;">${p.content.substring(0, 100)}...</p>
+                <div style="margin-top:15px; display:flex; gap:15px; color:gray; font-size:13px;">
+                    <span style="display:flex; align-items:center; gap:5px;">${ICONS.thumbUp} ${p.likes || 0}</span>
+                    <span style="display:flex; align-items:center; gap:5px;">💬 ${(p.replies || []).length}</span>
                 </div>
             </div>
-            <div>${tag}</div>
         </div>`;
-    }).join('');
+    });
 }
 
-async function openForumThread(postId) {
-    const post = forumPosts.find(p => p.id === postId);
-    if(!post) return;
-    
-    if (post.type === 'vip' && !isAdmin) {
-        if (!post.accessList || !post.accessList.includes(myUserId)) {
-            pendingVipPost = post; 
-            const priceFormat = post.vipPrice ? post.vipPrice.toLocaleString() : "0";
-            document.getElementById('vip-buy-title').innerText = post.title;
-            document.getElementById('vip-buy-price').innerText = "$" + priceFormat;
-            openModal('modal-buy-vip');
-            return; 
-        }
-    }
+function openChat(id) {
+    const post = forumPosts.find(p => p.id === id);
+    if (!post) return;
 
-    if (post.type === 'clave' && !isAdmin) {
-        const guess = prompt("Este debate requiere contraseña:");
-        if (guess !== post.password) return showToast("CONTRASEÑA INCORRECTA");
-    }
-
-    currentThreadId = postId;
-    showView('forum-detail');
-    
-    document.getElementById('chat-title-display').innerText = post.title;
-    
-    let statusHtml = post.type === 'cerrado' ? 'Debate cerrado' : `Activo`;
-    if (isAdmin) {
-        statusHtml += ` &nbsp;|&nbsp; <button onclick="deleteForumPost('${post.id}')" style="background:var(--danger); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:bold;">🗑️ ELIMINAR</button>`;
-    }
-    document.getElementById('chat-status-display').innerHTML = statusHtml;
-    
-    const inputArea = document.querySelector('.chat-input-area');
-    if(post.type === 'cerrado' && !isAdmin) {
-        if(inputArea) inputArea.classList.add('hidden'); 
+    if (post.vip) {
+        iosPrompt("Debate VIP", "Ingresa la contraseña para acceder:", (val) => {
+            if (val === post.password || isAdmin) {
+                accederChat(post);
+            } else {
+                showToast("CONTRASEÑA INCORRECTA");
+            }
+        });
     } else {
-        if(inputArea) inputArea.classList.remove('hidden');
+        accederChat(post);
+    }
+}
+
+function accederChat(post) {
+    currentThreadId = post.id;
+    document.getElementById('view-forum').classList.add('hidden');
+    document.getElementById('view-forum-detail').classList.remove('hidden');
+    
+    document.getElementById('chat-title').innerHTML = post.title + (post.vip ? ' <span style="color:var(--accent); font-size:12px;">(VIP)</span>' : '');
+    
+    if (isAdmin) {
+        document.getElementById('chat-admin-actions').innerHTML = `
+            <button class="btn-sm-danger" onclick="deletePost('${post.id}')">${ICONS.trash} Eliminar Debate</button>
+        `;
+    } else {
+        document.getElementById('chat-admin-actions').innerHTML = '';
     }
 
     renderChatMessages(post);
 }
 
 function renderChatMessages(post) {
-    const container = document.getElementById('chat-messages');
-    
-    let html = `
-    <div class="chat-bubble other">
-        <div class="sender-name" style="color:var(--accent);">${post.authorName} (Autor)</div>
-        ${post.img ? `<img src="${post.img}" style="width:100%; border-radius:10px; margin-bottom:10px;">` : ''}
-        ${post.content}
-        <div class="chat-time">${new Date(post.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-        ${post.type !== 'cerrado' || isAdmin ? `<button class="btn-reply-chat" onclick="setReplyTo('${post.authorName}', '${post.content.replace(/'/g,"\\'")}')">Responder</button>` : ''}
+    const c = document.getElementById('chat-messages');
+    c.innerHTML = `
+    <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px;">
+        <div style="font-size:12px; color:var(--accent); margin-bottom:5px;">Post Original por ${post.authorName}</div>
+        <div style="font-size:15px; line-height:1.5;">${post.content}</div>
+        ${post.img ? `<img src="${post.img}" style="width:100%; border-radius:8px; margin-top:10px;">` : ''}
     </div>`;
 
-    (post.replies || []).forEach(r => {
+    const replies = post.replies || [];
+    replies.forEach((r, index) => {
         const isMe = r.authorId === myUserId;
-        const refHtml = r.replyToText ? `<div class="reply-reference"><em>${r.replyToText.substring(0, 40)}${r.replyToText.length>40?'...':''}</em></div>` : '';
-        
-        html += `
-        <div class="chat-bubble ${isMe ? 'me' : 'other'}">
-            ${!isMe ? `<div class="sender-name">${r.authorName}</div>` : ''}
-            ${refHtml}
-            ${r.text}
-            <div class="chat-time">${new Date(r.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-            ${post.type !== 'cerrado' || isAdmin ? `<button class="btn-reply-chat" style="${isMe ? 'color:rgba(255,255,255,0.8);' : ''}" onclick="setReplyTo('${r.authorName}', '${r.text.replace(/'/g,"\\'")}')">Responder</button>` : ''}
+        const align = isMe ? 'flex-end' : 'flex-start';
+        const bg = isMe ? 'var(--accent)' : 'rgba(255,255,255,0.1)';
+        const color = isMe ? '#000' : '#fff';
+        const adminBadge = r.authorRole === 'superadmin' ? `<span style="color:red; font-size:10px;">[ADMIN]</span> ` : '';
+
+        c.innerHTML += `
+        <div style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:15px; width:100%;">
+            <div style="font-size:11px; color:gray; margin-bottom:4px; margin-left:5px; margin-right:5px;">${adminBadge}${r.authorName}</div>
+            <div style="background:${bg}; color:${color}; padding:10px 15px; border-radius:18px; max-width:85%; font-size:14px; position:relative;">
+                ${r.content}
+                ${isAdmin || isMe ? `<button onclick="deleteReply('${post.id}', ${index})" style="position:absolute; right:-30px; top:5px; background:none; border:none; color:var(--danger); cursor:pointer;">${ICONS.trash}</button>` : ''}
+            </div>
         </div>`;
     });
-    
-    container.innerHTML = html;
-    setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50); 
+    c.scrollTop = c.scrollHeight;
 }
 
-function setReplyTo(name, textSnippet) {
-    replyingTo = textSnippet;
-    document.getElementById('reply-to-name').innerText = name;
-    document.getElementById('replying-to-box').classList.remove('hidden');
-    document.getElementById('chat-input').focus();
-}
+// ==========================================
+// 12. GESTIÓN ADMIN (CRUD PRODUCTOS)
+// ==========================================
+async function saveProduct() {
+    if (!isAdmin) return;
+    const name = document.getElementById('p-name').value.trim();
+    const desc = document.getElementById('p-desc').value.trim();
+    const price = parseInt(document.getElementById('p-price').value);
+    const stock = parseInt(document.getElementById('p-stock').value);
+    const cat = document.getElementById('p-cat').value;
+    const discount = parseInt(document.getElementById('p-discount').value) || 0;
 
-function cancelReply() {
-    replyingTo = null;
-    document.getElementById('replying-to-box').classList.add('hidden');
-}
+    if (!name || !price || isNaN(price) || isNaN(stock)) return showToast("DATOS INVÁLIDOS");
 
-async function sendForumReply() {
-    if(!currentUser || !currentUser.registered) return showToast("DEBES REGISTRARTE PARA COMENTAR");
-    
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if(!text || !currentThreadId) return;
-    
-    await db.collection("foro").doc(currentThreadId).update({
-        replies: firebase.firestore.FieldValue.arrayUnion({
-            authorId: myUserId, authorName: currentUser.name, text: text,
-            replyToText: replyingTo, timestamp: new Date().toISOString()
-        })
-    });
-    
-    input.value = '';
-    cancelReply();
-}
+    const data = { name, desc, price, stock, category: cat, discount, img: currentImg };
 
-async function deleteForumPost(id) {
-    if(confirm("¿Seguro que quieres borrar este debate entero?")) {
-        await db.collection("foro").doc(id).delete();
-        showView('foro'); 
-        showToast("DEBATE ELIMINADO");
+    if (editingId) {
+        await db.collection("productos").doc(editingId).update(data);
+        showToast("PRODUCTO ACTUALIZADO");
+    } else {
+        await db.collection("productos").add(data);
+        showToast("PRODUCTO CREADO");
     }
+    closeModal('modal-product');
+    renderGrid(); 
 }
 
-// ==========================================
-// 12. PASARELA DE PAGO VIP
-// ==========================================
-async function processVipWallet() {
-    if(!pendingVipPost) return;
-    const price = pendingVipPost.vipPrice || 0;
-    
-    if(currentUser.balance < price) return showToast("SALDO INSUFICIENTE EN BILLETERA");
-
-    closeModal('modal-buy-vip');
-    showToast("Procesando acceso...");
-
-    await db.collection("usuarios").doc(myUserId).update({ 
-        balance: firebase.firestore.FieldValue.increment(-price) 
+function deleteProduct(id) {
+    if (!isAdmin) return;
+    iosConfirm("Eliminar Producto", "¿Seguro que quieres borrar este artículo?", async () => {
+        await db.collection("productos").doc(id).delete();
+        showToast("ELIMINADO");
+        showView('store');
     });
-    
-    await db.collection("foro").doc(pendingVipPost.id).update({
-        accessList: firebase.firestore.FieldValue.arrayUnion(myUserId)
-    });
-
-    const gananciaCreador = price * 0.7;
-    const gananciaUranium = price * 0.3;
-    const phoneFormat = pendingVipPost.vipPhone || "Desconocido";
-
-    let tgMsg = `💎 *ACCESO VIP VENDIDO (BILLETERA)* 💎\n\n*Debate:* ${pendingVipPost.title}\n*Comprador ID:* #${myUserId}\n*Creador ID:* #${pendingVipPost.authorId}\n*Precio Pagado:* $${price}\n\n⚠️ *ACCIÓN REQUERIDA:*\nTransfiere $${gananciaCreador} al creador (WA: ${phoneFormat})\nTu ganancia libre: $${gananciaUranium}`;
-    sendTelegramNotification(tgMsg);
-
-    setTimeout(() => { 
-        showToast("¡ACCESO CONCEDIDO!");
-        openForumThread(pendingVipPost.id); 
-    }, 1500);
-}
-
-function processVipNequi() {
-    if(!pendingVipPost) return;
-    closeModal('modal-buy-vip');
-    
-    const price = pendingVipPost.vipPrice || 0;
-
-    currentReceiptContext = {
-        type: 'vip_access', 
-        postId: pendingVipPost.id,
-        title: pendingVipPost.title,
-        authorPhone: pendingVipPost.vipPhone || "Desconocido",
-        amount: price,
-        token: "VIP-" + Math.random().toString(36).substr(2,5).toUpperCase()
-    };
-    
-    showReceiptModal(`Envía $${price.toLocaleString()} al NEQUI 3137084357 para entrar al debate VIP.\nUna vez verificado, un admin te dará acceso.`);
 }
