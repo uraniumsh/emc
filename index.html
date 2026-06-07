@@ -282,6 +282,49 @@
         </div>
     </div>
 
+    <div id="modal-ios-confirm" class="modal hidden">
+    <div class="ios-dialog">
+        <div class="ios-dialog-content">
+            <div id="ios-confirm-title" class="ios-dialog-title">Atención</div>
+            <div id="ios-confirm-msg" class="ios-dialog-msg">¿Estás seguro?</div>
+        </div>
+        <div class="ios-dialog-actions">
+            <button class="ios-dialog-btn" onclick="closeModal('modal-ios-confirm')">Cancelar</button>
+            <button class="ios-dialog-btn bold danger" onclick="executeIosConfirm()">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-ios-prompt" class="modal hidden">
+    <div class="ios-dialog">
+        <div class="ios-dialog-content">
+            <div id="ios-prompt-title" class="ios-dialog-title">Contraseña</div>
+            <div id="ios-prompt-msg" class="ios-dialog-msg">Ingresa la clave del debate.</div>
+            <input type="password" id="ios-prompt-input" class="ios-dialog-input" placeholder="Contraseña">
+        </div>
+        <div class="ios-dialog-actions">
+            <button class="ios-dialog-btn" onclick="closeModal('modal-ios-prompt')">Cancelar</button>
+            <button class="ios-dialog-btn bold" onclick="executeIosPrompt()">Aceptar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-claim" class="modal hidden">
+    <div class="ios-card">
+        <div class="close" onclick="closeModal('modal-claim')">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </div>
+        <h2 style="margin-bottom:15px; text-align:center;">Reclamar Pantalla</h2>
+        <p class="text-muted" style="text-align:center; margin-bottom:20px; font-size:14px;">Ingresa tus datos para enviarte los accesos de la pantalla de inmediato por Telegram.</p>
+        <div class="apple-form">
+            <input type="text" id="claim-name" placeholder="Tu Nombre">
+            <input type="tel" id="claim-phone" placeholder="Número de WhatsApp">
+            <button class="apple-btn" onclick="submitClaim()">Reclamar Ahora</button>
+        </div>
+    </div>
+</div>
+
+
     <div id="modal-profile" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-profile')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span><div class="profile-header-modal" style="text-align: center;"><div class="avatar-lg" style="margin: 0 auto 10px auto; width:60px; height:60px; display:flex; align-items:center; justify-content:center; background:var(--surface-elevated); border-radius:50%;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><h2 id="profile-name-display">Usuario</h2><p class="text-muted">ID: <span id="profile-id"></span></p></div><div class="wallet-card" style="background: var(--surface-elevated); padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"><p class="text-muted" style="font-size: 12px;">SALDO DISPONIBLE</p><h1 id="wallet-balance" style="margin: 5px 0;">$0</h1><button class="apple-btn" style="background: #28a745; margin-top: 10px; padding: 10px;" onclick="openUserRecharge()">Recargar Mi Saldo</button></div><div id="register-section" class="apple-form" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;"><p class="text-accent" style="font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: center;">REGÍSTRATE Y GANA $5,000 COP</p><input type="text" id="reg-username" placeholder="@Usuario (Único)"><input type="text" id="reg-name" placeholder="Nombre Mostrado"><input type="password" id="reg-pass" placeholder="Crea un PIN o Clave (Ej: 1234)"><button class="apple-btn" onclick="registerUser()">Guardar Perfil</button><div id="recover-section" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;"><p class="text-muted" style="font-size: 13px; margin-bottom: 10px; text-align: center; font-weight: bold;">¿Ya tienes cuenta o cambiaste de equipo?</p><input type="text" id="rec-id" placeholder="Escribe tu ID (Ej: 555555)"><input type="password" id="rec-pass" placeholder="Tu PIN o Clave"><button class="apple-btn" style="background: #333;" onclick="recoverAccount()">Recuperar mi cuenta</button></div></div></div></div>
     <div id="modal-cart" class="modal hidden"><div class="modal-content ios-card cart-tall" style="height: 85vh; display: flex; flex-direction: column;"><span class="close" onclick="closeModal('modal-cart')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span><h2>Carrito</h2><div id="cart-list" style="flex-grow: 1; overflow-y: auto; margin: 15px 0;"></div><div class="total-box" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-bottom: 15px; font-size: 20px; font-weight: bold;">Total: <span id="cart-total">$0</span></div><div style="display:flex; flex-direction:column; gap:10px;"><button class="apple-btn" onclick="goToWalletPayment()">Pagar con Billetera</button><button class="apple-btn" style="background: #da0081;" onclick="goToPayment()">Pagar con Nequi</button></div></div></div>
     <div id="modal-detail" class="modal hidden"><div class="modal-content ios-card detail-box" style="max-width: 800px;"><span class="close" onclick="closeModal('modal-detail')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span><div id="detail-body"></div></div></div>
