@@ -3,694 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>URANIUM DIGITAL</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>URANIUM DIGITAL | Store</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- CORTINA DE MANTENIMIENTO -->
-    <div id="maintenance-screen" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100dvh; background: black; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;">
-        <div style="font-size: 60px; margin-bottom: 20px;">🛠️</div>
-        <h1 style="color: var(--accent); margin-bottom: 10px;">En Mantenimiento</h1>
-        <p id="maintenance-msg" style="color: white; font-size: 16px; line-height: 1.5;"></p>
-    </div>
-    
     <div id="toast-container"></div>
-    
-    <!-- REPRODUCTOR DE MÚSICA FLOTANTE -->
-    <div id="music-player-container" class="hidden" style="position:fixed; bottom:20px; left:20px; z-index:9000; background:rgba(28,28,30,0.9); padding:10px 15px; border-radius:20px; backdrop-filter:blur(10px); display:flex; align-items:center; gap:10px; border:1px solid var(--border-color);">
-        <span style="font-size:20px;">🎵</span>
-        <div style="font-size:12px; font-weight:bold; color:var(--text-main);">Radio Uranium</div>
-        <button onclick="toggleMusic()" id="btn-play-music" style="background:var(--accent); color:white; border:none; border-radius:50%; width:25px; height:25px; cursor:pointer; font-weight:bold;">▶</button>
-        <div id="yt-player-hidden" style="display:none;"></div>
-    </div>
 
-    <!-- HEADER -->
-    <header class="main-header">
-        <div class="logo" onclick="navigateTo('/shop')">URANIUM</div>
-        <div class="header-right">
-            <div class="header-icon hidden" id="btn-add-post-header" onclick="openPublishModal()" style="font-size: 20px;">➕</div>
-            <div class="header-icon" id="btn-login-gear" onclick="openModal('modal-settings')" style="font-size: 22px;">⚙️</div>
+    <!-- HEADER APPLE STYLE (GLASSMORPHISM) -->
+        <header class="main-header">
+        <div class="logo" onclick="showView('products')">
+            URANIUM
+        </div>
+                <div class="header-right">
+            <div class="header-icon hidden" id="btn-add-post-header" onclick="openPublishModal()" style="font-size: 20px;">
+                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
+            </div>
+            
+            <div class="header-icon" id="btn-login-gear" onclick="openModal('modal-settings')" style="font-size: 22px;">
+                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+            </div>
+            
             <div class="cart-wrapper" onclick="openModal('modal-cart')">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                 <span id="cart-count" class="cart-badge">0</span>
             </div>
             <div class="header-icon menu-btn" onclick="openMenu()">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </div>
         </div>
+
     </header>
 
-    <!-- MENÚ HAMBURGUESA -->
+    <!-- MENÚ HAMBURGUESA DESLIZABLE -->
     <div id="mobile-menu" class="apple-menu hidden">
-        <div class="menu-header"><button class="close-menu" onclick="closeMenu()">✕</button></div>
+        <div class="menu-header">
+            <button class="close-menu" onclick="closeMenu()">✕</button>
+        </div>
         <div class="menu-content">
             <div class="menu-profile" onclick="openModal('modal-profile'); closeMenu()">
-                <div class="avatar">👤</div>
-                <div class="user-info"><h3 id="menu-user-name">Usuario</h3><p id="menu-user-id">ID:</p></div>
+                <div class="avatar">
+                    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div class="user-info">
+                    <h3 id="menu-user-name">Usuario</h3>
+                    <p id="menu-user-id">ID:</p>
+                </div>
             </div>
             <nav class="menu-links">
-                <a href="#" onclick="navigateTo('/shop'); closeMenu()">Tienda Oficial</a>
-                <a href="#" onclick="navigateTo('/forum'); closeMenu()">Comunidad & Foro</a>
-                <a href="#" onclick="navigateTo('/guides'); closeMenu()">Guías y Tutoriales 📚</a>
-                <a href="#" id="btn-admin-menu" class="hidden text-accent" onclick="navigateTo('/adminpanel'); closeMenu()">Panel de Control</a>
+                <a href="#" onclick="showView('products'); closeMenu()">Tienda Oficial</a>
+                <a href="#" onclick="showView('foro'); closeMenu()">Comunidad & Foro</a>
+                <!-- Opciones que solo verá el Admin -->
+                <a href="#" id="btn-admin-menu" class="hidden text-accent" onclick="showView('dashboard'); closeMenu()">Panel de Control (Admin)</a>
                 <a href="#" id="btn-logout-menu" class="hidden text-danger" onclick="handleLogout()">Cerrar Sesión</a>
             </nav>
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="content">
+        <!-- VISTA DE PRODUCTOS -->
         <section id="view-products" class="view-section">
             <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
             <div class="product-grid" id="product-grid"></div>
         </section>
 
+        <!-- VISTA DASHBOARD ADMIN -->
         <section id="view-dashboard" class="view-section hidden">
             <h1 class="section-title">Panel de Control</h1>
+            
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 20px 0;">
-                <button class="apple-btn-secondary" style="background: #28a745; color: white; margin:0;" onclick="openModal('modal-add-balance')">💰 + Saldo</button>
-                <button class="apple-btn-secondary" style="background: var(--accent); color: white; margin:0;" onclick="openModal('modal-add-cat')">📁 + Categoría</button>
-                <button class="apple-btn-secondary" style="background: var(--danger); color: white; margin:0;" onclick="openDeleteCatModal()">🗑️ - Categoría</button>
-                <button class="apple-btn-secondary" style="background: #007aff; color: white; margin:0;" onclick="openModal('modal-publish-guide')">📝 Escribir Guía</button>
-                <button class="apple-btn-secondary" style="background: #1c1c1e; color: white; border: 1px solid var(--accent); margin:0;" onclick="openModal('modal-admin-options')">⚙️ Opciones Avanzadas</button>
-                <button class="apple-btn-secondary" style="background: #8e8e93; color: white; margin:0;" onclick="openModal('modal-manage-admins')">👨‍💻 Gestionar Admins</button>
-                <button id="btn-security" class="apple-btn-secondary hidden" style="background: #ffcc00; color: black; margin:0;" onclick="openModal('modal-security')">🔑 Seguridad S.A.</button>
+                <button class="apple-btn-secondary" style="background: #28a745; color: white; margin:0;" onclick="openModal('modal-add-balance')">+ Saldo Manual</button>
+                <button class="apple-btn-secondary" style="background: var(--accent); color: white; margin:0;" onclick="openModal('modal-add-cat')">+ Crear Categoría</button>
+                <button class="apple-btn-secondary" style="background: var(--danger); color: white; margin:0;" onclick="openDeleteCatModal()">- Eliminar Categoría</button>
+                <button class="apple-btn-secondary" style="margin:0;" onclick="openModal('modal-manage-admins')">Gestión Admins</button>
+                <button id="btn-security" class="apple-btn-secondary hidden" style="background: #ffcc00; color: black; margin:0;" onclick="openModal('modal-security')">
+                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> Seguridad
+                </button>
             </div>
+
+            
             <div id="admin-list-container" class="admin-card hidden">
-                <h3>Administradores Activos</h3><div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
+                <h3>Administradores Activos</h3>
+                <div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
             </div>
+
             <div class="admin-card">
-                <h3>👥 Registro de Usuarios</h3>
+                <h3>
+                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Registro General de Usuarios
+                </h3>
                 <div class="table-container" style="max-height: 300px; overflow-y: auto;">
-                    <table class="apple-table"><thead><tr><th>ID / Usuario</th><th>Saldo</th><th>Acción</th></tr></thead><tbody id="users-table"></tbody></table>
+                    <table class="apple-table">
+                        <thead><tr><th>ID / Usuario</th><th>Saldo</th><th>Estado / Acción</th></tr></thead>
+                        <tbody id="users-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <h3>Log de Movimientos</h3>
+                <div class="table-container">
+                    <table class="apple-table">
+                        <thead><tr><th>Hora</th><th>Acción</th><th>Detalle / Valor</th></tr></thead>
+                        <tbody id="log-table"></tbody>
+                    </table>
                 </div>
             </div>
         </section>
 
+        <!-- VISTA FORO / COMUNIDAD -->
         <section id="view-foro" class="view-section hidden">
             <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h1 class="section-title" style="margin: 0;">Comunidad 💬</h1>
+                <h1 class="section-title" style="margin: 0;">
+                    Comunidad <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                </h1>
                 <button class="apple-btn" style="width: auto; padding: 10px 20px;" onclick="openForumModal()">+ Nuevo Debate</button>
             </div>
             <div id="forum-feed" class="forum-grid"></div>
         </section>
 
+        <!-- VISTA DETALLE DEL FORO (ESTILO iMESSAGE) -->
         <section id="view-forum-detail" class="view-section hidden">
             <div class="chat-header glass-header">
-                <button class="back-btn" onclick="navigateTo('/forum')">← Atrás</button>
-                <div class="chat-title-info"><h3 id="chat-title-display">...</h3><span id="chat-status-display" class="chat-status"></span></div>
+                <button class="back-btn" onclick="showView('foro')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    Atrás
+                </button>
+                <div class="chat-title-info">
+                    <h3 id="chat-title-display">...</h3>
+                    <span id="chat-status-display" class="chat-status"></span>
+                </div>
             </div>
+            
+            <!-- Aquí se inyectan las burbujas desde JS -->
             <div id="chat-messages" class="chat-messages"></div>
+            
+            <!-- Input fijado estilo Apple -->
             <div class="chat-input-area glass-footer">
-                <div id="replying-to-box" class="replying-to hidden"><span>Respondiendo a: <strong id="reply-to-name"></strong></span><button onclick="cancelReply()">✕</button></div>
-                <div class="input-wrapper"><input type="text" id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off"><button class="send-btn" onclick="sendForumReply()">↑</button></div>
+                <div id="replying-to-box" class="replying-to hidden">
+                    <span>Respondiendo a: <strong id="reply-to-name"></strong></span>
+                    <button onclick="cancelReply()">✕</button>
+                </div>
+                <div class="input-wrapper">
+                    <input type="text" id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off" name="chat-msg">
+                    <button class="send-btn" onclick="sendForumReply()">↑</button>
+                </div>
             </div>
-        </section>
-
-        <section id="view-guides" class="view-section hidden">
-            <h1 class="section-title">Guías y Tutoriales 📚</h1>
-            <p class="text-muted" style="margin-bottom: 20px;">Instrucciones y reglas para usar nuestras plataformas.</p>
-            <div id="guides-list" style="display: flex; flex-direction: column; gap: 15px;"></div>
-        </section>
-
-        <section id="view-guide-detail" class="view-section hidden">
-            <button class="back-btn" style="margin-bottom:20px; color:var(--accent); background:none; border:none; font-size:16px;" onclick="navigateTo('/guides')">← Volver a Guías</button>
-            <article id="guide-content-area" style="background:var(--surface-elevated); padding:20px; border-radius:12px; line-height:1.6;"></article>
         </section>
     </main>
 
-    <!-- ZONA DE MODALES -->
-    <div id="modal-admin-options" class="modal hidden">
+    <!-- ========================================= -->
+    <!-- MODALES COMPLETOS CON CLASES APPLE        -->
+    <!-- ========================================= -->
+
+    <!-- PAGO BILLETERA -->
+    <div id="modal-wallet-confirm" class="modal hidden">
         <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-admin-options')">✕</span>
-            <h2>Opciones Avanzadas</h2>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                <button class="apple-btn-secondary" style="background: #ffcc00; color: black;" onclick="openMaintenanceModal()">🛠️ Mantenimiento / Update</button>
-                <button class="apple-btn-secondary" style="background: var(--danger); color: white;" onclick="openBlockProductsModal()">🚫 Bloquear Productos (Agotado)</button>
-                <button class="apple-btn-secondary" style="background: #28a745; color: white;" onclick="openRewardModal()">🎁 Enviar Recompensa a ID</button>
-                <button class="apple-btn-secondary" style="background: #da0081; color: white;" onclick="openMusicModal()">🎵 Configurar Música</button>
+            <span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span>
+            <h2 class="text-accent">Pago Billetera</h2>
+            <p class="text-muted" style="margin-bottom: 15px;">Confirma tu pedido para descontar el saldo.</p>
+            <div id="wallet-form" class="apple-form">
+                <input type="text" id="w-pay-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="w-pay-phone" placeholder="Tu Número de WhatsApp">
+                <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total a descontar: <strong id="w-pay-val"></strong></div>
+                <button class="apple-btn" style="background: #28a745;" onclick="processWalletPayment()">Confirmar Compra</button>
+            </div>
+            <div id="wallet-processing" class="hidden" style="text-align: center; padding: 20px 0;">
+                <div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3>
             </div>
         </div>
     </div>
 
-    <div id="modal-send-reward" class="modal hidden">
-        <div class="modal-content ios-card" style="max-height: 80vh; overflow-y: auto;">
-            <span class="close" onclick="closeModal('modal-send-reward')">✕</span>
-            <h2>🎁 Enviar Recompensa</h2>
-            <div class="apple-form" style="margin-top: 15px;">
-                <input type="text" id="rw-userid" placeholder="ID del Usuario Destino">
-                <textarea id="rw-message" placeholder="Mensaje para el usuario (Ej: ¡Felicidades, ganaste!)" style="height: 60px;"></textarea>
-                
-                <select id="rw-type" onchange="toggleRewardType()" style="margin-bottom: 15px;">
-                    <option value="saldo">Dar Saldo 💰</option>
-                    <option value="pantallas">Regalar Pantallas/Cuentas 📺</option>
-                    <option value="descuentos">Otorgar Descuento % 📉</option>
-                </select>
-
-                <div id="rw-saldo-div">
-                    <input type="number" id="rw-amount" placeholder="Cantidad de saldo a regalar ($)">
+    <!-- PERFIL Y REGISTRO -->
+    <div id="modal-profile" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-profile')">✕</span>
+            <div class="profile-header-modal" style="text-align: center;">
+                <div class="avatar-lg" style="font-size: 50px;">
+                    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                 </div>
-
-                <div id="rw-pantallas-div" class="hidden">
-                    <p class="text-muted" style="font-size:12px; margin-bottom:5px;">Selecciona las pantallas a regalar:</p>
-                    <div id="rw-pantallas-list" style="background:var(--surface-elevated); padding:10px; border-radius:8px; max-height:150px; overflow-y:auto; margin-bottom:10px;"></div>
-                </div>
-
-                <div id="rw-desc-div" class="hidden">
-                    <input type="number" id="rw-discount-val" placeholder="Porcentaje de descuento (1 - 100)" min="1" max="100">
-                    <p class="text-muted" style="font-size:12px; margin-bottom:5px;">Aplicar descuento a:</p>
-                    <select id="rw-desc-target" onchange="toggleDescTarget()">
-                        <option value="all">Todas las plataformas</option>
-                        <option value="specific">Pantallas en específico...</option>
-                    </select>
-                    <div id="rw-desc-list" class="hidden" style="background:var(--surface-elevated); padding:10px; border-radius:8px; max-height:150px; overflow-y:auto; margin-top:10px;"></div>
-                </div>
-
-                <button class="apple-btn" style="background: #28a745; margin-top:15px;" onclick="sendRewardToUser()">Enviar Recompensa Ahora</button>
+                <h2 id="profile-name-display" style="margin-top: 10px;">Usuario</h2>
+                <p class="text-muted">ID: <span id="profile-id"></span></p>
+            </div>
+            <div class="wallet-card" style="background: var(--surface-elevated); padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;">
+                <p class="text-muted" style="font-size: 12px;">SALDO DISPONIBLE</p>
+                <h1 id="wallet-balance" style="margin: 5px 0;">$0</h1>
+                <button class="apple-btn" style="background: #28a745; margin-top: 10px; padding: 10px;" onclick="openUserRecharge()">Recargar Mi Saldo</button>
+            </div>
+            <div id="register-section" class="apple-form" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <p class="text-accent" style="font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: center;">REGÍSTRATE Y GANA $5,000 COP</p>
+                <input type="text" id="reg-username" placeholder="@Usuario (Único)">
+                <input type="text" id="reg-name" placeholder="Nombre Mostrado">
+                <button class="apple-btn" onclick="registerUser()">Guardar Perfil</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-user-reward" class="modal hidden" style="z-index: 99999;">
-        <div class="modal-content ios-card" style="text-align:center; background: linear-gradient(135deg, #1c1c1e, #2c2c2e); border: 2px solid var(--accent);">
-            <div style="font-size:50px; margin-bottom:10px;">🎁</div>
-            <h2 class="text-accent">¡Tienes un Regalo!</h2>
-            <p id="urw-message" style="margin: 15px 0; font-size: 16px; line-height: 1.5; color: white;"></p>
-            <div id="urw-details" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; color: var(--success);"></div>
-            <button class="apple-btn" style="background: var(--accent);" onclick="claimReward()">¡Reclamar Recompensa!</button>
+    <!-- RECARGAR SALDO -->
+    <div id="modal-user-recharge" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-user-recharge')">✕</span>
+            <h2>Recargar Mi Saldo</h2>
+            <div id="recharge-form" class="apple-form" style="margin-top: 15px;">
+                <input type="text" id="r-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="r-phone" placeholder="Tu Número de WhatsApp">
+                <input type="number" id="r-amount" placeholder="Monto a recargar ($)">
+                <button class="apple-btn" style="background: #28a745;" onclick="processRecharge()">Continuar</button>
+            </div>
+            <div id="recharge-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
         </div>
     </div>
 
-    <div id="modal-config-music" class="modal hidden">
+    <!-- COMPROBANTE -->
+    <div id="modal-receipt" class="modal hidden">
         <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-config-music')">✕</span>
-            <h2>🎵 Configurar Música</h2>
-            <p class="text-muted" style="font-size:12px; margin-bottom:10px;">Pega links de YouTube (uno por línea).</p>
+            <span class="close" onclick="closeModal('modal-receipt')">✕</span>
+            <h3>Adjuntar Comprobante</h3>
+            <p id="receipt-instructions" class="text-accent" style="font-size: 14px; margin-bottom: 15px; font-weight: bold; line-height: 1.4;"></p>
+            <div id="receipt-form" class="apple-form">
+                <div class="upload-zone" onclick="document.getElementById('receipt-file-input').click()" style="height: 200px; border: 2px dashed var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;">
+                    <span id="receipt-upload-label" style="text-align: center; color: var(--accent);">
+                        Clic para subir comprobante <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                    </span>
+                    <img id="receipt-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute;">
+                </div>
+                <input type="file" id="receipt-file-input" accept="image/*" class="hidden" onchange="previewReceipt()">
+                <button class="apple-btn" onclick="submitReceipt()">Enviar Comprobante</button>
+            </div>
+            <div id="receipt-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <!-- GESTIÓN ADMINS -->
+    <div id="modal-manage-admins" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-manage-admins')">✕</span>
+            <h2>Gestión Admins</h2>
+            <p class="text-muted" style="font-size: 12px; margin-bottom:15px;">El usuario con este ID podrá acceder al panel de control.</p>
             <div class="apple-form">
-                <textarea id="music-links" placeholder="https://youtube.com/watch?v=...nhttps://youtube.com/watch?v=..." style="height: 100px; white-space: nowrap;"></textarea>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 0 10px;">
-                    <label><input type="checkbox" id="music-loop"> Bucle 🔁</label>
-                    <label><input type="checkbox" id="music-random"> Aleatorio 🔀</label>
-                </div>
-                <button class="apple-btn" style="background: #da0081;" onclick="saveMusicConfig()">Guardar y Reproducir</button>
+                <input type="text" id="new-admin-id" placeholder="ID del Usuario">
+                <input type="email" id="new-admin-email" placeholder="Correo Provisional">
+                <input type="password" id="new-admin-pass" placeholder="Clave Provisional">
+                <button class="apple-btn" onclick="addSubAdmin()">Agregar Admin</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-publish-guide" class="modal hidden">
+    <!-- AÑADIR SALDO MANUAL -->
+    <div id="modal-add-balance" class="modal hidden">
         <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-publish-guide')">✕</span>
-            <h2>Publicar Guía</h2>
-            <div class="apple-form" style="margin-top: 15px;">
-                <div class="upload-zone" onclick="document.getElementById('g-file-input').click()" style="height: 100px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 12px;">
-                    <span id="g-upload-label" style="color: var(--text-muted);">Adjuntar Portada (Opcional) 📸</span>
-                    <img id="g-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);">
-                </div>
-                <input type="file" id="g-file-input" accept="image/*" class="hidden" onchange="previewGuideImage()">
-                <input type="text" id="g-title" placeholder="Título de la Guía">
-                <textarea id="g-content" placeholder="Escribe el texto aquí... Si pegas un link terminado en .jpg o .png se volverá imagen." style="height: 200px;"></textarea>
-                <button class="apple-btn" id="btn-save-guide" onclick="saveGuide()">Publicar Guía</button>
+            <span class="close" onclick="closeModal('modal-add-balance')">✕</span>
+            <h2>Recargar Saldo Manual</h2>
+            <div class="apple-form">
+                <input type="text" id="bal-user-id" placeholder="ID del Usuario">
+                <input type="number" id="bal-amount" placeholder="Cantidad ($)">
+                <button class="apple-btn" style="background: #28a745;" onclick="addBalanceToUser()">Recargar Billetera</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-maintenance" class="modal hidden">
+    <!-- CREAR Y ELIMINAR CATEGORÍA -->
+    <div id="modal-add-cat" class="modal hidden">
         <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-maintenance')">✕</span>
-            <h2>Modo Mantenimiento</h2>
+            <span class="close" onclick="closeModal('modal-add-cat')">✕</span>
+            <h2>Nueva Categoría</h2>
+            <div class="apple-form">
+                <input type="text" id="new-cat-name" placeholder="Nombre de Plataforma">
+                <button class="apple-btn" onclick="saveNewCategory()">Crear Plataforma</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-delete-cat" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-delete-cat')">✕</span>
+            <h2>Eliminar Categoría</h2>
             <div class="apple-form" style="margin-top: 15px;">
-                <textarea id="maint-desc" placeholder="Mensaje para clientes..." style="height: 100px; margin-bottom: 15px;"></textarea>
+                <select id="d-cat-select"></select>
+                <button class="apple-btn" style="background: var(--danger);" onclick="deleteCategory()">
+                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Eliminar Plataforma
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PUBLICAR PRODUCTO (CON EDITOR GRANDE) -->
+    <div id="modal-publish" class="modal hidden">
+        <div class="modal-content ios-card" style="max-width: 500px;">
+            <span class="close" onclick="closeModal('modal-publish')">✕</span>
+            <h2 id="pub-title">Publicar Producto</h2>
+            <div class="apple-form">
+                <div class="upload-zone" onclick="document.getElementById('file-input').click()" style="height: 150px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;">
+                    <span id="upload-label" style="color: var(--text-muted);">Clic para subir imagen *</span>
+                    <img id="file-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute; background: var(--surface-elevated);">
+                </div>
+                <input type="file" id="file-input" accept="image/*" class="hidden" onchange="previewImage()">
+                <input type="text" id="p-name" placeholder="Nombre (Ej: Netflix)">
+                <textarea id="p-short" placeholder="Slogan / Info extra" style="display: none;"></textarea>
+                <input type="number" id="p-price" placeholder="Precio ($)">
+                <select id="p-cat-select"></select>
+                
+                <textarea id="p-desc" placeholder="Descripción Detallada"></textarea>
+                <button type="button" class="apple-btn-secondary" style="margin-top:-5px; margin-bottom:10px; padding: 8px;" onclick="openBigEditor()">
+                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> Abrir Editor Avanzado
+                </button>
+
+                <input type="text" id="p-contact" placeholder="WhatsApp de Contacto">
+                <input type="text" id="p-wa" placeholder="Msj predeterminado WhatsApp">
+                
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <input type="checkbox" id="p-pinned" style="width: auto;"> 
+                    <label for="p-pinned">
+                        <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> Fijar publicación al inicio
+                    </label>
+                </div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="apple-btn" style="background: var(--danger);" onclick="toggleMaintenance(true)">Activar</button>
-                    <button class="apple-btn" style="background: #28a745;" onclick="toggleMaintenance(false)">Desactivar</button>
+                    <button class="apple-btn" onclick="handleSaveProduct()">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="modal-block-products" class="modal hidden">
-        <div class="modal-content ios-card" style="max-height: 80vh; display: flex; flex-direction: column;">
-            <span class="close" onclick="closeModal('modal-block-products')">✕</span>
-            <h2>Gestión de Stock</h2>
-            <div id="block-product-list" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top:15px;"></div>
+    <!-- EDITOR GRANDE -->
+    <div id="modal-big-editor" class="modal hidden">
+        <div class="modal-content ios-card" style="width: 95%; max-width: 800px;">
+            <span class="close" onclick="closeBigEditor()">✕</span>
+            <h2>Editor Avanzado</h2>
+            <p class="text-muted" style="font-size:12px; margin-bottom:10px;">Usa **negrita**, __cursiva__, >resaltado o =#FF0000color</p>
+            <textarea id="big-editor-area" style="height: 300px; width: 100%; background: var(--surface-elevated); color: var(--text-main); border: none; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-family: monospace;"></textarea>
+            <button class="apple-btn" onclick="saveBigEditor()">Guardar y Cerrar</button>
         </div>
     </div>
 
-    <div id="modal-profile" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-profile')">✕</span><div class="profile-header-modal" style="text-align: center;"><div class="avatar-lg" style="font-size: 50px;">👤</div><h2 id="profile-name-display" style="margin-top: 10px;">Usuario</h2><p class="text-muted">ID: <span id="profile-id"></span></p></div><div class="wallet-card" style="background: var(--surface-elevated); padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"><p class="text-muted" style="font-size: 12px;">SALDO DISPONIBLE</p><h1 id="wallet-balance" style="margin: 5px 0;">$0</h1><button class="apple-btn" style="background: #28a745; margin-top: 10px; padding: 10px;" onclick="openUserRecharge()">Recargar Mi Saldo</button></div><div id="register-section" class="apple-form" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;"><p class="text-accent" style="font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: center;">REGÍSTRATE Y GANA $5,000 COP</p><input type="text" id="reg-username" placeholder="@Usuario (Único)"><input type="text" id="reg-name" placeholder="Nombre Mostrado"><input type="password" id="reg-pass" placeholder="Crea un PIN o Clave (Ej: 1234)"><button class="apple-btn" onclick="registerUser()">Guardar Perfil</button><div id="recover-section" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;"><p class="text-muted" style="font-size: 13px; margin-bottom: 10px; text-align: center; font-weight: bold;">¿Ya tienes cuenta o cambiaste de equipo?</p><input type="text" id="rec-id" placeholder="Escribe tu ID (Ej: 555555)"><input type="password" id="rec-pass" placeholder="Tu PIN o Clave"><button class="apple-btn" style="background: #333;" onclick="recoverAccount()">Recuperar mi cuenta</button></div></div></div></div>
-    <div id="modal-cart" class="modal hidden"><div class="modal-content ios-card cart-tall" style="height: 85vh; display: flex; flex-direction: column;"><span class="close" onclick="closeModal('modal-cart')">✕</span><h2>Carrito</h2><div id="cart-list" style="flex-grow: 1; overflow-y: auto; margin: 15px 0;"></div><div class="total-box" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-bottom: 15px; font-size: 20px; font-weight: bold;">Total: <span id="cart-total">$0</span></div><div style="display:flex; flex-direction:column; gap:10px;"><button class="apple-btn" onclick="goToWalletPayment()">Pagar con Billetera</button><button class="apple-btn" style="background: #da0081;" onclick="goToPayment()">Pagar con Nequi</button></div></div></div>
-    <div id="modal-detail" class="modal hidden"><div class="modal-content ios-card detail-box" style="max-width: 800px;"><span class="close" onclick="closeModal('modal-detail')">✕</span><div id="detail-body"></div></div></div>
-    <div id="modal-wallet-confirm" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span><h2 class="text-accent">Pago Billetera</h2><p class="text-muted" style="margin-bottom: 15px;">Confirma tu pedido para descontar el saldo.</p><div id="wallet-form" class="apple-form"><input type="text" id="w-pay-name" placeholder="Tus Nombres y Apellidos"><input type="number" id="w-pay-phone" placeholder="Tu Número de WhatsApp"><div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total a descontar: <strong id="w-pay-val"></strong></div><button class="apple-btn" style="background: #28a745;" onclick="processWalletPayment()">Confirmar Compra</button></div><div id="wallet-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3></div></div></div>
-    <div id="modal-user-recharge" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-user-recharge')">✕</span><h2>Recargar Mi Saldo</h2><div id="recharge-form" class="apple-form" style="margin-top: 15px;"><input type="text" id="r-name" placeholder="Tus Nombres y Apellidos"><input type="number" id="r-phone" placeholder="Tu Número de WhatsApp"><input type="number" id="r-amount" placeholder="Monto a recargar ($)"><button class="apple-btn" style="background: #28a745;" onclick="processRecharge()">Continuar</button></div><div id="recharge-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div></div></div>
-    <div id="modal-receipt" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-receipt')">✕</span><h3>Adjuntar Comprobante</h3><p id="receipt-instructions" class="text-accent" style="font-size: 14px; margin-bottom: 15px; font-weight: bold; line-height: 1.4;"></p><div id="receipt-form" class="apple-form"><div class="upload-zone" onclick="document.getElementById('receipt-file-input').click()" style="height: 200px; border: 2px dashed var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;"><span id="receipt-upload-label" style="text-align: center; color: var(--accent);">Clic para subir comprobante 📸</span><img id="receipt-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute;"></div><input type="file" id="receipt-file-input" accept="image/*" class="hidden" onchange="previewReceipt()"><button class="apple-btn" onclick="submitReceipt()">Enviar Comprobante</button></div><div id="receipt-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div></div></div>
-    <div id="modal-manage-admins" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-manage-admins')">✕</span><h2>Gestión Admins</h2><div class="apple-form"><input type="text" id="new-admin-id" placeholder="ID del Usuario"><input type="email" id="new-admin-email" placeholder="Correo Provisional"><input type="password" id="new-admin-pass" placeholder="Clave Provisional"><button class="apple-btn" onclick="addSubAdmin()">Agregar Admin</button></div></div></div>
-    <div id="modal-add-balance" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-add-balance')">✕</span><h2>Recargar Saldo Manual</h2><div class="apple-form"><input type="text" id="bal-user-id" placeholder="ID del Usuario"><input type="number" id="bal-amount" placeholder="Cantidad ($)"><button class="apple-btn" style="background: #28a745;" onclick="addBalanceToUser()">Recargar Billetera</button></div></div></div>
-    <div id="modal-add-cat" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-add-cat')">✕</span><h2>Nueva Categoría</h2><div class="apple-form"><input type="text" id="new-cat-name" placeholder="Nombre"><button class="apple-btn" onclick="saveNewCategory()">Crear</button></div></div></div>
-    <div id="modal-delete-cat" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-delete-cat')">✕</span><h2>Eliminar Categoría</h2><div class="apple-form"><select id="d-cat-select"></select><button class="apple-btn" style="background: var(--danger);" onclick="deleteCategory()">Eliminar</button></div></div></div>
-    <div id="modal-publish" class="modal hidden"><div class="modal-content ios-card" style="max-width: 500px;"><span class="close" onclick="closeModal('modal-publish')">✕</span><h2 id="pub-title">Publicar Producto</h2><div class="apple-form"><div class="upload-zone" onclick="document.getElementById('file-input').click()" style="height: 150px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;"><span id="upload-label" style="color: var(--text-muted);">Clic para subir imagen *</span><img id="file-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute; background: var(--surface-elevated);"></div><input type="file" id="file-input" accept="image/*" class="hidden" onchange="previewImage()"><input type="text" id="p-name" placeholder="Nombre (Ej: Netflix)"><textarea id="p-short" placeholder="Slogan / Info extra" style="display: none;"></textarea><input type="number" id="p-price" placeholder="Precio ($)"><select id="p-cat-select"></select><textarea id="p-desc" placeholder="Descripción Detallada"></textarea><button type="button" class="apple-btn-secondary" style="margin-top:-5px; margin-bottom:10px; padding: 8px;" onclick="openBigEditor()">📝 Abrir Editor Avanzado</button><input type="text" id="p-contact" placeholder="WhatsApp de Contacto"><input type="text" id="p-wa" placeholder="Msj predeterminado WhatsApp"><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;"><input type="checkbox" id="p-pinned" style="width: auto;"> <label for="p-pinned">⭐ Fijar publicación</label></div><button class="apple-btn" onclick="handleSaveProduct()">Guardar</button></div></div></div>
-    <div id="modal-big-editor" class="modal hidden"><div class="modal-content ios-card" style="width: 95%; max-width: 800px;"><span class="close" onclick="closeBigEditor()">✕</span><h2>Editor Avanzado</h2><textarea id="big-editor-area" style="height: 300px; width: 100%; background: var(--surface-elevated); color: var(--text-main); border: none; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-family: monospace;"></textarea><button class="apple-btn" onclick="saveBigEditor()">Guardar y Cerrar</button></div></div>
-    <div id="modal-nequi" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-nequi')">✕</span><h2 style="color: #da0081; margin-bottom: 15px;">Pago Nequi</h2><div id="nequi-form" class="apple-form"><input type="text" id="pay-name" placeholder="Tus Nombres y Apellidos"><input type="number" id="pay-phone" placeholder="Tu Número de WhatsApp"><div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total: <strong id="pay-val"></strong></div><button class="apple-btn" style="background: #da0081;" onclick="processPayment()">Generar Orden Segura</button></div><div id="nequi-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div></div></div>
-    <div id="modal-settings" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-settings')">✕</span><div id="login-box"><h2>Acceso Administrador</h2><div class="apple-form" style="margin-top: 15px;"><input type="email" id="l-email" placeholder="Correo Electrónico"><input type="password" id="l-pass" placeholder="Contraseña"><button class="apple-btn" onclick="handleLogin()">Entrar</button></div></div><div id="logout-box" class="hidden" style="text-align: center;"><h2>Sesión Iniciada</h2><button class="apple-btn" style="margin-top: 15px; background: var(--danger);" onclick="handleLogout()">Cerrar Sesión</button></div></div></div>
-    <div id="modal-security" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-security')">✕</span><h2>Credenciales Súper Admin</h2><div class="apple-form"><input type="email" id="sec-new-email" placeholder="Nuevo Correo"><input type="password" id="sec-new-pass" placeholder="Nueva Contraseña"><button class="apple-btn" style="background: #ffcc00; color: black;" onclick="updateSuperAdminCreds()">Actualizar</button></div></div></div>
-    <div id="modal-forum" class="modal hidden"><div class="modal-content ios-card"><span class="close" onclick="closeModal('modal-forum')">✕</span><h2>Nuevo Debate</h2><div class="apple-form" style="margin-top: 15px;"><div class="upload-zone" onclick="document.getElementById('f-file-input').click()" style="height: 100px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 12px;"><span id="f-upload-label" style="color: var(--text-muted);">Adjuntar Imagen 📸</span><img id="f-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);"></div><input type="file" id="f-file-input" accept="image/*" class="hidden" onchange="previewForumImage()"><input type="text" id="f-title" placeholder="Asunto o Tema"><select id="f-type" onchange="toggleForumPassword()" style="margin-bottom: 12px;"><option value="publico">Público</option><option value="vip">Solo VIP</option><option value="clave">Con Clave</option><option value="cerrado">Cerrado</option></select><input type="password" id="f-password" class="hidden" placeholder="Establecer Clave"><div id="f-vip-options" class="hidden"><input type="number" id="f-vip-price" placeholder="Precio ($)"><input type="number" id="f-vip-phone" placeholder="Tu WhatsApp"></div><textarea id="f-content" placeholder="Escribe tu mensaje aquí..." style="height: 100px; margin-bottom:12px;"></textarea><button class="apple-btn" onclick="saveForumPost()">Publicar</button></div></div></div>
-    <div id="modal-buy-vip" class="modal hidden"><div class="modal-content ios-card" style="text-align:center;"><span class="close" onclick="closeModal('modal-buy-vip')">✕</span><div style="font-size:40px; margin-bottom:10px;">💎</div><h2>Acceso Exclusivo</h2><p class="text-muted" id="vip-buy-title" style="margin-bottom:15px; font-size:14px;"></p><h1 style="color:var(--accent); margin-bottom:20px;" id="vip-buy-price">$0</h1><div style="display:flex; flex-direction:column; gap:10px;"><button class="apple-btn" style="background:#28a745;" onclick="processVipWallet()">Billetera</button><button class="apple-btn" style="background:#da0081;" onclick="processVipNequi()">Nequi</button></div></div></div>
-    <!-- ESTILOS INTERNOS -->
-    <style>
-        .code-editor { width: 100%; flex-grow: 1; background: #1e1e1e; color: #00ff00; font-family: monospace; border: none; padding: 15px; border-radius: 10px; resize: none; font-size: 14px; outline: none; }
-        .tab-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; }
-        .tab-btn.active { background: var(--accent); font-weight: bold; }
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--danger); }
-        input:checked + .slider:before { transform: translateX(20px); }
-        .agotado-tag { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,59,48,0.9); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; z-index: 5; border: 2px solid white;}
-        .product-card.disabled img { filter: grayscale(100%) opacity(0.5); }
-        .discount-tag { position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; z-index: 10; box-shadow: 0 4px 10px rgba(255,0,0,0.4); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-    </style>
+    <!-- DETALLE DEL PRODUCTO (VISTA CLIENTE) -->
+    <div id="modal-detail" class="modal hidden">
+        <div class="modal-content ios-card detail-box" style="max-width: 800px;">
+            <span class="close" onclick="closeModal('modal-detail')">✕</span>
+            <div id="detail-body"></div>
+        </div>
+    </div>
 
-    <!-- FIREBASE Y SU EMC.JS -->
+    <!-- CARRITO DE COMPRAS -->
+    <div id="modal-cart" class="modal hidden">
+        <div class="modal-content ios-card cart-tall" style="height: 85vh; display: flex; flex-direction: column;">
+            <span class="close" onclick="closeModal('modal-cart')">✕</span>
+            <h2>Carrito</h2>
+            <div id="cart-list" style="flex-grow: 1; overflow-y: auto; margin: 15px 0;"></div>
+            <div class="total-box" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-bottom: 15px; font-size: 20px; font-weight: bold;">
+                Total: <span id="cart-total">$0</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="apple-btn" onclick="goToWalletPayment()">Pagar con Billetera</button>
+                <button class="apple-btn" style="background: #da0081;" onclick="goToPayment()">Pagar con Nequi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGO NEQUI -->
+    <div id="modal-nequi" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-nequi')">✕</span>
+            <h2 style="color: #da0081; margin-bottom: 15px;">Pago Nequi</h2>
+            <div id="nequi-form" class="apple-form">
+                <input type="text" id="pay-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="pay-phone" placeholder="Tu Número de WhatsApp">
+                <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total: <strong id="pay-val"></strong></div>
+                <button class="apple-btn" style="background: #da0081;" onclick="processPayment()">Generar Orden Segura</button>
+            </div>
+            <div id="nequi-processing" class="hidden" style="text-align: center; padding: 20px 0;">
+                <div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACCESO Y CONFIGURACIÓN -->
+    <div id="modal-settings" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-settings')">✕</span>
+            <div id="login-box">
+                <h2>Acceso Administrador</h2>
+                <div class="apple-form" style="margin-top: 15px;">
+                    <input type="email" id="l-email" placeholder="Correo Electrónico">
+                    <input type="password" id="l-pass" placeholder="Contraseña">
+                    <button class="apple-btn" onclick="handleLogin()">Entrar</button>
+                </div>
+            </div>
+            <div id="logout-box" class="hidden" style="text-align: center;">
+                <h2>Sesión Iniciada</h2>
+                <button class="apple-btn" style="margin-top: 15px; background: var(--danger);" onclick="handleLogout()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEGURIDAD SUPER ADMIN -->
+    <div id="modal-security" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-security')">✕</span>
+            <h2>Cambiar Credenciales Súper Admin</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <input type="email" id="sec-new-email" placeholder="Nuevo Correo">
+                <input type="password" id="sec-new-pass" placeholder="Nueva Contraseña">
+                <button class="apple-btn" style="background: #ffcc00; color: black;" onclick="updateSuperAdminCreds()">Actualizar Datos</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- CREAR DEBATE -->
+    <div id="modal-forum" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-forum')">✕</span>
+            <h2>Nuevo Debate</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <div class="upload-zone" onclick="document.getElementById('f-file-input').click()" style="height: 100px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 12px;">
+                    <span id="f-upload-label" style="color: var(--text-muted);">
+                        Adjuntar Imagen <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                    </span>
+                    <img id="f-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);">
+                </div>
+                <input type="file" id="f-file-input" accept="image/*" class="hidden" onchange="previewForumImage()">
+                
+                <input type="text" id="f-title" placeholder="Asunto o Tema">
+                <select id="f-type" onchange="toggleForumPassword()" style="margin-bottom: 12px;">
+                    <option value="publico">Público</option>
+                    <option value="vip">Solo VIP (Monetizado)</option>
+                    <option value="clave">Con Clave</option>
+                    <option value="cerrado">Cerrado (Solo lectura)</option>
+                </select>
+                
+                <!-- Campos dinámicos de seguridad/cobro -->
+                <input type="password" id="f-password" class="hidden" placeholder="Establecer Clave">
+                <div id="f-vip-options" class="hidden">
+                    <input type="number" id="f-vip-price" placeholder="Precio de entrada ($)">
+                    <input type="number" id="f-vip-phone" placeholder="Tu WhatsApp (Para recibir pagos)">
+                    <p class="text-muted" style="font-size:11px; margin-bottom:12px; line-height:1.3;">Uranium retiene el 30%. Recibirás el 70% de cada venta directamente a este número cuando los usuarios paguen.</p>
+                </div>
+
+                <textarea id="f-content" placeholder="Escribe tu mensaje aquí..." style="height: 100px; margin-bottom:12px;"></textarea>
+                <button class="apple-btn" onclick="saveForumPost()">Publicar Debate</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- MODAL DE COMPRA VIP -->
+    <div id="modal-buy-vip" class="modal hidden">
+        <div class="modal-content ios-card" style="text-align:center;">
+            <span class="close" onclick="closeModal('modal-buy-vip')">✕</span>
+            <div style="font-size:40px; margin-bottom:10px;">
+                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M19 3H5L2 9l10 14L22 9l-3-6z"/></svg>
+            </div>
+            <h2>Acceso Exclusivo</h2>
+            <p class="text-muted" id="vip-buy-title" style="margin-bottom:15px; font-size:14px;"></p>
+            <h1 style="color:var(--accent); margin-bottom:20px;" id="vip-buy-price">$0</h1>
+            
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="apple-btn" style="background:#28a745;" onclick="processVipWallet()">Pagar con Billetera (Instantáneo)</button>
+                <button class="apple-btn" style="background:#da0081;" onclick="processVipNequi()">Pagar con Nequi (Requiere revisión)</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- SCRIPTS -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script> 
-    <script src="/emc.js"></script>
-
-    <!-- LÓGICA FINAL Y PODEROSA -->
-    <script>
-        let userPendingReward = null;
-        let activeDiscounts = {}; 
-        let musicPlaylist = [];
-        let musicConfig = { loop: false, random: false };
-        let ytPlayer;
-        let guidesData = [];
-        let currentGuideImg = "";
-
-        // --- 1. RE-ESCRIBIMOS EL GRID PARA APLICAR DESCUENTOS Y MOSTRAR BOTONES AL ADMIN ---
-        function getPriceWithDiscount(product) {
-            let discountPercent = 0;
-            if(activeDiscounts["all"]) discountPercent = activeDiscounts["all"];
-            else if(activeDiscounts[product.id]) discountPercent = activeDiscounts[product.id];
-
-            if(discountPercent > 0) {
-                return { original: product.price, final: product.price - (product.price * (discountPercent / 100)), percent: discountPercent };
-            }
-            return { original: product.price, final: product.price, percent: 0 };
-        }
-
-        renderGrid = function(catId = 'all') {
-            const grid = document.getElementById('product-grid'); if(!grid) return; grid.innerHTML = '';
-            let f = products.filter(p => catId === 'all' || p.catId === catId); f.sort((a, b) => (b.pinned === true) - (a.pinned === true));
-            f.forEach(p => {
-                const pricing = getPriceWithDiscount(p);
-                const c = document.createElement('div'); c.className = `product-card ${p.agotado ? 'disabled' : ''}`; c.onclick = () => openDetail(p.id);
-                
-                let priceHtml = `$${parseFloat(pricing.final).toLocaleString()}`;
-                let tagHtml = '';
-                if(pricing.percent > 0) {
-                    priceHtml = `<span style="text-decoration:line-through; font-size:10px; color:rgba(255,255,255,0.6); margin-right:5px;">$${parseFloat(pricing.original).toLocaleString()}</span><span style="color:var(--danger);">$${parseFloat(pricing.final).toLocaleString()}</span>`;
-                    tagHtml = `<div class="discount-tag">-${pricing.percent}%</div>`;
-                }
-
-                c.innerHTML = `
-                    ${(typeof isAdmin !== 'undefined' && isAdmin) ? `
-                    <div style="position:absolute; top:8px; right:8px; z-index:10; display:flex; gap:5px;">
-                        <button onclick="event.stopPropagation(); editingId='${p.id}'; openModal('modal-publish')" style="background:var(--accent); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✏️</button>
-                        <button onclick="event.stopPropagation(); deleteProduct('${p.id}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✕</button>
-                    </div>` : ''}
-                    <div class="card-img">
-                        ${tagHtml}
-                        <div class="price-tag">${priceHtml}</div>
-                        ${p.agotado ? '<div class="agotado-tag">AGOTADO</div>' : ''}
-                        <img src="${p.img}">
-                    </div>
-                    <div class="card-product-name">${p.name}</div>`;
-                grid.appendChild(c);
-            });
-        };
-
-        // --- 2. SISTEMA DE RUTAS Y FORO ---
-        function navigateTo(path) {
-            window.history.pushState({}, "", path);
-            handleRoute();
-        }
-
-        function handleRoute() {
-            const path = window.location.pathname;
-            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
-            
-            if (path === '/shop' || path === '/') {
-                document.getElementById('view-products').classList.remove('hidden');
-            } else if (path === '/forum') {
-                document.getElementById('view-foro').classList.remove('hidden');
-            } else if (path.startsWith('/forum/')) {
-                const parts = path.split('/');
-                if(parts.length >= 3 && parts[2]) {
-                    setTimeout(() => { if(typeof openForumThread === 'function') openForumThread(parts[2]); }, 800); 
-                } else { document.getElementById('view-foro').classList.remove('hidden'); }
-            } else if (path === '/adminpanel') {
-                if(typeof isAdmin !== 'undefined' && isAdmin) document.getElementById('view-dashboard').classList.remove('hidden');
-                else navigateTo('/shop');
-            } else if (path === '/guides') {
-                document.getElementById('view-guides').classList.remove('hidden');
-            } else if (path.startsWith('/guides/')) {
-                const parts = path.split('/');
-                if(parts.length >= 3 && parts[2]) {
-                    setTimeout(() => { if(typeof openGuide === 'function') openGuide(parts[2]); }, 800); 
-                } else { document.getElementById('view-guides').classList.remove('hidden'); }
-            } else { document.getElementById('view-products').classList.remove('hidden'); }
-        }
-        window.addEventListener('popstate', handleRoute);
-
-        async function openForumThread(postId) {
-            const post = forumPosts.find(p => p.id === postId);
-            if(!post) return;
-            if (post.type === 'vip' && (!typeof isAdmin !== 'undefined' || !isAdmin)) {
-                if (!post.accessList || !post.accessList.includes(myUserId)) {
-                    pendingVipPost = post; 
-                    const priceFormat = post.vipPrice ? post.vipPrice.toLocaleString() : "0";
-                    document.getElementById('vip-buy-title').innerText = post.title;
-                    document.getElementById('vip-buy-price').innerText = "$" + priceFormat;
-                    openModal('modal-buy-vip'); return; 
-                }
-            }
-            if (post.type === 'clave' && (!typeof isAdmin !== 'undefined' || !isAdmin)) {
-                const guess = prompt("Este debate requiere contraseña:");
-                if (guess !== post.password) { if(typeof showToast === 'function') showToast("CONTRASEÑA INCORRECTA"); return; }
-            }
-
-            currentThreadId = postId;
-            if(window.location.pathname !== `/forum/${postId}`) { window.history.pushState({}, "", `/forum/${postId}`); }
-
-            showView('forum-detail');
-            document.getElementById('chat-title-display').innerText = post.title;
-            
-            let statusHtml = post.type === 'cerrado' ? 'Debate cerrado' : `Activo`;
-            if (typeof isAdmin !== 'undefined' && isAdmin) {
-                statusHtml += ` &nbsp;|&nbsp; <button onclick="deleteForumPost('${post.id}')" style="background:var(--danger); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:bold;">🗑️ ELIMINAR</button>`;
-            }
-            document.getElementById('chat-status-display').innerHTML = statusHtml;
-            
-            const inputArea = document.querySelector('.chat-input-area');
-            if(post.type === 'cerrado' && (!typeof isAdmin !== 'undefined' || !isAdmin)) {
-                if(inputArea) inputArea.classList.add('hidden'); 
-            } else { if(inputArea) inputArea.classList.remove('hidden'); }
-
-            renderChatMessages(post);
-        }
-
-        // --- 3. RECOMPENSAS LADO ADMIN ---
-        function openRewardModal() {
-            closeModal('modal-admin-options');
-            const pList = document.getElementById('rw-pantallas-list');
-            const dList = document.getElementById('rw-desc-list');
-            let html = products.map(p => `<label style="display:flex; align-items:center; gap:10px; margin-bottom:5px;"><input type="checkbox" value="${p.id}" class="rw-prod-cb"> ${p.name}</label>`).join('');
-            pList.innerHTML = html; dList.innerHTML = html;
-            openModal('modal-send-reward');
-        }
-
-        function toggleRewardType() {
-            const type = document.getElementById('rw-type').value;
-            document.getElementById('rw-saldo-div').classList.add('hidden');
-            document.getElementById('rw-pantallas-div').classList.add('hidden');
-            document.getElementById('rw-desc-div').classList.add('hidden');
-            if(type === 'saldo') document.getElementById('rw-saldo-div').classList.remove('hidden');
-            if(type === 'pantallas') document.getElementById('rw-pantallas-div').classList.remove('hidden');
-            if(type === 'descuentos') document.getElementById('rw-desc-div').classList.remove('hidden');
-        }
-
-        function toggleDescTarget() {
-            const target = document.getElementById('rw-desc-target').value;
-            if(target === 'specific') document.getElementById('rw-desc-list').classList.remove('hidden');
-            else document.getElementById('rw-desc-list').classList.add('hidden');
-        }
-
-        async function sendRewardToUser() {
-            const userId = document.getElementById('rw-userid').value.trim();
-            const message = document.getElementById('rw-message').value.trim();
-            const type = document.getElementById('rw-type').value;
-            
-            if(!userId || !message) return alert("Llena el ID y el mensaje.");
-            let rewardData = { message: message, type: type, status: "pending" };
-
-            if(type === 'saldo') {
-                const amount = parseInt(document.getElementById('rw-amount').value);
-                if(!amount) return alert("Pon una cantidad válida.");
-                rewardData.amount = amount;
-            } 
-            else if(type === 'pantallas') {
-                let selected = [];
-                document.querySelectorAll('#rw-pantallas-list .rw-prod-cb:checked').forEach(cb => selected.push({ id: cb.value, name: cb.parentNode.innerText.trim() }));
-                if(selected.length === 0) return alert("Selecciona al menos una pantalla.");
-                rewardData.pantallas = selected;
-            } 
-            else if(type === 'descuentos') {
-                const discount = parseInt(document.getElementById('rw-discount-val').value);
-                if(!discount || discount < 1 || discount > 100) return alert("Descuento inválido (1-100).");
-                const target = document.getElementById('rw-desc-target').value;
-                let applyTo = {};
-                if(target === 'all') { applyTo["all"] = discount; } 
-                else {
-                    document.querySelectorAll('#rw-desc-list .rw-prod-cb:checked').forEach(cb => { applyTo[cb.value] = discount; });
-                    if(Object.keys(applyTo).length === 0) return alert("Selecciona pantallas para el descuento.");
-                }
-                rewardData.descuentos = applyTo;
-            }
-
-            try {
-                await firebase.firestore().collection("usuarios").doc(userId).update({ pendingReward: rewardData });
-                alert("¡Recompensa enviada al ID " + userId + "!");
-                closeModal('modal-send-reward');
-            } catch (e) { alert("Error al enviar: " + e.message + ". Verifica que el ID exista."); }
-        }
-
-        // --- 4. RECOMPENSAS LADO USUARIO ---
-        function checkUserRewards() {
-            if(typeof currentUser === 'undefined' || !currentUser || !currentUser.pendingReward) return;
-            userPendingReward = currentUser.pendingReward;
-            document.getElementById('urw-message').innerText = userPendingReward.message;
-            let details = "";
-            if(userPendingReward.type === 'saldo') details = `+$${userPendingReward.amount.toLocaleString()} a tu Billetera`;
-            if(userPendingReward.type === 'pantallas') details = `Pantallas regaladas:<br>` + userPendingReward.pantallas.map(p => `• ${p.name}`).join('<br>');
-            if(userPendingReward.type === 'descuentos') details = `¡Descuento Exclusivo Aplicado en la Tienda!`;
-            
-            document.getElementById('urw-details').innerHTML = details;
-            openModal('modal-user-reward');
-        }
-
-        async function claimReward() {
-            if(!userPendingReward) return;
-            try {
-                let updates = { pendingReward: firebase.firestore.FieldValue.delete() };
-                if(userPendingReward.type === 'saldo') { updates.balance = firebase.firestore.FieldValue.increment(userPendingReward.amount); } 
-                else if(userPendingReward.type === 'descuentos') {
-                    let currentDisc = currentUser.activeDiscounts || {};
-                    updates.activeDiscounts = { ...currentDisc, ...userPendingReward.descuentos };
-                }
-                else if(userPendingReward.type === 'pantallas') { updates.regalosRecibidos = firebase.firestore.FieldValue.arrayUnion(...userPendingReward.pantallas); }
-
-                await firebase.firestore().collection("usuarios").doc(myUserId).update(updates);
-                alert("¡Recompensa reclamada con éxito!");
-                closeModal('modal-user-reward'); userPendingReward = null;
-            } catch (e) { alert("Error reclamando: " + e.message); }
-        }
-
-        // --- 5. GUÍAS Y TUTORIALES ---
-        function previewGuideImage() {
-            const file = document.getElementById('g-file-input').files[0];
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas'); const MAX_WIDTH = 600; let scaleSize = MAX_WIDTH / img.width; if(scaleSize > 1) scaleSize = 1;
-                        canvas.width = img.width * scaleSize; canvas.height = img.height * scaleSize;
-                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        currentGuideImg = canvas.toDataURL('image/jpeg', 0.7);
-                        document.getElementById('g-preview').src = currentGuideImg; document.getElementById('g-preview').classList.remove('hidden'); document.getElementById('g-upload-label').classList.add('hidden');
-                    };
-                    img.src = event.target.result;
-                }; reader.readAsDataURL(file);
-            }
-        }
-
-        async function saveGuide() {
-            try {
-                const title = document.getElementById('g-title').value.trim(); const content = document.getElementById('g-content').value.trim();
-                if(!title || !content) { if(typeof showToast === 'function') showToast("LLENA LOS DATOS"); return; }
-
-                const btn = document.getElementById('btn-save-guide'); btn.disabled = true; btn.innerText = "Guardando...";
-
-                await firebase.firestore().collection("guias").add({ title: title, content: content, coverImg: currentGuideImg, timestamp: new Date().toISOString() });
-                
-                document.getElementById('g-title').value = ""; document.getElementById('g-content').value = ""; currentGuideImg = "";
-                document.getElementById('g-preview').src = ""; document.getElementById('g-preview').classList.add('hidden'); document.getElementById('g-upload-label').classList.remove('hidden');
-
-                if(typeof closeModal === 'function') closeModal('modal-publish-guide'); 
-                if(typeof showToast === 'function') showToast("GUÍA PUBLICADA");
-                
-                btn.disabled = false; btn.innerText = "Publicar Guía";
-            } catch (e) { alert("🚨 Error publicando guía: " + e.message); document.getElementById('btn-save-guide').disabled = false; document.getElementById('btn-save-guide').innerText = "Publicar Guía"; }
-        }
-
-        async function deleteGuide(id) {
-            if(confirm("¿Seguro que quieres borrar esta guía permanentemente?")) {
-                await firebase.firestore().collection("guias").doc(id).delete();
-                if(typeof showToast === 'function') showToast("GUÍA ELIMINADA");
-            }
-        }
-
-        function formatGuideContent(text) {
-            if(!text) return ""; let f = text.replace(/\n/g, '<br>');
-            const imgRegex = /(https?:\/\/[^\s"'<>]+?\.(?:jpg|jpeg|gif|png|webp))/gi;
-            f = f.replace(imgRegex, '<img src="$1" style="max-width:100%; border-radius:10px; margin:15px 0; display:block; box-shadow:0 5px 15px rgba(0,0,0,0.3);">');
-            const customImgRegex = /\[img\](.*?)\[\/img\]/gi;
-            f = f.replace(customImgRegex, '<img src="$1" style="max-width:100%; border-radius:10px; margin:15px 0; display:block; box-shadow:0 5px 15px rgba(0,0,0,0.3);">');
-            return f;
-        }
-
-        function renderGuides() {
-            const list = document.getElementById('guides-list'); if(!list) return;
-            list.innerHTML = guidesData.map(g => `
-                <div class="forum-thread-card" onclick="openGuide('${g.id}')" style="display:flex; align-items:center; gap:12px;">
-                    ${g.coverImg ? `<img src="${g.coverImg}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">` : `<div style="font-size:30px; line-height:1;">📖</div>`}
-                    <h3 style="margin:0; font-size:15px; flex-grow:1;">${g.title}</h3>
-                    ${(typeof isAdmin !== 'undefined' && isAdmin) ? `<button onclick="event.stopPropagation(); deleteGuide('${g.id}')" style="background:var(--danger); color:white; border:none; padding:6px; border-radius:6px; font-size:12px; font-weight:bold;">✕</button>` : ''}
-                </div>
-            `).join('');
-        }
-
-        function openGuide(id) {
-            const g = guidesData.find(x => x.id === id); if(!g) return;
-            if(window.location.pathname !== `/guides/${id}`) { window.history.pushState({}, "", `/guides/${id}`); }
-            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden')); document.getElementById('view-guide-detail').classList.remove('hidden');
-            let coverHtml = g.coverImg ? `<img src="${g.coverImg}" style="width:100%; height:200px; object-fit:cover; border-radius:12px; margin-bottom:20px; box-shadow:0 5px 15px rgba(0,0,0,0.5);">` : '';
-            let formattedContent = formatGuideContent(g.content);
-            document.getElementById('guide-content-area').innerHTML = `${coverHtml}<h1 style="margin-bottom:15px; font-size:24px; color:var(--accent);">${g.title}</h1><div style="font-size:15px; color:var(--text-main); line-height:1.6;">${formattedContent}</div>`;
-        }
-
-        // --- 6. MANTENIMIENTO Y BLOQUEO DE STOCK (RUTA DIRECTA) ---
-        function openMaintenanceModal() {
-            if(typeof closeModal === 'function') closeModal('modal-admin-options');
-            if(typeof openModal === 'function') openModal('modal-maintenance');
-            firebase.firestore().collection("configuracion").doc("general").get().then(doc => {
-                if(doc.exists) document.getElementById('maint-desc').value = doc.data().maintenanceMsg || "";
-            }).catch(e => console.error(e));
-        }
-
-        async function toggleMaintenance(status) {
-            try {
-                const msg = document.getElementById('maint-desc').value.trim();
-                await firebase.firestore().collection("configuracion").doc("general").set({ maintenance: status, maintenanceMsg: msg }, {merge: true});
-                if(typeof showToast === 'function') showToast(status ? "MANTENIMIENTO ACTIVADO" : "MANTENIMIENTO DESACTIVADO");
-                if(typeof closeModal === 'function') closeModal('modal-maintenance');
-            } catch (e) { alert("🚨 Error de Firebase: " + e.message); }
-        }
-
-        function openBlockProductsModal() {
-            if(typeof closeModal === 'function') closeModal('modal-admin-options');
-            document.getElementById('block-product-list').innerHTML = products.map(p => `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-elevated); padding:10px; border-radius:8px;">
-                    <div>${p.name} <br><span style="color:var(--accent); font-size:12px;">$${p.price.toLocaleString()}</span></div>
-                    <label class="switch"><input type="checkbox" onchange="toggleAgotado('${p.id}', this.checked)" ${p.agotado ? 'checked' : ''}><span class="slider"></span></label>
-                </div>`).join('');
-            if(typeof openModal === 'function') openModal('modal-block-products');
-        }
-
-        async function toggleAgotado(id, status) {
-            try { await firebase.firestore().collection("productos").doc(id.toString()).update({ agotado: status }); } 
-            catch (e) { alert("🚨 Error actualizando stock: " + e.message); }
-        }
-
-        // --- 7. MÚSICA EN SEGUNDO PLANO ---
-        function openMusicModal() {
-            closeModal('modal-admin-options'); openModal('modal-config-music');
-            firebase.firestore().collection("configuracion").doc("musica").get().then(doc => {
-                if(doc.exists) {
-                    const d = doc.data(); document.getElementById('music-links').value = (d.links || []).join('\n');
-                    document.getElementById('music-loop').checked = d.loop || false; document.getElementById('music-random').checked = d.random || false;
-                }
-            });
-        }
-
-        async function saveMusicConfig() {
-            const text = document.getElementById('music-links').value;
-            const links = text.split('\n').map(l => l.trim()).filter(l => l !== "");
-            const loop = document.getElementById('music-loop').checked; const random = document.getElementById('music-random').checked;
-            await firebase.firestore().collection("configuracion").doc("musica").set({ links, loop, random });
-            closeModal('modal-config-music'); alert("Música guardada. Se actualizará para todos.");
-        }
-
-        function getYTVideoId(url) {
-            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/); return match ? match[1] : null;
-        }
-
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('yt-player-hidden', { height: '0', width: '0', playerVars: { 'autoplay': 0, 'controls': 0, 'disablekb': 1 }, events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange } });
-        }
-
-        let isPlayingMusic = false; let currentTrackIndex = 0;
-
-        function onPlayerReady(event) {
-            firebase.firestore().collection("configuracion").doc("musica").onSnapshot(doc => {
-                if(doc.exists) {
-                    const data = doc.data(); musicPlaylist = (data.links || []).map(getYTVideoId).filter(id => id !== null);
-                    musicConfig.loop = data.loop; musicConfig.random = data.random;
-                    if(musicPlaylist.length > 0) {
-                        document.getElementById('music-player-container').classList.remove('hidden');
-                        if(musicConfig.random) currentTrackIndex = Math.floor(Math.random() * musicPlaylist.length); else currentTrackIndex = 0;
-                        ytPlayer.cueVideoById(musicPlaylist[currentTrackIndex]);
-                    } else { document.getElementById('music-player-container').classList.add('hidden'); ytPlayer.stopVideo(); }
-                }
-            });
-        }
-
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.ENDED) {
-                if(musicConfig.random) currentTrackIndex = Math.floor(Math.random() * musicPlaylist.length); else currentTrackIndex++;
-                if(currentTrackIndex >= musicPlaylist.length) {
-                    if(musicConfig.loop) currentTrackIndex = 0; else { ytPlayer.stopVideo(); document.getElementById('btn-play-music').innerText = "▶"; isPlayingMusic = false; return; }
-                }
-                ytPlayer.loadVideoById(musicPlaylist[currentTrackIndex]);
-            }
-        }
-
-        function toggleMusic() {
-            if(!ytPlayer || musicPlaylist.length === 0) return;
-            const btn = document.getElementById('btn-play-music');
-            if(isPlayingMusic) { ytPlayer.pauseVideo(); btn.innerText = "▶"; isPlayingMusic = false; }
-            else { ytPlayer.playVideo(); btn.innerText = "⏸"; isPlayingMusic = true; }
-        }
-
-        // --- ARRANQUE SEGURO ---
-        window.addEventListener('load', () => {
-            setTimeout(handleRoute, 100);
-
-            // Escuchar cambios en el usuario para Recompensas y Descuentos
-            if(typeof myUserId !== 'undefined') {
-                firebase.firestore().collection("usuarios").doc(myUserId).onSnapshot(doc => {
-                    if(doc.exists) {
-                        const u = doc.data(); activeDiscounts = u.activeDiscounts || {};
-                        if(u.pendingReward && document.getElementById('modal-user-reward').classList.contains('hidden')) { setTimeout(checkUserRewards, 1000); }
-                        if(typeof products !== 'undefined' && products.length > 0) renderAll();
-                    }
-                });
-            }
-
-            firebase.firestore().collection("configuracion").doc("general").onSnapshot(doc => {
-                if(doc.exists) {
-                    const data = doc.data(); const screen = document.getElementById('maintenance-screen');
-                    if(data.maintenance && (typeof isAdmin === 'undefined' || !isAdmin)) {
-                        document.getElementById('maintenance-msg').innerText = data.maintenanceMsg; screen.classList.remove('hidden'); document.body.style.overflow = 'hidden'; 
-                    } else { screen.classList.add('hidden'); document.body.style.overflow = 'auto'; }
-                }
-            });
-
-            firebase.firestore().collection("guias").orderBy("timestamp", "desc").onSnapshot(snap => {
-                guidesData = []; snap.forEach(d => guidesData.push({ id: d.id, ...d.data() })); renderGuides();
-            });
-        });
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="emc.js"></script>
 </body>
 </html>
