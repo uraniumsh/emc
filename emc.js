@@ -41,18 +41,22 @@ async function sendTelegramPhoto(file, caption) {
     }
 }
 
-// ÍCONOS SVG (Estilo iOS)
+// ==========================================
+// 2. ÍCONOS VECTORIALES (APPLE SAN FRANCISCO)
+// ==========================================
 const ICONS = {
     edit: `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`,
     trash: `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
     lock: `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
     close: `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
     thumbUp: `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`,
-    thumbDown: `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2"></path></svg>`
+    chat: `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`,
+    admin: `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
+    alert: `<svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`
 };
 
 // ==========================================
-// 2. VARIABLES GLOBALES
+// 3. VARIABLES GLOBALES
 // ==========================================
 let products = [];
 let categories = [];
@@ -72,11 +76,12 @@ let currentThreadId = null;
 let claimContext = null; 
 
 // ==========================================
-// 3. INICIALIZACIÓN Y SEGURIDAD
+// 4. INICIALIZACIÓN Y SEGURIDAD
 // ==========================================
 async function initSession() {
     document.body.addEventListener('touchstart', function(){}, {passive: true});
-    
+    injectIOSModalContainer(); // Inyecta el contenedor de modales nativos
+
     let originalId = localStorage.getItem('original_uid');
     if (!originalId) {
         originalId = Math.floor(100000 + Math.random() * 900000).toString();
@@ -101,10 +106,7 @@ async function initSession() {
         currentUser = userData;
     } else {
         currentUser = userDoc.data();
-        if(currentUser.banned === true && myUserId !== "170125") {
-            document.body.innerHTML = `<div style="background:#000; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
-            return; 
-        }
+        checkBannedStatus();
         await userRef.update({ lastActive: rightNow });
     }
 
@@ -112,16 +114,183 @@ async function initSession() {
     const hasAuth = localStorage.getItem('admin_auth') === 'true';
     isAdmin = hasAdminRole && hasAuth;
 
-    if (isAdmin) {
-        activateAdminUI();
-    }
-    
+    if (isAdmin) activateAdminUI();
     updateProfileUI();
 }
 window.onload = initSession;
 
+function checkBannedStatus() {
+    if(currentUser.banned === true && myUserId !== "170125") {
+        document.body.innerHTML = `
+        <div style="background:var(--bg-color); color:var(--text-main); height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;">
+            <div style="color:var(--danger); margin-bottom:20px;">${ICONS.alert}</div>
+            <h1 style="font-size:24px; font-weight:700; margin-bottom:10px;">Cuenta Suspendida</h1>
+            <p style="color:var(--text-muted); font-size:15px; max-width:300px;">El acceso a tu cuenta ha sido restringido permanentemente por violar los términos de servicio.</p>
+        </div>`;
+    }
+}
+
 // ==========================================
-// 4. ESCUCHADORES Y ACTUALIZACIÓN UI
+// 5. SISTEMA NATIVO DE ALERTAS iOS
+// ==========================================
+function injectIOSModalContainer() {
+    if (document.getElementById('sys-ios-modal')) return;
+    const div = document.createElement('div');
+    div.id = 'sys-ios-modal';
+    div.className = 'modal hidden';
+    div.style.zIndex = '9999';
+    div.innerHTML = `
+        <div class="ios-dialog">
+            <div class="ios-dialog-content">
+                <div class="ios-dialog-title" id="sys-ios-title">Título</div>
+                <div class="ios-dialog-msg" id="sys-ios-msg">Mensaje</div>
+                <input type="text" class="ios-dialog-input hidden" id="sys-ios-input" />
+            </div>
+            <div class="ios-dialog-actions" id="sys-ios-actions"></div>
+        </div>
+    `;
+    document.body.appendChild(div);
+}
+
+function showIOSModal(title, msg, type, callback) {
+    const modal = document.getElementById('sys-ios-modal');
+    document.getElementById('sys-ios-title').innerText = title;
+    document.getElementById('sys-ios-msg').innerText = msg;
+    
+    const input = document.getElementById('sys-ios-input');
+    const actions = document.getElementById('sys-ios-actions');
+    actions.innerHTML = '';
+    
+    input.classList.add('hidden');
+    input.value = '';
+
+    if (type === 'alert') {
+        actions.innerHTML = `<button class="ios-dialog-btn bold" onclick="closeSysModal(); if(${callback}) ${callback}();">OK</button>`;
+    } 
+    else if (type === 'confirm') {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'ios-dialog-btn';
+        cancelBtn.innerText = 'Cancelar';
+        cancelBtn.onclick = closeSysModal;
+
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'ios-dialog-btn bold';
+        confirmBtn.innerText = 'Confirmar';
+        confirmBtn.onclick = () => { closeSysModal(); if(callback) callback(); };
+
+        actions.appendChild(cancelBtn);
+        actions.appendChild(confirmBtn);
+    }
+    else if (type === 'prompt') {
+        input.classList.remove('hidden');
+        input.focus();
+        
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'ios-dialog-btn';
+        cancelBtn.innerText = 'Cancelar';
+        cancelBtn.onclick = closeSysModal;
+
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'ios-dialog-btn bold';
+        confirmBtn.innerText = 'Aceptar';
+        confirmBtn.onclick = () => {
+            const val = input.value.trim();
+            closeSysModal();
+            if(callback) callback(val);
+        };
+
+        actions.appendChild(cancelBtn);
+        actions.appendChild(confirmBtn);
+    }
+    
+    modal.classList.remove('hidden');
+    modal.classList.remove('closing');
+}
+
+function closeSysModal() {
+    const modal = document.getElementById('sys-ios-modal');
+    modal.classList.add('closing');
+    setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('closing'); }, 200);
+}
+
+// Wrappers para usar en todo el código
+function iosAlert(title, message) { showIOSModal(title, message, 'alert'); }
+function iosConfirm(title, message, callback) { showIOSModal(title, message, 'confirm', callback); }
+function iosPrompt(title, message, callback) { showIOSModal(title, message, 'prompt', callback); }
+
+// ==========================================
+// 6. UTILIDADES & UI
+// ==========================================
+function getFinalPrice(p) {
+    let price = Number(p.price) || 0;
+    let discount = Number(p.discount) || 0;
+    return discount > 0 ? (price - discount) : price;
+}
+
+function showToast(msg) {
+    let c = document.getElementById('toast-container');
+    if(!c) {
+        c = document.createElement('div');
+        c.id = 'toast-container';
+        document.body.appendChild(c);
+    }
+    const t = document.createElement('div'); 
+    t.className = 'toast'; 
+    t.innerText = msg;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+function openModal(id) { 
+    const el = document.getElementById(id);
+    if(el) { el.classList.remove('hidden'); el.classList.remove('closing'); }
+}
+
+function closeModal(id) {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.classList.add('closing');
+    setTimeout(() => { el.classList.remove('closing'); el.classList.add('hidden'); }, 200);
+}
+
+function showView(view) {
+    document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+    const v = document.getElementById(`view-${view}`);
+    if(v) v.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openMenu() {
+    const menu = document.getElementById('mobile-menu');
+    if(!menu) return;
+    menu.classList.remove('hidden');
+    menu.style.pointerEvents = 'auto';
+    
+    const nameEl = document.getElementById('menu-user-name');
+    if(nameEl) nameEl.innerText = currentUser?.registered ? currentUser.name : "Invitado";
+    
+    const idEl = document.getElementById('menu-user-id');
+    if(idEl) idEl.innerText = `ID: #${myUserId}`;
+    
+    if (isAdmin) { 
+        const adminBtn = document.getElementById('btn-admin-menu');
+        if(adminBtn) adminBtn.classList.remove('hidden'); 
+    }
+}
+
+function closeMenu() { 
+    const menu = document.getElementById('mobile-menu');
+    if(menu) { menu.style.pointerEvents = 'none'; menu.classList.add('hidden'); }
+}
+
+function updateProfileUI() {
+    if(!currentUser) return;
+    document.querySelectorAll('.user-balance-display').forEach(el => el.innerText = `$${(currentUser.balance || 0).toLocaleString()}`);
+    document.querySelectorAll('.user-name-display').forEach(el => el.innerText = currentUser.registered ? currentUser.name : "Invitado");
+}
+
+// ==========================================
+// 7. ESCUCHADORES FIREBASE
 // ==========================================
 function escucharDatos() {
     db.collection("productos").onSnapshot(snap => {
@@ -145,9 +314,7 @@ function escucharDatos() {
         if (doc.exists) {
             currentUser = doc.data();
             updateProfileUI();
-            if(currentUser.banned === true && myUserId !== "170125") {
-                document.body.innerHTML = `<div style="background:#000; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
-            }
+            checkBannedStatus();
         }
     });
 
@@ -162,100 +329,8 @@ function escucharDatos() {
     });
 }
 
-function updateProfileUI() {
-    if(!currentUser) return;
-    const balanceEls = document.querySelectorAll('.user-balance-display');
-    balanceEls.forEach(el => el.innerText = `$${(currentUser.balance || 0).toLocaleString()}`);
-    
-    const nameEls = document.querySelectorAll('.user-name-display');
-    nameEls.forEach(el => el.innerText = currentUser.registered ? currentUser.name : "Invitado");
-}
-
 // ==========================================
-// 5. MODALES Y NAVEGACIÓN APPLE
-// ==========================================
-function showToast(msg) {
-    const c = document.getElementById('toast-container');
-    if(!c) return;
-    const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg;
-    c.appendChild(t);
-    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
-}
-
-function openModal(id) { 
-    const el = document.getElementById(id);
-    if(el) { el.classList.remove('hidden'); el.classList.remove('closing'); }
-}
-
-function closeModal(id) {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.classList.add('closing');
-    setTimeout(() => { el.classList.remove('closing'); el.classList.add('hidden'); }, 200);
-}
-
-function showView(view) {
-    document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
-    const v = document.getElementById(`view-${view}`);
-    if(v) v.classList.remove('hidden');
-}
-
-function openMenu() {
-    const menu = document.getElementById('mobile-menu');
-    if(!menu) return;
-    menu.classList.remove('hidden');
-    menu.style.pointerEvents = 'auto';
-    
-    const nameEl = document.getElementById('menu-user-name');
-    if(nameEl) nameEl.innerText = currentUser?.registered ? currentUser.name : "Invitado";
-    
-    const idEl = document.getElementById('menu-user-id');
-    if(idEl) idEl.innerText = `ID: #${myUserId}`;
-    
-    if (isAdmin) { 
-        const adminBtn = document.getElementById('btn-admin-menu');
-        if(adminBtn) adminBtn.classList.remove('hidden'); 
-    }
-    if (localStorage.getItem('admin_auth') === 'true') {
-        const logoutBtn = document.getElementById('btn-logout-menu');
-        if(logoutBtn) logoutBtn.classList.remove('hidden');
-    }
-}
-function closeMenu() { 
-    const menu = document.getElementById('mobile-menu');
-    if(menu) { menu.style.pointerEvents = 'none'; menu.classList.add('hidden'); }
-}
-
-// SISTEMA NATIVO DE ALERTAS (REEMPLAZA ALERT/CONFIRM)
-let confirmCallback = null;
-let promptCallback = null;
-
-function iosConfirm(title, message, callback) {
-    document.getElementById('ios-confirm-title').innerText = title;
-    document.getElementById('ios-confirm-msg').innerText = message;
-    confirmCallback = callback;
-    openModal('modal-ios-confirm');
-}
-function executeIosConfirm() {
-    closeModal('modal-ios-confirm');
-    if(confirmCallback) confirmCallback();
-}
-
-function iosPrompt(title, message, callback) {
-    document.getElementById('ios-prompt-title').innerText = title;
-    document.getElementById('ios-prompt-msg').innerText = message;
-    document.getElementById('ios-prompt-input').value = "";
-    promptCallback = callback;
-    openModal('modal-ios-prompt');
-}
-function executeIosPrompt() {
-    const val = document.getElementById('ios-prompt-input').value.trim();
-    closeModal('modal-ios-prompt');
-    if(promptCallback) promptCallback(val);
-}
-
-// ==========================================
-// 6. RENDERIZADO DE PRODUCTOS
+// 8. RENDERIZADO DE PRODUCTOS
 // ==========================================
 function renderGrid(filterCat = null) {
     const grid = document.getElementById('products-grid');
@@ -267,19 +342,21 @@ function renderGrid(filterCat = null) {
     if (filterCat) toShow = products.filter(p => p.category === filterCat);
 
     toShow.forEach(p => {
-        const finalPrice = p.discount > 0 ? (p.price - p.discount) : p.price;
+        const finalPrice = getFinalPrice(p);
         const discountTag = p.discount > 0 ? `<div class="discount-tag">-$${p.discount.toLocaleString()}</div>` : '';
         
         grid.innerHTML += `
-        <div class="card" onclick="verProducto('${p.id}')">
+        <div class="product-card" onclick="verProducto('${p.id}')">
             <div class="card-img" style="background-image: url('${p.img}')">${discountTag}</div>
-            <div class="card-body">
-                <h3>${p.name}</h3>
-                <p class="price" style="${p.discount > 0 ? 'color: var(--danger);' : ''}">
-                    $${finalPrice.toLocaleString()} 
-                    ${p.discount > 0 ? `<span style="text-decoration:line-through; font-size:12px; color:gray; margin-left:5px;">$${p.price.toLocaleString()}</span>` : ''}
-                </p>
-                <button class="apple-btn" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Agregar</button>
+            <div class="card-body" style="padding:12px; flex-grow:1; display:flex; flex-direction:column; justify-content:space-between;">
+                <h3 style="font-size:15px; font-weight:600; margin-bottom:5px;">${p.name}</h3>
+                <div>
+                    <p class="price" style="font-weight:700; font-size:16px; margin-bottom:10px; ${p.discount > 0 ? 'color: var(--danger);' : ''}">
+                        $${finalPrice.toLocaleString()} 
+                        ${p.discount > 0 ? `<br><span style="text-decoration:line-through; font-weight:400; font-size:12px; color:var(--text-muted);">$${p.price.toLocaleString()}</span>` : ''}
+                    </p>
+                    <button class="apple-btn-secondary" style="font-size:13px; padding:8px; border-radius:14px; background:var(--bg-color); border:1px solid var(--border-color);" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Añadir</button>
+                </div>
             </div>
         </div>`;
     });
@@ -295,21 +372,23 @@ function renderAll() {
         const prods = products.filter(p => p.category === cat.id);
         if (prods.length === 0) return;
 
-        let html = `<div class="category-section"><h2 class="category-title">${cat.name}</h2><div class="products-grid">`;
+        let html = `<div class="category-section" style="margin-bottom:30px;"><h2 style="font-size:22px; font-weight:700; margin-bottom:15px;">${cat.name}</h2><div class="product-grid">`;
         prods.forEach(p => {
-            const finalPrice = p.discount > 0 ? (p.price - p.discount) : p.price;
+            const finalPrice = getFinalPrice(p);
             const discountTag = p.discount > 0 ? `<div class="discount-tag">-$${p.discount.toLocaleString()}</div>` : '';
             
             html += `
-            <div class="card" onclick="verProducto('${p.id}')">
+            <div class="product-card" onclick="verProducto('${p.id}')">
                 <div class="card-img" style="background-image: url('${p.img}')">${discountTag}</div>
-                <div class="card-body">
-                    <h3>${p.name}</h3>
-                    <p class="price" style="${p.discount > 0 ? 'color: var(--danger);' : ''}">
-                        $${finalPrice.toLocaleString()}
-                        ${p.discount > 0 ? `<span style="text-decoration:line-through; font-size:12px; color:gray; margin-left:5px;">$${p.price.toLocaleString()}</span>` : ''}
-                    </p>
-                    <button class="apple-btn" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Agregar</button>
+                <div class="card-body" style="padding:12px; display:flex; flex-direction:column; flex-grow:1; justify-content:space-between;">
+                    <h3 style="font-size:15px; font-weight:600; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</h3>
+                    <div>
+                        <p class="price" style="font-weight:700; font-size:15px; margin-bottom:10px; ${p.discount > 0 ? 'color: var(--danger);' : ''}">
+                            $${finalPrice.toLocaleString()}
+                            ${p.discount > 0 ? `<span style="text-decoration:line-through; font-weight:400; font-size:12px; color:var(--text-muted); margin-left:5px;">$${p.price.toLocaleString()}</span>` : ''}
+                        </p>
+                        <button class="apple-btn-secondary" style="font-size:13px; padding:8px; border-radius:14px; margin-bottom:0;" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Agregar</button>
+                    </div>
                 </div>
             </div>`;
         });
@@ -319,19 +398,19 @@ function renderAll() {
 }
 
 // ==========================================
-// 7. DETALLE DE PRODUCTO Y RECLAMAR
+// 9. DETALLE Y RECLAMACIÓN
 // ==========================================
 function verProducto(id) {
     const p = products.find(x => x.id === id);
     if(!p) return;
-    const finalPrice = p.discount > 0 ? (p.price - p.discount) : p.price;
+    const finalPrice = getFinalPrice(p);
     
-    document.getElementById('detail-img').style.backgroundImage = `url('${p.img}')`;
+    document.getElementById('detail-img').src = p.img;
     document.getElementById('detail-name').innerText = p.name;
     document.getElementById('detail-desc').innerText = p.desc || 'Sin descripción';
     
     document.getElementById('detail-price').innerHTML = `$${finalPrice.toLocaleString()} ` + 
-        (p.discount > 0 ? `<span style="text-decoration:line-through; font-size:14px; color:gray; margin-left:8px;">$${p.price.toLocaleString()}</span>` : '');
+        (p.discount > 0 ? `<span style="text-decoration:line-through; font-weight:400; font-size:14px; color:var(--text-muted); margin-left:8px;">$${p.price.toLocaleString()}</span>` : '');
 
     document.getElementById('detail-stock').innerText = `Disponibles: ${p.stock}`;
     
@@ -339,8 +418,8 @@ function verProducto(id) {
     if (isAdmin && adminPanel) {
         adminPanel.classList.remove('hidden');
         adminPanel.innerHTML = `
-            <button class="apple-btn" onclick="editProduct('${id}')">${ICONS.edit} Editar</button>
-            <button class="apple-btn" style="background:var(--danger); color:white;" onclick="deleteProduct('${id}')">${ICONS.trash} Eliminar</button>
+            <button class="apple-btn-secondary" onclick="editProduct('${id}')">${ICONS.edit} Editar</button>
+            <button class="apple-btn-secondary" style="color:var(--danger);" onclick="deleteProduct('${id}')">${ICONS.trash} Eliminar</button>
         `;
     } else if(adminPanel) {
         adminPanel.classList.add('hidden');
@@ -349,8 +428,8 @@ function verProducto(id) {
     const userActions = document.getElementById('detail-user-actions');
     if(userActions) {
         userActions.innerHTML = `
-            <button class="apple-btn" style="margin-bottom:10px;" onclick="addToCart('${p.id}', 1)">Agregar al Carrito</button>
-            <button class="apple-btn" style="background:var(--success); color:white;" onclick="abrirClaim('${p.id}')">Reclamar Pantalla Ahora</button>
+            <button class="apple-btn" style="margin-bottom:12px;" onclick="addToCart('${p.id}', 1)">Añadir al Carrito</button>
+            <button class="apple-btn" style="background:var(--success); color:white;" onclick="abrirClaim('${p.id}')">Reclamar Pantalla</button>
         `;
     }
 
@@ -360,6 +439,26 @@ function verProducto(id) {
 function abrirClaim(productId) {
     claimContext = products.find(p => p.id === productId);
     if(!claimContext) return;
+    
+    // Inyecta dinámicamente si el modal no existe, o usa el existente.
+    let modal = document.getElementById('modal-claim');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-claim';
+        modal.className = 'modal hidden';
+        modal.innerHTML = `
+        <div class="ios-card detail-box">
+            <button class="close" onclick="closeModal('modal-claim')">${ICONS.close}</button>
+            <h2 style="margin-bottom:20px; font-weight:700;">Reclamar Pantalla</h2>
+            <p style="font-size:14px; color:var(--text-muted); margin-bottom:20px;">Déjanos tus datos y nos pondremos en contacto contigo por WhatsApp para la entrega de tu cuenta.</p>
+            <div class="apple-form">
+                <input type="text" id="claim-name" placeholder="Tu Nombre">
+                <input type="number" id="claim-phone" placeholder="Número de WhatsApp">
+                <button class="apple-btn" style="margin-top:10px; background:var(--success); color:white;" onclick="submitClaim()">Enviar Solicitud</button>
+            </div>
+        </div>`;
+        document.body.appendChild(modal);
+    }
     openModal('modal-claim');
 }
 
@@ -367,28 +466,29 @@ function submitClaim() {
     const name = document.getElementById('claim-name').value.trim();
     const phone = document.getElementById('claim-phone').value.trim();
     
-    if(!name || !phone) return showToast("Faltan datos");
+    if(!name || !phone) return showToast("Por favor, completa todos los datos.");
     
-    const msg = `🚨 *NUEVA PANTALLA RECLAMADA* 🚨\n\n👤 *Usuario:* ${name}\n📱 *WhatsApp:* ${phone}\n🛒 *Producto:* ${claimContext.name}\n🆔 *ID Sistema:* #${myUserId}`;
+    // Envío por telegram usando diseño texto limpio sin emojis
+    const msg = `*NUEVA PANTALLA RECLAMADA*\n\n*Usuario:* ${name}\n*WhatsApp:* ${phone}\n*Producto:* ${claimContext.name}\n*ID Sistema:* #${myUserId}`;
     
     sendTelegramNotification(msg);
     closeModal('modal-claim');
-    showToast("¡Solicitud enviada! Te contactaremos vía WhatsApp.");
+    iosAlert("Solicitud Enviada", "Nos pondremos en contacto contigo vía WhatsApp a la brevedad posible.");
     document.getElementById('claim-name').value = "";
     document.getElementById('claim-phone').value = "";
     claimContext = null;
 }
 
 // ==========================================
-// 8. CARRITO Y PAGOS
+// 10. CARRITO Y PAGOS (CÁLCULO EXACTO)
 // ==========================================
 function addToCart(id, qty) {
     const p = products.find(x => x.id === id);
     if (!p) return;
-    if (p.stock <= 0) return showToast("AGOTADO");
+    if (p.stock <= 0) return iosAlert("Agotado", "Este producto ya no tiene existencias.");
 
     if (cartCooldowns[id] && Date.now() - cartCooldowns[id] < 600000) {
-        return showToast("ESPERA 10 MIN PARA AGREGAR OTRA VEZ");
+        return iosAlert("Límite de Tiempo", "Por favor espera 10 minutos para agregar este mismo artículo nuevamente.");
     }
 
     cart[id] = (cart[id] || 0) + qty;
@@ -396,20 +496,28 @@ function addToCart(id, qty) {
     
     cartCooldowns[id] = Date.now();
     updateCartCount();
-    showToast(`"${p.name}" AGREGADO`);
+    showToast(`Agregado a tu carrito`);
 }
 
 function updateCartCount() {
     const c = Object.values(cart).reduce((a, b) => a + b, 0);
-    const badge = document.getElementById('cart-count');
-    if (badge) badge.innerText = c;
+    const badges = document.querySelectorAll('.cart-badge');
+    badges.forEach(badge => {
+        badge.innerText = c;
+        badge.style.display = c > 0 ? 'flex' : 'none';
+    });
 }
 
 function toggleCart() {
     const c = document.getElementById('cart-sidebar');
     if(!c) return;
-    c.classList.toggle('open');
-    if (c.classList.contains('open')) renderCart();
+    
+    if (c.style.transform === 'translateX(0%)') {
+        c.style.transform = 'translateX(100%)';
+    } else {
+        c.style.transform = 'translateX(0%)';
+        renderCart();
+    }
 }
 
 function renderCart() {
@@ -419,7 +527,7 @@ function renderCart() {
     let total = 0;
 
     if (Object.keys(cart).length === 0) {
-        items.innerHTML = '<p class="text-muted" style="text-align:center; margin-top:20px;">Tu carrito está vacío</p>';
+        items.innerHTML = '<p class="text-muted" style="text-align:center; margin-top:40px; font-size:15px;">Tu carrito está vacío.</p>';
         document.getElementById('cart-total').innerText = '$0';
         return;
     }
@@ -428,16 +536,16 @@ function renderCart() {
         const p = products.find(x => x.id === id);
         if (!p) continue;
         
-        const finalPrice = p.discount > 0 ? (p.price - p.discount) : p.price;
+        const finalPrice = getFinalPrice(p);
         total += finalPrice * qty;
 
         items.innerHTML += `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px;">
-            <div>
-                <strong style="font-size:15px;">${p.name}</strong><br>
-                <span class="text-muted" style="font-size:13px;">${qty} x $${finalPrice.toLocaleString()}</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:var(--surface-elevated); padding:12px 15px; border-radius:14px;">
+            <div style="flex-grow:1; padding-right:10px;">
+                <strong style="font-size:15px; font-weight:600;">${p.name}</strong><br>
+                <span class="text-muted" style="font-size:13px;">Cant: ${qty} | $${finalPrice.toLocaleString()} c/u</span>
             </div>
-            <button class="btn-sm-danger" onclick="delete cart['${id}']; renderCart(); updateCartCount();">${ICONS.close}</button>
+            <button style="background:transparent; border:none; color:var(--text-muted); padding:5px; cursor:pointer;" onclick="delete cart['${id}']; renderCart(); updateCartCount();">${ICONS.trash}</button>
         </div>`;
     }
     const totalEl = document.getElementById('cart-total');
@@ -445,7 +553,7 @@ function renderCart() {
 }
 
 async function payCart(method) {
-    if (Object.keys(cart).length === 0) return showToast("CARRITO VACÍO");
+    if (Object.keys(cart).length === 0) return iosAlert("Carrito Vacío", "No tienes artículos en tu carrito para comprar.");
 
     let total = 0;
     let itemsText = "";
@@ -454,7 +562,7 @@ async function payCart(method) {
     for (const [id, qty] of Object.entries(cart)) {
         const p = products.find(x => x.id === id);
         if (p) {
-            const finalPrice = p.discount > 0 ? (p.price - p.discount) : p.price;
+            const finalPrice = getFinalPrice(p);
             total += finalPrice * qty;
             itemsText += `- ${qty}x ${p.name} ($${finalPrice.toLocaleString()} c/u)\n`;
             itemsToUpdate.push({ ref: db.collection("productos").doc(id), newStock: p.stock - qty });
@@ -462,20 +570,20 @@ async function payCart(method) {
     }
 
     if (method === 'billetera') {
-        if (!currentUser.registered) return showToast("DEBES REGISTRARTE PARA USAR TU BILLETERA");
-        if (currentUser.balance < total) return showToast("SALDO INSUFICIENTE");
+        if (!currentUser.registered) return iosAlert("Acción Requerida", "Debes registrarte en la plataforma para usar tu billetera.");
+        if (currentUser.balance < total) return iosAlert("Saldo Insuficiente", "No tienes suficiente saldo en tu billetera para realizar esta compra.");
 
-        iosConfirm("Pagar con Billetera", `Se descontarán $${total.toLocaleString()} de tu saldo.`, async () => {
+        iosConfirm("Confirmar Pago", `Se descontarán $${total.toLocaleString()} de tu saldo. ¿Deseas continuar?`, async () => {
             const newBalance = currentUser.balance - total;
             await db.collection("usuarios").doc(myUserId).update({ balance: newBalance });
             
             for (let item of itemsToUpdate) { await item.ref.update({ stock: item.newStock }); }
             
-            const msg = `✅ *COMPRA CON BILLETERA*\n\n👤 ID: #${myUserId}\n💵 Total: $${total.toLocaleString()}\n🛒 Artículos:\n${itemsText}`;
+            const msg = `*COMPRA CON BILLETERA*\n\n*ID:* #${myUserId}\n*Total:* $${total.toLocaleString()}\n*Artículos:*\n${itemsText}`;
             sendTelegramNotification(msg);
             
             cart = {}; updateCartCount(); toggleCart();
-            showToast("¡COMPRA EXITOSA!");
+            iosAlert("Compra Exitosa", "Tu pago ha sido procesado exitosamente.");
         });
     } else if (method === 'nequi') {
         currentReceiptContext = { total, itemsText, itemsToUpdate, type: 'nequi_cart' };
@@ -484,7 +592,7 @@ async function payCart(method) {
 }
 
 // ==========================================
-// 9. RECIBOS (NEQUI / RECARGAS)
+// 11. RECIBOS NEQUI
 // ==========================================
 function triggerReceiptInput() { 
     const input = document.getElementById('receipt-input');
@@ -496,37 +604,37 @@ if(recInput) {
     recInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        document.getElementById('receipt-preview').innerText = "Archivo seleccionado: " + file.name;
+        document.getElementById('receipt-preview').innerText = "Documento adjunto: " + file.name;
         currentReceiptFile = file;
     });
 }
 
 async function sendReceipt() {
-    if (!currentReceiptFile) return showToast("ADJUNTA EL COMPROBANTE");
+    if (!currentReceiptFile) return iosAlert("Error", "Por favor selecciona una imagen del comprobante antes de enviar.");
     
     const btn = document.getElementById('btn-send-receipt');
-    if(btn) { btn.innerText = "Enviando..."; btn.disabled = true; }
+    if(btn) { btn.innerText = "Procesando..."; btn.disabled = true; }
 
     try {
         const ctx = currentReceiptContext;
-        let msg = `📸 *NUEVO COMPROBANTE*\n\n👤 ID: #${myUserId}\n`;
+        let msg = `*NUEVO COMPROBANTE*\n\n*ID:* #${myUserId}\n`;
         
         if (ctx.type === 'nequi_cart') {
-            msg += `🛒 *COMPRA CARRITO*\n💵 Total a verificar: $${ctx.total.toLocaleString()}\nArtículos:\n${ctx.itemsText}`;
+            msg += `*TIPO:* COMPRA EN TIENDA\n*TOTAL A VERIFICAR:* $${ctx.total.toLocaleString()}\n*ARTÍCULOS:*\n${ctx.itemsText}`;
             for (let item of ctx.itemsToUpdate) { await item.ref.update({ stock: item.newStock }); }
             cart = {}; updateCartCount();
         } else if (ctx.type === 'topup') {
-            msg += `💰 *RECARGA BILLETERA*\n💵 Monto a recargar: $${ctx.amount.toLocaleString()}`;
+            msg += `*TIPO:* RECARGA BILLETERA\n*MONTO A RECARGAR:* $${ctx.amount.toLocaleString()}`;
         }
 
         await sendTelegramPhoto(currentReceiptFile, msg);
-        showToast("COMPROBANTE ENVIADO. EN BREVE SE VALIDARÁ.");
+        iosAlert("Enviado", "El comprobante ha sido enviado a revisión. En breve procesaremos tu solicitud.");
         closeModal('modal-receipt');
         const sidebar = document.getElementById('cart-sidebar');
-        if(sidebar && sidebar.classList.contains('open')) toggleCart();
+        if(sidebar && sidebar.style.transform === 'translateX(0%)') toggleCart();
         
     } catch (error) {
-        showToast("ERROR AL ENVIAR");
+        iosAlert("Error", "Ocurrió un problema al enviar el comprobante. Inténtalo de nuevo.");
     } finally {
         if(btn) { btn.innerText = "Enviar a Verificación"; btn.disabled = false; }
         currentReceiptFile = null;
@@ -536,7 +644,7 @@ async function sendReceipt() {
 }
 
 // ==========================================
-// 10. FORO Y CHATS
+// 12. FORO / CHATS (APPLE UI)
 // ==========================================
 function renderForum() {
     const c = document.getElementById('forum-posts');
@@ -545,24 +653,24 @@ function renderForum() {
     
     forumPosts.forEach(p => {
         const d = new Date(p.timestamp);
-        const vipTag = p.vip ? `<span style="background:var(--accent); color:black; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; margin-left:5px;">VIP</span>` : '';
-        const adminBadge = p.authorRole === 'superadmin' ? `<span style="color:var(--accent); margin-left:5px;">${ICONS.lock} Admin</span>` : '';
+        const vipTag = p.vip ? `<span class="tag vip">VIP</span>` : '';
+        const adminBadge = p.authorRole === 'superadmin' ? `<span style="color:var(--accent); font-size:12px; margin-left:6px; display:inline-flex; align-items:center; gap:3px;">${ICONS.admin} Admin</span>` : '';
 
         c.innerHTML += `
-        <div class="card" style="margin-bottom:15px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);" onclick="openChat('${p.id}')">
-            <div style="padding:15px;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <strong style="font-size:16px;">${p.title} ${vipTag}</strong>
-                        <div class="text-muted" style="font-size:12px; margin-top:4px;">Por: ${p.authorName} ${adminBadge} • ${d.toLocaleDateString()}</div>
-                    </div>
+        <div class="forum-thread-card" style="margin-bottom:12px;" onclick="openChat('${p.id}')">
+            <div style="flex-grow:1;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                    <strong style="font-size:16px; font-weight:600;">${p.title}</strong>
+                    ${vipTag}
                 </div>
-                <p style="margin-top:10px; font-size:14px; line-height:1.4;">${p.content.substring(0, 100)}...</p>
-                <div style="margin-top:15px; display:flex; gap:15px; color:gray; font-size:13px;">
-                    <span style="display:flex; align-items:center; gap:5px;">${ICONS.thumbUp} ${p.likes || 0}</span>
-                    <span style="display:flex; align-items:center; gap:5px;">💬 ${(p.replies || []).length}</span>
+                <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Por: ${p.authorName} ${adminBadge}</div>
+                <p style="font-size:14px; color:var(--text-main); line-height:1.4; opacity:0.9;">${p.content.substring(0, 80)}...</p>
+                <div style="margin-top:12px; display:flex; gap:16px; color:var(--text-muted); font-size:13px; font-weight:500;">
+                    <span style="display:flex; align-items:center; gap:6px;">${ICONS.thumbUp} ${p.likes || 0}</span>
+                    <span style="display:flex; align-items:center; gap:6px;">${ICONS.chat} ${(p.replies || []).length}</span>
                 </div>
             </div>
+            <div style="color:var(--border-color);">${ICONS.lock.replace('width="12"', 'width="16"').replace('height="12"', 'height="16"')}</div>
         </div>`;
     });
 }
@@ -572,9 +680,9 @@ function openChat(id) {
     if (!post) return;
 
     if (post.vip) {
-        iosPrompt("Debate VIP", "Ingresa la contraseña para acceder:", (val) => {
+        iosPrompt("Acceso VIP requerido", "Ingresa la clave de acceso al debate:", (val) => {
             if (val === post.password || isAdmin) { accederChat(post); } 
-            else { showToast("CONTRASEÑA INCORRECTA"); }
+            else { iosAlert("Acceso Denegado", "La contraseña es incorrecta."); }
         });
     } else {
         accederChat(post);
@@ -585,11 +693,11 @@ function accederChat(post) {
     currentThreadId = post.id;
     document.getElementById('view-forum').classList.add('hidden');
     document.getElementById('view-forum-detail').classList.remove('hidden');
-    document.getElementById('chat-title').innerHTML = post.title + (post.vip ? ' <span style="color:var(--accent); font-size:12px;">(VIP)</span>' : '');
+    document.getElementById('chat-title').innerHTML = post.title + (post.vip ? ' <span style="color:var(--accent); font-size:11px; margin-left:5px; padding:2px 6px; background:rgba(10,132,255,0.1); border-radius:10px;">VIP</span>' : '');
     
     const actions = document.getElementById('chat-admin-actions');
     if (isAdmin && actions) {
-        actions.innerHTML = `<button class="btn-sm-danger" onclick="deletePost('${post.id}')">${ICONS.trash} Eliminar Debate</button>`;
+        actions.innerHTML = `<button style="background:transparent; border:none; color:var(--danger); cursor:pointer;" onclick="deletePost('${post.id}')">${ICONS.trash}</button>`;
     } else if (actions) {
         actions.innerHTML = '';
     }
@@ -601,26 +709,26 @@ function renderChatMessages(post) {
     if(!c) return;
     
     c.innerHTML = `
-    <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px;">
-        <div style="font-size:12px; color:var(--accent); margin-bottom:5px;">Post Original por ${post.authorName}</div>
-        <div style="font-size:15px; line-height:1.5;">${post.content}</div>
-        ${post.img ? `<img src="${post.img}" style="width:100%; border-radius:8px; margin-top:10px;">` : ''}
+    <div style="background:var(--surface-elevated); padding:16px; border-radius:18px; margin-bottom:24px;">
+        <div style="font-size:12px; font-weight:600; color:var(--accent); margin-bottom:8px;">Hilo original por ${post.authorName}</div>
+        <div style="font-size:15px; line-height:1.5; color:var(--text-main);">${post.content}</div>
+        ${post.img ? `<img src="${post.img}" style="width:100%; border-radius:12px; margin-top:12px;">` : ''}
     </div>`;
 
     const replies = post.replies || [];
     replies.forEach((r, index) => {
         const isMe = r.authorId === myUserId;
         const align = isMe ? 'flex-end' : 'flex-start';
-        const bg = isMe ? 'var(--accent)' : 'rgba(255,255,255,0.1)';
-        const color = isMe ? '#000' : '#fff';
-        const adminBadge = r.authorRole === 'superadmin' ? `<span style="color:red; font-size:10px;">[ADMIN]</span> ` : '';
+        const bg = isMe ? 'var(--accent)' : 'var(--surface-elevated)';
+        const color = isMe ? '#ffffff' : 'var(--text-main)';
+        const adminBadge = r.authorRole === 'superadmin' ? `<span style="color:var(--danger); font-size:10px; font-weight:700;">[STAFF]</span> ` : '';
 
         c.innerHTML += `
-        <div style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:15px; width:100%;">
-            <div style="font-size:11px; color:gray; margin-bottom:4px; margin-left:5px; margin-right:5px;">${adminBadge}${r.authorName}</div>
-            <div style="background:${bg}; color:${color}; padding:10px 15px; border-radius:18px; max-width:85%; font-size:14px; position:relative;">
+        <div style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:16px; width:100%;">
+            <div style="font-size:11px; font-weight:500; color:var(--text-muted); margin-bottom:4px; margin-left:8px; margin-right:8px;">${adminBadge}${r.authorName}</div>
+            <div style="background:${bg}; color:${color}; padding:10px 16px; border-radius:18px; max-width:85%; font-size:15px; position:relative; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
                 ${r.content}
-                ${isAdmin || isMe ? `<button onclick="deleteReply('${post.id}', ${index})" style="position:absolute; right:-30px; top:5px; background:none; border:none; color:var(--danger); cursor:pointer;">${ICONS.trash}</button>` : ''}
+                ${isAdmin || isMe ? `<button onclick="deleteReply('${post.id}', ${index})" style="position:absolute; ${isMe ? 'left:-30px;' : 'right:-30px;'} top:8px; background:none; border:none; color:var(--text-muted); cursor:pointer;">${ICONS.trash}</button>` : ''}
             </div>
         </div>`;
     });
@@ -628,25 +736,24 @@ function renderChatMessages(post) {
 }
 
 async function deletePost(id) {
-    iosConfirm("Eliminar Debate", "¿Seguro que quieres borrar este debate completo?", async () => {
+    iosConfirm("Eliminar Debate", "¿Estás seguro de borrar este hilo de conversación completamente?", async () => {
         await db.collection("foro").doc(id).delete();
-        showToast("DEBATE ELIMINADO");
         showView('forum');
+        iosAlert("Eliminado", "El debate fue eliminado del sistema.");
     });
 }
 
 async function deleteReply(postId, replyIndex) {
-    iosConfirm("Eliminar Mensaje", "¿Borrar esta respuesta?", async () => {
+    iosConfirm("Eliminar Mensaje", "¿Borrar esta respuesta del debate?", async () => {
         const p = forumPosts.find(x => x.id === postId);
         if(!p) return;
         p.replies.splice(replyIndex, 1);
         await db.collection("foro").doc(postId).update({ replies: p.replies });
-        showToast("MENSAJE ELIMINADO");
     });
 }
 
 // ==========================================
-// 11. PANEL DE ADMINISTRADOR (PRODUCTOS)
+// 13. PANEL ADMINISTRATIVO
 // ==========================================
 function editProduct(id) {
     const p = products.find(x => x.id === id);
@@ -674,16 +781,16 @@ async function saveProduct() {
     const cat = document.getElementById('p-cat').value;
     const discount = parseInt(document.getElementById('p-discount').value) || 0;
 
-    if (!name || !price || isNaN(price) || isNaN(stock)) return showToast("DATOS INVÁLIDOS");
+    if (!name || !price || isNaN(price) || isNaN(stock)) return iosAlert("Datos Inválidos", "Revisa que los campos numéricos estén correctos.");
 
-    const data = { name, desc, price, stock, category: cat, discount, img: currentImg || "https://via.placeholder.com/150" };
+    const data = { name, desc, price, stock, category: cat, discount, img: currentImg || "https://via.placeholder.com/300" };
 
     if (editingId) {
         await db.collection("productos").doc(editingId).update(data);
-        showToast("PRODUCTO ACTUALIZADO");
+        iosAlert("Éxito", "El producto ha sido actualizado.");
     } else {
         await db.collection("productos").add(data);
-        showToast("PRODUCTO CREADO");
+        iosAlert("Éxito", "El producto ha sido creado correctamente.");
     }
     editingId = null;
     closeModal('modal-product');
@@ -692,10 +799,10 @@ async function saveProduct() {
 
 function deleteProduct(id) {
     if (!isAdmin) return;
-    iosConfirm("Eliminar Producto", "¿Seguro que quieres borrar este artículo de la tienda?", async () => {
+    iosConfirm("Confirmar Acción", "¿Estás seguro de que deseas eliminar este producto del inventario?", async () => {
         await db.collection("productos").doc(id).delete();
-        showToast("ELIMINADO");
         showView('store');
+        iosAlert("Eliminado", "Producto borrado del sistema.");
     });
 }
 
