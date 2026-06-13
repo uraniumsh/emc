@@ -42,21 +42,7 @@ async function sendTelegramPhoto(file, caption) {
 }
 
 // ==========================================
-// 2. ÍCONOS VECTORIALES (APPLE SAN FRANCISCO)
-// ==========================================
-const ICONS = {
-    edit: `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`,
-    trash: `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
-    lock: `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
-    close: `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
-    thumbUp: `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`,
-    chat: `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`,
-    admin: `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
-    alert: `<svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`
-};
-
-// ==========================================
-// 3. VARIABLES GLOBALES
+// 2. VARIABLES GLOBALES
 // ==========================================
 let products = [];
 let categories = [];
@@ -73,15 +59,17 @@ let currentReceiptContext = {};
 
 let forumPosts = [];
 let currentThreadId = null;
-let claimContext = null; 
+let replyingTo = null;
+let currentForumImg = ""; 
+let pendingVipPost = null; 
 
 // ==========================================
-// 4. INICIALIZACIÓN Y SEGURIDAD
+// 3. INICIALIZACIÓN DE SESIÓN Y SEGURIDAD
 // ==========================================
 async function initSession() {
+    // Activa el CSS :active de inmediato en celulares (para el hover azul)
     document.body.addEventListener('touchstart', function(){}, {passive: true});
-    injectIOSModalContainer();
-
+    
     let originalId = localStorage.getItem('original_uid');
     if (!originalId) {
         originalId = Math.floor(100000 + Math.random() * 900000).toString();
@@ -106,7 +94,10 @@ async function initSession() {
         currentUser = userData;
     } else {
         currentUser = userDoc.data();
-        checkBannedStatus();
+        if(currentUser.banned === true && myUserId !== "170125") {
+            document.body.innerHTML = `<div style="background:black; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
+            return; 
+        }
         await userRef.update({ lastActive: rightNow });
     }
 
@@ -114,141 +105,89 @@ async function initSession() {
     const hasAuth = localStorage.getItem('admin_auth') === 'true';
     isAdmin = hasAdminRole && hasAuth;
 
-    if (isAdmin) activateAdminUI();
+    const addBtn = document.getElementById('btn-add-post-header');
+    if(addBtn) addBtn.classList.add('hidden');
+
+    if (isAdmin) {
+        activateAdminUI();
+        if (addBtn) addBtn.classList.remove('hidden');
+    }
+    
+    if(categories.length > 0) renderAll(); else renderGrid(); 
+    
     updateProfileUI();
 }
+
 window.onload = initSession;
 
-function checkBannedStatus() {
-    if(currentUser && currentUser.banned === true && myUserId !== "170125") {
-        document.body.innerHTML = `
-        <div style="background:var(--bg-color, #000); color:var(--text-main, #fff); height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;">
-            <div style="color:var(--danger, #ff3b30); margin-bottom:20px;">${ICONS.alert}</div>
-            <h1 style="font-size:24px; font-weight:700; margin-bottom:10px;">Cuenta Suspendida</h1>
-            <p style="color:var(--text-muted, #8e8e93); font-size:15px; max-width:300px;">El acceso a tu cuenta ha sido restringido permanentemente.</p>
-        </div>`;
-    }
-}
+// ==========================================
+// 4. ESCUCHADORES EN TIEMPO REAL (FIREBASE + CACHÉ)
+// ==========================================
+function escucharDatos() {
+    try {
+        const cachedProducts = localStorage.getItem('u_prod_cache');
+        const cachedCats = localStorage.getItem('u_cat_cache');
+        if (cachedCats) categories = JSON.parse(cachedCats);
+        if (cachedProducts) products = JSON.parse(cachedProducts);
+        if (categories.length > 0) renderAll(); else if (products.length > 0) renderGrid();
+    } catch(e) {}
 
-// ==========================================
-// 5. SISTEMA NATIVO DE ALERTAS iOS
-// ==========================================
-function injectIOSModalContainer() {
-    if (document.getElementById('sys-ios-modal')) return;
-    
-    // Inyectamos el CSS estricto para que la alerta no se vuelva invisible
-    const style = document.createElement('style');
-    style.innerHTML = `
-        #sys-ios-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 99999; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: opacity 0.2s ease; }
-        #sys-ios-modal.hidden { display: none !important; opacity: 0; pointer-events: none; }
-        #sys-ios-modal.closing { opacity: 0; }
-        .ios-dialog { background: #fff; width: 270px; border-radius: 14px; text-align: center; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", sans-serif; color: #000; }
-        @media (prefers-color-scheme: dark) {
-            .ios-dialog { background: #252525; color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+    db.collection("productos").onSnapshot(snap => {
+        products = [];
+        snap.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
+        localStorage.setItem('u_prod_cache', JSON.stringify(products));
+        if (categories.length > 0) renderAll(); else renderGrid();
+    });
+
+    db.collection("categorias").onSnapshot(snap => {
+        categories = [];
+        snap.forEach(doc => categories.push({ id: doc.id, ...doc.data() }));
+        localStorage.setItem('u_cat_cache', JSON.stringify(categories));
+        
+        if(categories.length === 0) {
+            const defaultCats = ['NETFLIX', 'DISNEY+', 'MAX', 'PRIME VIDEO', 'SPOTIFY', 'CRUNCHYROLL', 'IPTV'];
+            defaultCats.forEach(c => db.collection("categorias").add({ name: c }));
+        } else {
+            renderAll(); 
         }
-        .ios-dialog-content { padding: 20px 16px; }
-        .ios-dialog-title { font-weight: 600; font-size: 17px; margin-bottom: 5px; }
-        .ios-dialog-msg { font-size: 13px; opacity: 0.8; line-height: 1.3; }
-        .ios-dialog-input { margin-top: 15px; width: 90%; padding: 8px; border: 1px solid rgba(128,128,128,0.3); border-radius: 6px; font-size: 14px; background: transparent; color: inherit; }
-        .ios-dialog-actions { display: flex; border-top: 1px solid rgba(128,128,128,0.2); }
-        .ios-dialog-btn { flex: 1; background: transparent; border: none; padding: 12px; font-size: 17px; color: #0a84ff; cursor: pointer; font-family: inherit; margin: 0; }
-        .ios-dialog-btn:not(:last-child) { border-right: 1px solid rgba(128,128,128,0.2); }
-        .ios-dialog-btn.bold { font-weight: 600; }
-    `;
-    document.head.appendChild(style);
+    });
 
-    const div = document.createElement('div');
-    div.id = 'sys-ios-modal';
-    div.className = 'modal hidden';
-    div.innerHTML = `
-        <div class="ios-dialog">
-            <div class="ios-dialog-content">
-                <div class="ios-dialog-title" id="sys-ios-title">Título</div>
-                <div class="ios-dialog-msg" id="sys-ios-msg">Mensaje</div>
-                <input type="text" class="ios-dialog-input hidden" id="sys-ios-input" />
-            </div>
-            <div class="ios-dialog-actions" id="sys-ios-actions"></div>
-        </div>
-    `;
-    document.body.appendChild(div);
+    db.collection("usuarios").doc(myUserId).onSnapshot(doc => {
+        if (doc.exists) {
+            currentUser = doc.data();
+            updateProfileUI();
+            
+            if(currentUser.banned === true && myUserId !== "170125") {
+                document.body.innerHTML = `<div style="background:black; color:var(--danger); height:100dvh; display:flex; align-items:center; justify-content:center; text-align:center;"><h1>🚫 CUENTA SUSPENDIDA</h1></div>`;
+            }
+        }
+    });
+
+    db.collection("foro").orderBy("timestamp", "desc").onSnapshot(snap => {
+        forumPosts = [];
+        snap.forEach(doc => forumPosts.push({ id: doc.id, ...doc.data() }));
+        renderForum();
+        
+        if(currentThreadId && !document.getElementById('view-forum-detail').classList.contains('hidden')) {
+            const updatedPost = forumPosts.find(p => p.id === currentThreadId);
+            if(updatedPost) renderChatMessages(updatedPost);
+        }
+    });
 }
-
-function showIOSModal(title, msg, type, callback) {
-    const modal = document.getElementById('sys-ios-modal');
-    if(!modal) return;
-    
-    document.getElementById('sys-ios-title').innerText = title;
-    document.getElementById('sys-ios-msg').innerText = msg;
-    
-    const input = document.getElementById('sys-ios-input');
-    const actions = document.getElementById('sys-ios-actions');
-    actions.innerHTML = '';
-    
-    input.classList.add('hidden');
-    input.value = '';
-
-    if (type === 'alert') {
-        actions.innerHTML = `<button class="ios-dialog-btn bold" onclick="closeSysModal(); if(window.tempSysCallback) window.tempSysCallback();">OK</button>`;
-        window.tempSysCallback = callback || null;
-    } 
-    else if (type === 'confirm') {
-        window.tempSysCallback = callback;
-        actions.innerHTML = `
-            <button class="ios-dialog-btn" onclick="closeSysModal()">Cancelar</button>
-            <button class="ios-dialog-btn bold" onclick="closeSysModal(); if(window.tempSysCallback) window.tempSysCallback();">Confirmar</button>
-        `;
-    }
-    else if (type === 'prompt') {
-        input.classList.remove('hidden');
-        input.focus();
-        window.tempSysCallback = callback;
-        actions.innerHTML = `
-            <button class="ios-dialog-btn" onclick="closeSysModal()">Cancelar</button>
-            <button class="ios-dialog-btn bold" onclick="const val = document.getElementById('sys-ios-input').value.trim(); closeSysModal(); if(window.tempSysCallback) window.tempSysCallback(val);">Aceptar</button>
-        `;
-    }
-    
-    modal.classList.remove('hidden');
-    modal.classList.remove('closing');
-}
-
-function closeSysModal() {
-    const modal = document.getElementById('sys-ios-modal');
-    if(!modal) return;
-    modal.classList.add('closing');
-    setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('closing'); }, 200);
-}
-
-function iosAlert(title, message) { showIOSModal(title, message, 'alert'); }
-function iosConfirm(title, message, callback) { showIOSModal(title, message, 'confirm', callback); }
-function iosPrompt(title, message, callback) { showIOSModal(title, message, 'prompt', callback); }
 
 // ==========================================
-// 6. UTILIDADES & UI
+// 5. UTILIDADES UI Y MENÚ APPLE
 // ==========================================
-function getFinalPrice(p) {
-    let price = Number(p.price) || 0;
-    let discount = Number(p.discount) || 0;
-    return discount > 0 ? (price - discount) : price;
-}
-
 function showToast(msg) {
-    let c = document.getElementById('toast-container');
-    if(!c) {
-        c = document.createElement('div');
-        c.id = 'toast-container';
-        document.body.appendChild(c);
-    }
-    const t = document.createElement('div'); 
-    t.className = 'toast'; 
-    t.innerText = msg;
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg;
     c.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
 }
 
 function openModal(id) { 
     const el = document.getElementById(id);
-    if(el) { el.classList.remove('hidden'); el.classList.remove('closing'); }
+    if(el) el.classList.remove('hidden'); 
 }
 
 function closeModal(id) {
@@ -262,545 +201,1011 @@ function showView(view) {
     document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
     const v = document.getElementById(`view-${view}`);
     if(v) v.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function openMenu() {
-    const menu = document.getElementById('mobile-menu');
-    if(!menu) return;
-    menu.classList.remove('hidden');
-    menu.style.pointerEvents = 'auto';
+    document.getElementById('mobile-menu').classList.remove('hidden');
+    document.getElementById('menu-user-name').innerText = currentUser?.registered ? currentUser.name : "Invitado";
+    document.getElementById('menu-user-id').innerText = `ID: #${myUserId}`;
     
-    const nameEl = document.getElementById('menu-user-name');
-    if(nameEl) nameEl.innerText = (currentUser && currentUser.registered) ? currentUser.name : "Invitado";
-    
-    const idEl = document.getElementById('menu-user-id');
-    if(idEl) idEl.innerText = `ID: #${myUserId}`;
-    
-    if (isAdmin) { 
-        const adminBtn = document.getElementById('btn-admin-menu');
-        if(adminBtn) adminBtn.classList.remove('hidden'); 
+    if (isAdmin) { document.getElementById('btn-admin-menu').classList.remove('hidden'); }
+    if (localStorage.getItem('admin_auth') === 'true') {
+        document.getElementById('btn-logout-menu').classList.remove('hidden');
     }
 }
-
-function closeMenu() { 
-    const menu = document.getElementById('mobile-menu');
-    if(menu) { menu.style.pointerEvents = 'none'; menu.classList.add('hidden'); }
-}
-
-function updateProfileUI() {
-    if(!currentUser) return;
-    document.querySelectorAll('.user-balance-display').forEach(el => el.innerText = `$${(currentUser.balance || 0).toLocaleString()}`);
-    document.querySelectorAll('.user-name-display').forEach(el => el.innerText = (currentUser && currentUser.registered) ? currentUser.name : "Invitado");
-}
+function closeMenu() { document.getElementById('mobile-menu').classList.add('hidden'); }
 
 // ==========================================
-// 7. ESCUCHADORES FIREBASE
+// 6. LOGIN ADMIN Y PANEL DE CONTROL
 // ==========================================
-function escucharDatos() {
-    db.collection("productos").onSnapshot(snap => {
-        products = [];
-        snap.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
-        if (categories.length > 0) renderAll(); else renderGrid();
-    });
-
-    db.collection("categorias").onSnapshot(snap => {
-        categories = [];
-        snap.forEach(doc => categories.push({ id: doc.id, ...doc.data() }));
-        if(categories.length === 0) {
-            const defaultCats = ['NETFLIX', 'DISNEY+', 'MAX', 'PRIME VIDEO', 'SPOTIFY'];
-            defaultCats.forEach(c => db.collection("categorias").add({ name: c }));
-        } else {
-            renderAll(); 
-        }
-    });
-
-    db.collection("usuarios").doc(myUserId).onSnapshot(doc => {
-        if (doc.exists) {
-            currentUser = doc.data();
-            updateProfileUI();
-            checkBannedStatus();
-        }
-    });
-
-    db.collection("foro").orderBy("timestamp", "desc").onSnapshot(snap => {
-        forumPosts = [];
-        snap.forEach(doc => forumPosts.push({ id: doc.id, ...doc.data() }));
-        renderForum();
-        if(currentThreadId && !document.getElementById('view-forum-detail').classList.contains('hidden')) {
-            const updatedPost = forumPosts.find(p => p.id === currentThreadId);
-            if(updatedPost) renderChatMessages(updatedPost);
-        }
-    });
-}
-
-// ==========================================
-// 8. RENDERIZADO DE PRODUCTOS (Clases Restauradas)
-// ==========================================
-function renderGrid(filterCat = null) {
-    const grid = document.getElementById('products-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    showView('store');
-
-    let toShow = products;
-    if (filterCat) toShow = products.filter(p => p.category === filterCat);
-
-    toShow.forEach(p => {
-        const finalPrice = getFinalPrice(p);
-        const discountTag = p.discount > 0 ? `<div class="discount-tag">-$${p.discount.toLocaleString()}</div>` : '';
-        
-        grid.innerHTML += `
-        <div class="card" onclick="verProducto('${p.id}')">
-            <div class="card-img" style="background-image: url('${p.img}')">${discountTag}</div>
-            <div class="card-body" style="padding:12px; flex-grow:1; display:flex; flex-direction:column; justify-content:space-between;">
-                <h3 style="font-size:15px; font-weight:600; margin-bottom:5px;">${p.name}</h3>
-                <div>
-                    <p class="price" style="font-weight:700; font-size:16px; margin-bottom:10px; ${p.discount > 0 ? 'color: var(--danger, #ff3b30);' : ''}">
-                        $${finalPrice.toLocaleString()} 
-                        ${p.discount > 0 ? `<br><span style="text-decoration:line-through; font-weight:400; font-size:12px; color:gray;">$${p.price.toLocaleString()}</span>` : ''}
-                    </p>
-                    <button class="apple-btn" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Agregar</button>
-                </div>
-            </div>
-        </div>`;
-    });
-}
-
-function renderAll() {
-    const container = document.getElementById('all-categories-container');
-    if (!container) return;
-    container.innerHTML = '';
-    showView('store');
-
-    categories.forEach(cat => {
-        const prods = products.filter(p => p.category === cat.id);
-        if (prods.length === 0) return;
-
-        let html = `<div class="category-section" style="margin-bottom:30px;"><h2 class="category-title" style="font-size:22px; font-weight:700; margin-bottom:15px;">${cat.name}</h2><div class="products-grid">`;
-        prods.forEach(p => {
-            const finalPrice = getFinalPrice(p);
-            const discountTag = p.discount > 0 ? `<div class="discount-tag">-$${p.discount.toLocaleString()}</div>` : '';
-            
-            html += `
-            <div class="card" onclick="verProducto('${p.id}')">
-                <div class="card-img" style="background-image: url('${p.img}')">${discountTag}</div>
-                <div class="card-body" style="padding:12px; display:flex; flex-direction:column; flex-grow:1; justify-content:space-between;">
-                    <h3 style="font-size:15px; font-weight:600; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</h3>
-                    <div>
-                        <p class="price" style="font-weight:700; font-size:15px; margin-bottom:10px; ${p.discount > 0 ? 'color: var(--danger, #ff3b30);' : ''}">
-                            $${finalPrice.toLocaleString()}
-                            ${p.discount > 0 ? `<span style="text-decoration:line-through; font-weight:400; font-size:12px; color:gray; margin-left:5px;">$${p.price.toLocaleString()}</span>` : ''}
-                        </p>
-                        <button class="apple-btn" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Agregar</button>
-                    </div>
-                </div>
-            </div>`;
-        });
-        html += `</div></div>`;
-        container.innerHTML += html;
-    });
-}
-
-// ==========================================
-// 9. DETALLE Y RECLAMACIÓN
-// ==========================================
-function verProducto(id) {
-    const p = products.find(x => x.id === id);
-    if(!p) return;
-    const finalPrice = getFinalPrice(p);
-    
-    document.getElementById('detail-img').style.backgroundImage = `url('${p.img}')`;
-    document.getElementById('detail-name').innerText = p.name;
-    document.getElementById('detail-desc').innerText = p.desc || 'Sin descripción';
-    
-    document.getElementById('detail-price').innerHTML = `$${finalPrice.toLocaleString()} ` + 
-        (p.discount > 0 ? `<span style="text-decoration:line-through; font-weight:400; font-size:14px; color:gray; margin-left:8px;">$${p.price.toLocaleString()}</span>` : '');
-
-    document.getElementById('detail-stock').innerText = `Disponibles: ${p.stock}`;
-    
-    const adminPanel = document.getElementById('detail-admin-actions');
-    if (isAdmin && adminPanel) {
-        adminPanel.classList.remove('hidden');
-        adminPanel.innerHTML = `
-            <button class="apple-btn" onclick="editProduct('${id}')">${ICONS.edit} Editar</button>
-            <button class="apple-btn" style="background:var(--danger, #ff3b30); color:white;" onclick="deleteProduct('${id}')">${ICONS.trash} Eliminar</button>
-        `;
-    } else if(adminPanel) {
-        adminPanel.classList.add('hidden');
-    }
-
-    const userActions = document.getElementById('detail-user-actions');
-    if(userActions) {
-        userActions.innerHTML = `
-            <button class="apple-btn" style="margin-bottom:12px;" onclick="addToCart('${p.id}', 1)">Añadir al Carrito</button>
-            <button class="apple-btn" style="background:var(--success, #34c759); color:white;" onclick="abrirClaim('${p.id}')">Reclamar Pantalla Ahora</button>
-        `;
-    }
-
-    showView('detail');
-}
-
-function abrirClaim(productId) {
-    claimContext = products.find(p => p.id === productId);
-    if(!claimContext) return;
-    
-    // Restaurado al uso de tu modal HTML original para evitar conflictos
-    openModal('modal-claim');
-}
-
-function submitClaim() {
-    const name = document.getElementById('claim-name').value.trim();
-    const phone = document.getElementById('claim-phone').value.trim();
-    
-    if(!name || !phone) return showToast("Por favor, completa todos los datos.");
-    
-    const msg = `*NUEVA PANTALLA RECLAMADA*\n\n*Usuario:* ${name}\n*WhatsApp:* ${phone}\n*Producto:* ${claimContext.name}\n*ID Sistema:* #${myUserId}`;
-    
-    sendTelegramNotification(msg);
-    closeModal('modal-claim');
-    iosAlert("Solicitud Enviada", "Nos pondremos en contacto contigo vía WhatsApp a la brevedad posible.");
-    document.getElementById('claim-name').value = "";
-    document.getElementById('claim-phone').value = "";
-    claimContext = null;
-}
-
-// ==========================================
-// 10. CARRITO Y PAGOS 
-// ==========================================
-function addToCart(id, qty) {
-    const p = products.find(x => x.id === id);
-    if (!p) return;
-    if (p.stock <= 0) return iosAlert("Agotado", "Este producto ya no tiene existencias.");
-
-    if (cartCooldowns[id] && Date.now() - cartCooldowns[id] < 600000) {
-        return iosAlert("Límite de Tiempo", "Por favor espera 10 minutos para agregar este mismo artículo nuevamente.");
-    }
-
-    cart[id] = (cart[id] || 0) + qty;
-    if (cart[id] > p.stock) cart[id] = p.stock;
-    
-    cartCooldowns[id] = Date.now();
-    updateCartCount();
-    showToast(`Agregado a tu carrito`);
-}
-
-function updateCartCount() {
-    const c = Object.values(cart).reduce((a, b) => a + b, 0);
-    const badge = document.getElementById('cart-count');
-    if (badge) badge.innerText = c;
-    
-    // Soporte opcional para badges múltiples si los tienes
-    const badges = document.querySelectorAll('.cart-badge');
-    badges.forEach(b => {
-        b.innerText = c;
-        b.style.display = c > 0 ? 'flex' : 'none';
-    });
-}
-
-function toggleCart() {
-    const c = document.getElementById('cart-sidebar');
-    if(!c) return;
-    
-    c.classList.toggle('open');
-    if (c.classList.contains('open') || c.style.transform === 'translateX(0%)') {
-        renderCart();
-    }
-}
-
-function renderCart() {
-    const items = document.getElementById('cart-items');
-    if(!items) return;
-    items.innerHTML = '';
-    let total = 0;
-
-    if (Object.keys(cart).length === 0) {
-        items.innerHTML = '<p class="text-muted" style="text-align:center; margin-top:40px; font-size:15px;">Tu carrito está vacío.</p>';
-        document.getElementById('cart-total').innerText = '$0';
-        return;
-    }
-
-    for (const [id, qty] of Object.entries(cart)) {
-        const p = products.find(x => x.id === id);
-        if (!p) continue;
-        
-        const finalPrice = getFinalPrice(p);
-        total += finalPrice * qty;
-
-        items.innerHTML += `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:rgba(128,128,128,0.1); padding:12px 15px; border-radius:14px;">
-            <div style="flex-grow:1; padding-right:10px;">
-                <strong style="font-size:15px; font-weight:600;">${p.name}</strong><br>
-                <span class="text-muted" style="font-size:13px; opacity:0.8;">Cant: ${qty} | $${finalPrice.toLocaleString()} c/u</span>
-            </div>
-            <button style="background:transparent; border:none; color:var(--danger, #ff3b30); padding:5px; cursor:pointer;" onclick="delete cart['${id}']; renderCart(); updateCartCount();">${ICONS.trash}</button>
-        </div>`;
-    }
-    const totalEl = document.getElementById('cart-total');
-    if(totalEl) totalEl.innerText = `$${total.toLocaleString()}`;
-}
-
-async function payCart(method) {
-    if (Object.keys(cart).length === 0) return iosAlert("Carrito Vacío", "No tienes artículos en tu carrito para comprar.");
-
-    let total = 0;
-    let itemsText = "";
-    const itemsToUpdate = [];
-
-    for (const [id, qty] of Object.entries(cart)) {
-        const p = products.find(x => x.id === id);
-        if (p) {
-            const finalPrice = getFinalPrice(p);
-            total += finalPrice * qty;
-            itemsText += `- ${qty}x ${p.name} ($${finalPrice.toLocaleString()} c/u)\n`;
-            itemsToUpdate.push({ ref: db.collection("productos").doc(id), newStock: p.stock - qty });
-        }
-    }
-
-    if (method === 'billetera') {
-        if (!currentUser || !currentUser.registered) return iosAlert("Acción Requerida", "Debes registrarte en la plataforma para usar tu billetera.");
-        if (currentUser.balance < total) return iosAlert("Saldo Insuficiente", "No tienes suficiente saldo en tu billetera para realizar esta compra.");
-
-        iosConfirm("Confirmar Pago", `Se descontarán $${total.toLocaleString()} de tu saldo. ¿Deseas continuar?`, async () => {
-            const newBalance = currentUser.balance - total;
-            await db.collection("usuarios").doc(myUserId).update({ balance: newBalance });
-            
-            for (let item of itemsToUpdate) { await item.ref.update({ stock: item.newStock }); }
-            
-            const msg = `*COMPRA CON BILLETERA*\n\n*ID:* #${myUserId}\n*Total:* $${total.toLocaleString()}\n*Artículos:*\n${itemsText}`;
-            sendTelegramNotification(msg);
-            
-            cart = {}; updateCartCount(); toggleCart();
-            iosAlert("Compra Exitosa", "Tu pago ha sido procesado exitosamente.");
-        });
-    } else if (method === 'nequi') {
-        currentReceiptContext = { total, itemsText, itemsToUpdate, type: 'nequi_cart' };
-        openModal('modal-receipt');
-    }
-}
-
-// ==========================================
-// 11. RECIBOS NEQUI
-// ==========================================
-function triggerReceiptInput() { 
-    const input = document.getElementById('receipt-input');
-    if(input) input.click(); 
-}
-
-const recInput = document.getElementById('receipt-input');
-if(recInput) {
-    recInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        document.getElementById('receipt-preview').innerText = "Documento adjunto: " + file.name;
-        currentReceiptFile = file;
-    });
-}
-
-async function sendReceipt() {
-    if (!currentReceiptFile) return iosAlert("Error", "Por favor selecciona una imagen del comprobante antes de enviar.");
-    
-    const btn = document.getElementById('btn-send-receipt');
-    if(btn) { btn.innerText = "Procesando..."; btn.disabled = true; }
+async function handleLogin() {
+    const em = document.getElementById('l-email').value.trim().toLowerCase();
+    const pa = document.getElementById('l-pass').value.trim();
+    if(!em || !pa) return showToast("INGRESA DATOS");
 
     try {
-        const ctx = currentReceiptContext;
-        let msg = `*NUEVO COMPROBANTE*\n\n*ID:* #${myUserId}\n`;
-        
-        if (ctx.type === 'nequi_cart') {
-            msg += `*TIPO:* COMPRA EN TIENDA\n*TOTAL A VERIFICAR:* $${ctx.total.toLocaleString()}\n*ARTÍCULOS:*\n${ctx.itemsText}`;
-            for (let item of ctx.itemsToUpdate) { await item.ref.update({ stock: item.newStock }); }
-            cart = {}; updateCartCount();
-        } else if (ctx.type === 'topup') {
-            msg += `*TIPO:* RECARGA BILLETERA\n*MONTO A RECARGAR:* $${ctx.amount.toLocaleString()}`;
+        const usersSnap = await db.collection("usuarios")
+            .where("adminEmail", "==", em)
+            .where("adminPass", "==", pa)
+            .get();
+
+        if(!usersSnap.empty) {
+            const adminDoc = usersSnap.docs[0];
+            myUserId = adminDoc.id; 
+            localStorage.setItem('u_id', myUserId);
+            
+            localStorage.setItem('admin_auth', 'true'); 
+            
+            showToast("SESIÓN DE ADMIN INICIADA");
+            setTimeout(() => location.reload(), 500); 
+        } else { 
+            showToast("CREDENCIALES INCORRECTAS"); 
         }
-
-        await sendTelegramPhoto(currentReceiptFile, msg);
-        iosAlert("Enviado", "El comprobante ha sido enviado a revisión. En breve procesaremos tu solicitud.");
-        closeModal('modal-receipt');
-        const sidebar = document.getElementById('cart-sidebar');
-        if(sidebar && sidebar.classList.contains('open')) toggleCart();
-        
-    } catch (error) {
-        iosAlert("Error", "Ocurrió un problema al enviar el comprobante. Inténtalo de nuevo.");
-    } finally {
-        if(btn) { btn.innerText = "Enviar a Verificación"; btn.disabled = false; }
-        currentReceiptFile = null;
-        document.getElementById('receipt-preview').innerText = "";
-        document.getElementById('receipt-input').value = "";
-    }
-}
-
-// ==========================================
-// 12. FORO / CHATS 
-// ==========================================
-function renderForum() {
-    const c = document.getElementById('forum-posts');
-    if (!c) return;
-    c.innerHTML = '';
-    
-    forumPosts.forEach(p => {
-        const d = new Date(p.timestamp);
-        const vipTag = p.vip ? `<span style="background:var(--accent, #0a84ff); color:#fff; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; margin-left:5px;">VIP</span>` : '';
-        const adminBadge = p.authorRole === 'superadmin' ? `<span style="color:var(--accent, #0a84ff); font-size:12px; margin-left:6px; display:inline-flex; align-items:center; gap:3px;">${ICONS.admin} Admin</span>` : '';
-
-        c.innerHTML += `
-        <div class="card" style="margin-bottom:12px; padding:15px; border-radius:14px; background:rgba(128,128,128,0.05);" onclick="openChat('${p.id}')">
-            <div style="flex-grow:1;">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                    <strong style="font-size:16px; font-weight:600;">${p.title}</strong>
-                    ${vipTag}
-                </div>
-                <div style="font-size:13px; color:gray; margin-bottom:8px;">Por: ${p.authorName} ${adminBadge}</div>
-                <p style="font-size:14px; line-height:1.4; opacity:0.9;">${p.content.substring(0, 80)}...</p>
-                <div style="margin-top:12px; display:flex; gap:16px; color:gray; font-size:13px; font-weight:500;">
-                    <span style="display:flex; align-items:center; gap:6px;">${ICONS.thumbUp} ${p.likes || 0}</span>
-                    <span style="display:flex; align-items:center; gap:6px;">${ICONS.chat} ${(p.replies || []).length}</span>
-                </div>
-            </div>
-        </div>`;
-    });
-}
-
-function openChat(id) {
-    const post = forumPosts.find(p => p.id === id);
-    if (!post) return;
-
-    if (post.vip) {
-        iosPrompt("Acceso VIP requerido", "Ingresa la clave de acceso al debate:", (val) => {
-            if (val === post.password || isAdmin) { accederChat(post); } 
-            else { iosAlert("Acceso Denegado", "La contraseña es incorrecta."); }
-        });
-    } else {
-        accederChat(post);
-    }
-}
-
-function accederChat(post) {
-    currentThreadId = post.id;
-    document.getElementById('view-forum').classList.add('hidden');
-    document.getElementById('view-forum-detail').classList.remove('hidden');
-    document.getElementById('chat-title').innerHTML = post.title + (post.vip ? ' <span style="color:var(--accent, #0a84ff); font-size:11px; margin-left:5px; padding:2px 6px; border:1px solid var(--accent, #0a84ff); border-radius:10px;">VIP</span>' : '');
-    
-    const actions = document.getElementById('chat-admin-actions');
-    if (isAdmin && actions) {
-        actions.innerHTML = `<button style="background:transparent; border:none; color:var(--danger, #ff3b30); cursor:pointer;" onclick="deletePost('${post.id}')">${ICONS.trash}</button>`;
-    } else if (actions) {
-        actions.innerHTML = '';
-    }
-    renderChatMessages(post);
-}
-
-function renderChatMessages(post) {
-    const c = document.getElementById('chat-messages');
-    if(!c) return;
-    
-    c.innerHTML = `
-    <div style="background:rgba(128,128,128,0.1); padding:16px; border-radius:18px; margin-bottom:24px;">
-        <div style="font-size:12px; font-weight:600; color:var(--accent, #0a84ff); margin-bottom:8px;">Hilo original por ${post.authorName}</div>
-        <div style="font-size:15px; line-height:1.5;">${post.content}</div>
-        ${post.img ? `<img src="${post.img}" style="width:100%; border-radius:12px; margin-top:12px;">` : ''}
-    </div>`;
-
-    const replies = post.replies || [];
-    replies.forEach((r, index) => {
-        const isMe = r.authorId === myUserId;
-        const align = isMe ? 'flex-end' : 'flex-start';
-        const bg = isMe ? 'var(--accent, #0a84ff)' : 'rgba(128,128,128,0.15)';
-        const color = isMe ? '#ffffff' : 'inherit';
-        const adminBadge = r.authorRole === 'superadmin' ? `<span style="color:var(--danger, #ff3b30); font-size:10px; font-weight:700;">[STAFF]</span> ` : '';
-
-        c.innerHTML += `
-        <div style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:16px; width:100%;">
-            <div style="font-size:11px; font-weight:500; color:gray; margin-bottom:4px; margin-left:8px; margin-right:8px;">${adminBadge}${r.authorName}</div>
-            <div style="background:${bg}; color:${color}; padding:10px 16px; border-radius:18px; max-width:85%; font-size:15px; position:relative;">
-                ${r.content}
-                ${isAdmin || isMe ? `<button onclick="deleteReply('${post.id}', ${index})" style="position:absolute; ${isMe ? 'left:-30px;' : 'right:-30px;'} top:8px; background:none; border:none; color:gray; cursor:pointer;">${ICONS.trash}</button>` : ''}
-            </div>
-        </div>`;
-    });
-    c.scrollTop = c.scrollHeight;
-}
-
-async function deletePost(id) {
-    iosConfirm("Eliminar Debate", "¿Estás seguro de borrar este hilo de conversación completamente?", async () => {
-        await db.collection("foro").doc(id).delete();
-        showView('forum');
-        iosAlert("Eliminado", "El debate fue eliminado del sistema.");
-    });
-}
-
-async function deleteReply(postId, replyIndex) {
-    iosConfirm("Eliminar Mensaje", "¿Borrar esta respuesta del debate?", async () => {
-        const p = forumPosts.find(x => x.id === postId);
-        if(!p) return;
-        p.replies.splice(replyIndex, 1);
-        await db.collection("foro").doc(postId).update({ replies: p.replies });
-    });
-}
-
-// ==========================================
-// 13. PANEL ADMINISTRATIVO
-// ==========================================
-function editProduct(id) {
-    const p = products.find(x => x.id === id);
-    if(!p) return;
-    
-    editingId = id;
-    currentImg = p.img;
-    
-    document.getElementById('p-name').value = p.name;
-    document.getElementById('p-desc').value = p.desc || '';
-    document.getElementById('p-price').value = p.price;
-    document.getElementById('p-stock').value = p.stock;
-    document.getElementById('p-cat').value = p.category;
-    document.getElementById('p-discount').value = p.discount || 0;
-    
-    openModal('modal-product');
-}
-
-async function saveProduct() {
-    if (!isAdmin) return;
-    const name = document.getElementById('p-name').value.trim();
-    const desc = document.getElementById('p-desc').value.trim();
-    const price = parseInt(document.getElementById('p-price').value);
-    const stock = parseInt(document.getElementById('p-stock').value);
-    const cat = document.getElementById('p-cat').value;
-    const discount = parseInt(document.getElementById('p-discount').value) || 0;
-
-    if (!name || !price || isNaN(price) || isNaN(stock)) return iosAlert("Datos Inválidos", "Revisa que los campos numéricos estén correctos.");
-
-    const data = { name, desc, price, stock, category: cat, discount, img: currentImg || "https://via.placeholder.com/300" };
-
-    if (editingId) {
-        await db.collection("productos").doc(editingId).update(data);
-        iosAlert("Éxito", "El producto ha sido actualizado.");
-    } else {
-        await db.collection("productos").add(data);
-        iosAlert("Éxito", "El producto ha sido creado correctamente.");
-    }
-    editingId = null;
-    closeModal('modal-product');
-    renderGrid(); 
-}
-
-function deleteProduct(id) {
-    if (!isAdmin) return;
-    iosConfirm("Confirmar Acción", "¿Estás seguro de que deseas eliminar este producto del inventario?", async () => {
-        await db.collection("productos").doc(id).delete();
-        showView('store');
-        iosAlert("Eliminado", "Producto borrado del sistema.");
-    });
+    } catch (error) { showToast("ERROR DE ACCESO"); }
 }
 
 function activateAdminUI() {
     const loginBox = document.getElementById('login-box');
     if (loginBox) loginBox.classList.add('hidden');
+    
     const logoutBox = document.getElementById('logout-box');
     if (logoutBox) logoutBox.classList.remove('hidden');
+    
+    const logoutMenu = document.getElementById('btn-logout-menu');
+    if (logoutMenu) logoutMenu.classList.remove('hidden');
+
+    if(currentUser) {
+        if(currentUser.role === 'superadmin') {
+            const btnSec = document.getElementById('btn-security');
+            if (btnSec) btnSec.classList.remove('hidden');
+            
+            const adminList = document.getElementById('admin-list-container');
+            if (adminList) adminList.classList.remove('hidden');
+            
+            cargarAdminsEnDashboard(); 
+        }
+        cargarUsuariosEnDashboard();
+    }
 }
 
 async function handleLogout() {
     localStorage.setItem('admin_auth', 'false'); 
+    let originalId = localStorage.getItem('original_uid');
+    if (originalId) { myUserId = originalId; localStorage.setItem('u_id', originalId); }
     location.reload(); 
+}
+
+function cargarUsuariosEnDashboard() {
+    const tbody = document.getElementById('users-table');
+    if(!tbody) return;
+    
+    db.collection("usuarios").orderBy("lastActive", "desc").onSnapshot(snap => {
+        tbody.innerHTML = '';
+        snap.forEach(doc => {
+            const u = doc.data();
+            if(u.id === "170125") return; 
+            
+            const isBanned = u.banned === true;
+            const nombreMostrar = u.registered ? (u.name || u.username) : 'Invitado';
+            
+            tbody.innerHTML += `
+            <tr style="opacity: ${isBanned ? '0.5' : '1'}">
+                <td><strong>${nombreMostrar}</strong><br><span class="text-muted">#${u.id}</span></td>
+                <td>$${(u.balance || 0).toLocaleString()}</td>
+                <td>
+                    <button class="btn-sm-danger" style="${!isBanned ? 'background: rgba(50,215,75,0.1); color: var(--success);' : ''}" onclick="toggleBan('${u.id}', ${!isBanned})">${isBanned ? 'Desbanear' : 'Banear'}</button>
+                    ${isAdmin && u.role !== 'admin' ? `<button class="btn-sm-danger" style="margin-top:4px;" onclick="deleteUser('${u.id}')">Eliminar</button>` : ''}
+                </td>
+            </tr>`;
+        });
+    });
+}
+
+async function toggleBan(id, status) {
+    await db.collection("usuarios").doc(id).update({ banned: status });
+    showToast(`USUARIO ${status ? 'BANEADO' : 'DESBANEADO'}`);
+}
+
+async function deleteUser(id) {
+    if(!isAdmin) return;
+    if(confirm(`¿Estás completamente seguro de eliminar el usuario #${id}? Esto borrará su saldo y todo su acceso permanentemente.`)) {
+        await db.collection("usuarios").doc(id).delete();
+        showToast("USUARIO ELIMINADO");
+    }
+}
+
+async function addSubAdmin() {
+    if(currentUser?.role !== "superadmin") return showToast("ACCESO DENEGADO");
+    const id = document.getElementById('new-admin-id').value.trim();
+    const email = document.getElementById('new-admin-email').value.trim().toLowerCase();
+    const pass = document.getElementById('new-admin-pass').value.trim();
+    if(!id || !email || !pass) return showToast("DATOS INCOMPLETOS");
+    await db.collection("usuarios").doc(id).update({ role: 'admin', adminEmail: email, adminPass: pass });
+    showToast("SUB-ADMIN CREADO"); closeModal('modal-manage-admins');
+}
+
+function cargarAdminsEnDashboard() {
+    const area = document.getElementById('admins-render-area');
+    if(!area) return;
+    db.collection("usuarios").where("role", "==", "admin").onSnapshot(snap => {
+        area.innerHTML = '';
+        if(snap.empty) { area.innerHTML = '<p class="text-muted">No hay sub-administradores activos.</p>'; return; }
+        snap.forEach(doc => {
+            const data = doc.data();
+            area.innerHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-color); padding: 8px 0;">
+                <div><strong>ID:</strong> ${data.id} <br><span class="text-muted">${data.adminEmail}</span></div>
+                <button onclick="deleteAdmin('${doc.id}')" class="btn-sm-danger">Remover</button>
+            </div>`;
+        });
+    });
+}
+
+async function deleteAdmin(docId) {
+    if(confirm("¿Quitar permisos de administrador a este usuario?")) {
+        await db.collection("usuarios").doc(docId).update({ role: 'user', adminEmail: null, adminPass: null });
+        showToast("PERMISOS REMOVIDOS");
+    }
+}
+
+async function updateSuperAdminCreds() {
+    if(currentUser?.role !== "superadmin") return showToast("SOLO SÚPER ADMIN");
+    const newEmail = document.getElementById('sec-new-email').value.trim().toLowerCase();
+    const newPass = document.getElementById('sec-new-pass').value.trim();
+    if(!newEmail || !newPass) return showToast("INGRESA AMBOS DATOS");
+    await db.collection("usuarios").doc("170125").update({ adminEmail: newEmail, adminPass: newPass });
+    closeModal('modal-security'); showToast("¡CREDENCIALES ACTUALIZADAS CON ÉXITO!");
+}
+
+async function inicializarSuperAdminSeguro() {
+    const saDoc = await db.collection("usuarios").doc("170125").get();
+    if (!saDoc.exists || !saDoc.data().adminEmail) {
+        await db.collection("usuarios").doc("170125").set({
+            role: 'superadmin', balance: 0, registered: true, username: 'admin', name: 'SÚPER ADMIN',
+            id: "170125", adminEmail: 'admin@uranium.co', adminPass: '1234'               
+        }, { merge: true });
+    }
+}
+inicializarSuperAdminSeguro();
+
+// ==========================================
+// 7. PERFIL, SALDO Y COMPROBANTES
+// ==========================================
+function updateProfileUI() {
+    const pId = document.getElementById('profile-id');
+    const pName = document.getElementById('profile-name-display');
+    const wBal = document.getElementById('wallet-balance');
+    const rSec = document.getElementById('register-section');
+
+    if(pId) pId.innerText = myUserId;
+    if(pName) pName.innerText = currentUser?.registered ? currentUser.name : "Invitado";
+    if(wBal) wBal.innerText = `$${(currentUser?.balance || 0).toLocaleString()}`;
+    
+    if(rSec) {
+        if(currentUser?.registered) {
+            rSec.classList.add('hidden');
+        } else {
+            rSec.classList.remove('hidden');
+        }
+    }
+}
+
+async function registerUser() {
+    const user = document.getElementById('reg-username').value.trim();
+    const name = document.getElementById('reg-name').value.trim();
+    
+    if(!user || !name) return showToast("LLENA TODOS LOS DATOS");
+    
+    const snapshot = await db.collection("usuarios").where("username", "==", user).get();
+    if (!snapshot.empty) {
+        if (snapshot.docs[0].id !== myUserId) {
+            return showToast("EL USUARIO YA EXISTE, ELIGE OTRO");
+        }
+    }
+
+    await db.collection("usuarios").doc(myUserId).update({
+        username: user, 
+        name: name, 
+        registered: true, 
+        balance: firebase.firestore.FieldValue.increment(5000)
+    });
+    
+    showToast("¡REGISTRO EXITOSO! +$5000 AÑADIDOS");
+    closeModal('modal-profile'); 
+}
+
+async function addBalanceToUser() {
+    if(!isAdmin) return;
+    const id = document.getElementById('bal-user-id').value.trim();
+    const amt = parseInt(document.getElementById('bal-amount').value);
+    if(!id || isNaN(amt)) return showToast("DATOS INVÁLIDOS");
+    const doc = await db.collection("usuarios").doc(id).get();
+    if(!doc.exists) return showToast("USUARIO NO ENCONTRADO EN LA BD");
+    await db.collection("usuarios").doc(id).update({ balance: firebase.firestore.FieldValue.increment(amt) });
+    showToast(`$${amt} RECARGADOS AL ID #${id}`); closeModal('modal-add-balance');
+}
+
+function openUserRecharge() {
+    closeModal('modal-profile');
+    document.getElementById('r-name').value = currentUser?.name || "";
+    document.getElementById('r-phone').value = "";
+    document.getElementById('r-amount').value = "";
+    document.getElementById('recharge-form').classList.remove('hidden');
+    document.getElementById('recharge-processing').classList.add('hidden');
+    openModal('modal-user-recharge');
+}
+
+function processRecharge() {
+    const name = document.getElementById('r-name').value.trim();
+    const phone = document.getElementById('r-phone').value.trim();
+    const amount = document.getElementById('r-amount').value;
+    
+    if(!name || !phone || !amount) return showToast("LLENA TODOS LOS DATOS");
+
+    document.getElementById('recharge-form').classList.add('hidden');
+    document.getElementById('recharge-processing').classList.remove('hidden');
+
+    currentReceiptContext = {
+        type: 'recharge', name: name, phone: phone, amount: amount,
+        token: "REC-" + Math.random().toString(36).substr(2,5).toUpperCase()
+    };
+
+    setTimeout(() => {
+        closeModal('modal-user-recharge');
+        showReceiptModal(`Envía $${parseInt(amount).toLocaleString()} al NEQUI 3137084357 para recargar tu saldo.`);
+    }, 1500);
+}
+
+function showReceiptModal(instructionText) {
+    document.getElementById('receipt-instructions').innerText = instructionText + "\nAdjunta el comprobante aquí debajo.";
+    document.getElementById('receipt-file-input').value = "";
+    document.getElementById('receipt-preview').src = "";
+    document.getElementById('receipt-preview').classList.add('hidden');
+    document.getElementById('receipt-upload-label').classList.remove('hidden');
+    currentReceiptFile = null;
+    
+    document.getElementById('receipt-form').classList.remove('hidden');
+    document.getElementById('receipt-processing').classList.add('hidden');
+
+    openModal('modal-receipt');
+}
+
+function previewReceipt() {
+    const file = document.getElementById('receipt-file-input').files[0];
+    if(file) {
+        currentReceiptFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('receipt-preview').src = e.target.result;
+            document.getElementById('receipt-preview').classList.remove('hidden');
+            document.getElementById('receipt-upload-label').classList.add('hidden');
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+async function submitReceipt() {
+    if(!currentReceiptFile) return showToast("DEBES ADJUNTAR EL COMPROBANTE");
+
+    document.getElementById('receipt-form').classList.add('hidden');
+    document.getElementById('receipt-processing').classList.remove('hidden');
+
+    let caption = "";
+    if(currentReceiptContext.type === 'recharge') {
+        caption = `💰 *SOLICITUD DE RECARGA*\n\n*Token:* ${currentReceiptContext.token}\n*Usuario:* ${currentReceiptContext.name}\n*WhatsApp:* ${currentReceiptContext.phone}\n*ID:* #${myUserId}\n*Monto a recargar:* $${currentReceiptContext.amount}\n\n_Revisa el comprobante y recarga la billetera manualmente._`;
+        
+    } else if (currentReceiptContext.type === 'vip_access') {
+        const gananciaCreador = currentReceiptContext.amount * 0.7;
+        const gananciaUranium = currentReceiptContext.amount * 0.3;
+        caption = `💎 *PAGO VIP NEQUI (COMPROBANTE)*\n\n*Token:* ${currentReceiptContext.token}\n*Debate:* ${currentReceiptContext.title}\n*Comprador ID:* #${myUserId}\n*Creador WA:* ${currentReceiptContext.authorPhone}\n*Pagado:* $${currentReceiptContext.amount}\n\n⚠️ *ACCIÓN REQUERIDA:*\n1. Añade el ID #${myUserId} a la accessList del debate en Firebase.\n2. Transfiere $${gananciaCreador} al creador.\n*Ganancia Uranium:* $${gananciaUranium}`;
+        
+    } else {
+        caption = `🛒 *NUEVA ORDEN (COMPROBANTE)*\n\n*Token:* ${currentReceiptContext.token}\n*Cliente:* ${currentReceiptContext.name}\n*WhatsApp:* ${currentReceiptContext.phone}\n*ID:* #${myUserId}\n*Servicios:* ${currentReceiptContext.details}\n*Total Pagado:* $${currentReceiptContext.amount}`;
+        cart = {}; updateCartUI(); 
+    }
+
+    await sendTelegramPhoto(currentReceiptFile, caption);
+
+    closeModal('modal-receipt');
+    showToast("¡COMPROBANTE ENVIADO CON ÉXITO! REVISAREMOS TU PAGO PRONTO.");
+}
+
+// ==========================================
+// 8. CATEGORÍAS Y PRODUCTOS (PUBLICAR/ELIMINAR)
+// ==========================================
+async function saveNewCategory() {
+    const name = document.getElementById('new-cat-name').value.trim();
+    if(name) {
+        await db.collection("categorias").add({ name: name.toUpperCase() });
+        closeModal('modal-add-cat'); showToast("CATEGORÍA CREADA");
+        document.getElementById('new-cat-name').value = "";
+    }
+}
+
+function openDeleteCatModal() {
+    const sel = document.getElementById('d-cat-select');
+    sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    openModal('modal-delete-cat');
+}
+
+async function deleteCategory() {
+    const id = document.getElementById('d-cat-select').value;
+    if(!id) return showToast("SELECCIONA UNA CATEGORÍA");
+    if(confirm("¿Seguro que quieres eliminar esta plataforma de raíz?")) {
+        await db.collection("categorias").doc(id).delete();
+        closeModal('modal-delete-cat');
+        showToast("CATEGORÍA ELIMINADA");
+    }
+}
+
+function openPublishModal(id = null) {
+    editingId = id;
+    if(id) {
+        document.getElementById('pub-title').innerText = "Editar Producto";
+        const p = products.find(prod => prod.id.toString() === id.toString());
+        if(!p) return;
+        
+        document.getElementById('p-name').value = p.name || "";
+        document.getElementById('p-short').value = p.short || "";
+        document.getElementById('p-price').value = p.price || "";
+        document.getElementById('p-cat-select').value = p.catId || "";
+        document.getElementById('p-desc').value = p.desc || "";
+        document.getElementById('p-contact').value = p.contact || "";
+        document.getElementById('p-wa').value = p.wa || "";
+        document.getElementById('p-pinned').checked = p.pinned || false;
+        
+        currentImg = p.img || "";
+        if(currentImg) {
+            document.getElementById('file-preview').src = currentImg;
+            document.getElementById('file-preview').classList.remove('hidden');
+            document.getElementById('upload-label').classList.add('hidden');
+        }
+    } else {
+        document.getElementById('pub-title').innerText = "Nuevo Producto";
+        resetForm();
+    }
+    openModal('modal-publish');
+}
+
+async function deleteProduct(id) {
+    if(confirm("¿Seguro que quieres eliminar este producto de la tienda para siempre?")) {
+        await db.collection("productos").doc(id.toString()).delete();
+        showToast("PRODUCTO ELIMINADO 🗑️");
+    }
+}
+
+// NUEVA VERSIÓN: COMPRESOR DE IMÁGENES
+function previewImage() {
+    const file = document.getElementById('file-input').files[0];
+    if(file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 600;
+                let scaleSize = MAX_WIDTH / img.width;
+                if(scaleSize > 1) scaleSize = 1; // No agrandar si es pequeña
+                
+                canvas.width = img.width * scaleSize;
+                canvas.height = img.height * scaleSize;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                currentImg = canvas.toDataURL('image/jpeg', 0.7);
+
+                document.getElementById('file-preview').src = currentImg;
+                document.getElementById('file-preview').classList.remove('hidden');
+                document.getElementById('upload-label').classList.add('hidden');
+            };
+            img.src = event.target.result;
+        }; 
+        reader.readAsDataURL(file);
+    }
+}
+
+// NUEVA VERSIÓN: BLINDADA CONTRA ERRORES
+async function handleSaveProduct() {
+    try {
+        const name = document.getElementById('p-name')?.value.trim();
+        const price = document.getElementById('p-price')?.value;
+        
+        if(!currentImg || !name || !price) return showToast("FOTO, NOMBRE Y PRECIO OBLIGATORIOS");
+
+        const data = {
+            name: name, 
+            price: parseFloat(price),
+            short: document.getElementById('p-short')?.value.trim() || "",
+            desc: document.getElementById('p-desc')?.value.trim() || "",
+            contact: document.getElementById('p-contact')?.value.trim() || "3137084357",
+            wa: document.getElementById('p-wa')?.value.trim() || `Hola URANIUM, me interesa ${name}`,
+            catId: document.getElementById('p-cat-select')?.value || "",
+            pinned: document.getElementById('p-pinned')?.checked || false, 
+            img: currentImg,
+        };
+
+        if(editingId) {
+            await db.collection("productos").doc(editingId.toString()).update(data);
+        } else {
+            data.reactions = {}; data.comments = [];
+            await db.collection("productos").add(data);
+        }
+
+        closeModal('modal-publish'); 
+        showToast(editingId ? "PRODUCTO ACTUALIZADO" : "PRODUCTO PUBLICADO"); 
+        
+    } catch (error) {
+        console.error("Error al guardar:", error);
+        showToast("⚠️ ERROR: " + error.message);
+    }
+}
+
+function resetForm() {
+    document.querySelectorAll('#modal-publish input[type="text"], #modal-publish input[type="number"], #modal-publish textarea').forEach(i => i.value = "");
+    const cb = document.getElementById('p-pinned'); if(cb) cb.checked = false;
+    const fp = document.getElementById('file-preview'); if(fp) fp.classList.add('hidden');
+    const ul = document.getElementById('upload-label'); if(ul) ul.classList.remove('hidden');
+    currentImg = "";
+}
+
+// ==========================================
+// 9. RENDERIZAR INTERFAZ PRINCIPAL (TIENDA Y DETALLES)
+// ==========================================
+function renderGrid(catId = 'all') {
+    const grid = document.getElementById('product-grid');
+    if(!grid) return; grid.innerHTML = '';
+    
+    let filtered = products.filter(p => catId === 'all' || p.catId === catId);
+    filtered.sort((a, b) => (b.pinned === true) - (a.pinned === true));
+    
+    filtered.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.onclick = () => openDetail(p.id);
+        
+        card.innerHTML = `
+            ${isAdmin ? `
+            <div style="position:absolute; top:8px; right:8px; z-index:10; display:flex; gap:5px;">
+                <button onclick="event.stopPropagation(); openPublishModal('${p.id}')" style="background:var(--accent); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✏️</button>
+                <button onclick="event.stopPropagation(); deleteProduct('${p.id}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px;">✕</button>
+            </div>
+            ` : ''}
+            <div class="card-img">
+                <div class="price-tag">$${parseFloat(p.price).toLocaleString()}</div>
+                <img src="${p.img}">
+            </div>
+            <div class="card-product-name">${p.name}</div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function renderAll() {
+    const navMob = document.getElementById('mobile-nav-cats');
+    const sel = document.getElementById('p-cat-select');
+    const selDel = document.getElementById('d-cat-select');
+    
+    let htmlMob = categories.map(c => `<button onclick="setActiveCat(this, '${c.id}')">${c.name}</button>`).join('');
+    let htmlOptions = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+    if(navMob) navMob.innerHTML = `<button class="active" onclick="setActiveCat(this, 'all')">Todas</button>` + htmlMob;
+    if(sel) sel.innerHTML = htmlOptions;
+    if(selDel) selDel.innerHTML = htmlOptions;
+    
+    renderGrid();
+}
+
+function setActiveCat(btn, catId) {
+    document.querySelectorAll('.mobile-cat-nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGrid(catId);
+}
+
+function formatText(text) {
+    if (!text) return "";
+    return String(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/__(.*?)__/g, '<em>$1</em>')
+        .replace(/>(.*?)</g, '<mark style="background:rgba(255,215,0,0.3); color:white; padding:0 4px; border-radius:4px;">$1</mark>')
+        .replace(/=#([0-9A-Fa-f]{6})(.*?)(?=\s|$)/g, '<span style="color:#$1">$2</span>')
+        .replace(/\n/g, '<br>');
+}
+
+function openDetail(id) {
+    const p = products.find(prod => prod.id.toString() === id.toString());
+    if(!p) return;
+    const body = document.getElementById('detail-body');
+    
+    let likes = 0, dislikes = 0;
+    let myReaction = p.reactions ? p.reactions[myUserId] : null;
+    
+    if(p.reactions) {
+        for(let user in p.reactions) {
+            if(p.reactions[user] === 'like') likes++;
+            if(p.reactions[user] === 'dislike') dislikes++;
+        }
+    }
+
+    let commentsHTML = (p.comments || []).map(c => `
+        <div style="border-bottom: 1px solid var(--border-color); padding: 10px 0; font-size: 13px;">
+            <strong style="color:var(--text-muted); font-size:11px;">#${c.userId}</strong><br>
+            ${c.text}
+        </div>
+    `).join('');
+
+    body.innerHTML = `
+        <div class="detail-layout">
+            <div class="detail-img-container"><img src="${p.img}"></div>
+            <div class="detail-info">
+                <h2 style="margin-bottom:5px;">${p.name}</h2>
+                <h3 style="color:var(--accent); margin-bottom:15px;">$${parseFloat(p.price).toLocaleString()}</h3>
+                <p style="font-size:14px; flex-grow:1; line-height:1.6;">${formatText(p.desc || '')}</p>
+                
+                <div class="social-bar">
+                    <button onclick="handleReaction('${p.id}', 'like')" style="color: ${myReaction==='like' ? 'var(--accent)' : 'inherit'}">👍 <span>${likes}</span></button>
+                    <button onclick="handleReaction('${p.id}', 'dislike')" style="color: ${myReaction==='dislike' ? 'var(--danger)' : 'inherit'}">👎 <span>${dislikes}</span></button>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <button class="apple-btn" onclick="addToCart('${p.id}'); closeModal('modal-detail')">Añadir al carrito</button>
+                    <button class="apple-btn-secondary" style="background:#28a745; color:white;" onclick="window.open('https://wa.me/57${p.contact || '3137084357'}?text=${encodeURIComponent(p.wa || 'Hola')}')">Chat WhatsApp</button>
+                    <button class="apple-btn-secondary" style="background:#da0081; color:white;" onclick="buyDirectNequi('${p.id}')">Pago Rápido Nequi</button>
+                </div>
+
+                <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top:20px;">
+                    <h4 style="margin-bottom:10px;">Reseñas</h4>
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <input type="text" id="com-text-${p.id}" placeholder="Opina sobre esto..." style="flex-grow:1; background:var(--surface-elevated); border:none; padding:10px 15px; border-radius:20px; color:white; outline:none;">
+                        <button class="apple-btn" style="width:auto; padding:10px 20px; border-radius:20px;" onclick="addComment('${p.id}')">Enviar</button>
+                    </div>
+                    <div style="max-height:150px; overflow-y:auto; padding-right:10px;">${commentsHTML || '<p class="text-muted" style="font-size:12px;">Sé el primero en comentar.</p>'}</div>
+                </div>
+            </div>
+        </div>
+    `; 
+    openModal('modal-detail');
+}
+
+async function handleReaction(id, type) {
+    const ref = db.collection("productos").doc(id.toString());
+    const doc = await ref.get();
+    let reactions = doc.data().reactions || {};
+    if(reactions[myUserId] === type) delete reactions[myUserId]; else reactions[myUserId] = type;
+    await ref.update({ reactions });
+    openDetail(id); 
+}
+
+async function addComment(id) {
+    const input = document.getElementById(`com-text-${id}`);
+    if(!input.value) return showToast("ESCRIBE ALGO");
+    await db.collection("productos").doc(id.toString()).update({
+        comments: firebase.firestore.FieldValue.arrayUnion({ userId: myUserId, text: input.value, timestamp: new Date().toISOString() })
+    });
+    input.value = ""; showToast("COMENTARIO ENVIADO"); openDetail(id);
+}
+
+function openBigEditor() {
+    document.getElementById('big-editor-area').value = document.getElementById('p-desc').value;
+    openModal('modal-big-editor');
+}
+function saveBigEditor() {
+    document.getElementById('p-desc').value = document.getElementById('big-editor-area').value;
+    closeModal('modal-big-editor');
+}
+
+// ==========================================
+// 10. CARRITO Y PAGOS
+// ==========================================
+function addToCart(id) {
+    if(cartCooldowns[id] && (Date.now() - cartCooldowns[id] < 1000)) return showToast("ESPERA...");
+    cartCooldowns[id] = Date.now();
+    
+    const productData = products.find(p => p.id.toString() === id.toString());
+    if(!productData) return;
+
+    if(cart[id]) cart[id].qty++; else cart[id] = {...productData, qty: 1};
+    updateCartUI(); showToast("AÑADIDO AL CARRITO");
+}
+
+function removeFromCart(id) { delete cart[id]; updateCartUI(); }
+
+function updateCartUI() {
+    const list = document.getElementById('cart-list'); let total = 0, count = 0;
+    list.innerHTML = Object.values(cart).map(p => {
+        total += (p.price * p.qty); count += p.qty;
+        return `
+        <div style="background:var(--surface-elevated); padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div><strong style="font-size:14px;">${p.name} (x${p.qty})</strong><br><span style="color:var(--accent); font-weight:bold;">$${(p.price * p.qty).toLocaleString()}</span></div>
+            <button onclick="removeFromCart('${p.id}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer;">✕</button>
+        </div>`;
+    }).join('');
+    document.getElementById('cart-count').innerText = count; 
+    document.getElementById('cart-total').innerText = `$${total.toLocaleString()}`; 
+    document.getElementById('pay-val').innerText = `$${total.toLocaleString()}`;
+}
+
+function goToWalletPayment() {
+    const total = Object.values(cart).reduce((sum, p) => sum + (p.price * p.qty), 0);
+    if(total === 0) return showToast("CARRITO VACÍO");
+    if(currentUser.balance < total) return showToast("SALDO INSUFICIENTE. ¡RECARGA!");
+
+    document.getElementById('w-pay-name').value = currentUser?.registered ? currentUser.name : "";
+    document.getElementById('w-pay-phone').value = "";
+    document.getElementById('w-pay-val').innerText = `$${total.toLocaleString()}`;
+    
+    closeModal('modal-cart');
+    document.getElementById('wallet-form').classList.remove('hidden');
+    document.getElementById('wallet-processing').classList.add('hidden');
+    openModal('modal-wallet-confirm');
+}
+
+async function processWalletPayment() {
+    const name = document.getElementById('w-pay-name').value.trim();
+    const phone = document.getElementById('w-pay-phone').value.trim();
+    const total = Object.values(cart).reduce((sum, p) => sum + (p.price * p.qty), 0);
+    
+    if(!name || phone.length < 10) return showToast("DATOS INVÁLIDOS");
+    if(currentUser.balance < total) return showToast("SALDO INSUFICIENTE");
+
+    document.getElementById('wallet-form').classList.add('hidden');
+    document.getElementById('wallet-processing').classList.remove('hidden');
+
+    await db.collection("usuarios").doc(myUserId).update({ balance: firebase.firestore.FieldValue.increment(-total) });
+    
+    const token = "WAL-" + Math.random().toString(36).substr(2,5).toUpperCase();
+    let details = Object.values(cart).map(p => `${p.qty}x ${p.name}`).join(', ');
+    
+    let tgMsg = `🟢 *COMPRA (BILLETERA)* 🟢\n\n*Token:* ${token}\n*Cliente:* ${name} (${phone})\n*ID:* #${myUserId}\n*Servicios:* ${details}\n*Total:* $${total}`;
+    sendTelegramNotification(tgMsg);
+
+    setTimeout(() => {
+        cart = {}; updateCartUI(); closeModal('modal-wallet-confirm'); 
+        showToast("¡COMPRA EXITOSA!");
+    }, 1500);
+}
+
+function goToPayment() {
+    if(Object.keys(cart).length === 0) return showToast("CARRITO VACÍO");
+    closeModal('modal-cart'); openModal('modal-nequi');
+}
+
+function buyDirectNequi(id) {
+    const p = products.find(prod => prod.id.toString() === id.toString()); 
+    if(!p) return;
+    cart = {}; addToCart(id); 
+    closeModal('modal-detail'); openModal('modal-nequi');
+}
+
+function processPayment() {
+    const name = document.getElementById('pay-name').value.trim();
+    const phone = document.getElementById('pay-phone').value.trim();
+    if(!name || phone.length < 10) return showToast("DATOS INVÁLIDOS");
+
+    let total = Object.values(cart).reduce((sum, p) => sum + (p.price * p.qty), 0);
+
+    document.getElementById('nequi-form').classList.add('hidden');
+    document.getElementById('nequi-processing').classList.remove('hidden');
+
+    currentReceiptContext = {
+        type: 'checkout', name: name, phone: phone, amount: total,
+        details: Object.values(cart).map(p => `${p.qty}x ${p.name}`).join(', '),
+        token: "ORD-" + Math.random().toString(36).substr(2,5).toUpperCase()
+    };
+
+    setTimeout(() => {
+        closeModal('modal-nequi');
+        showReceiptModal(`Envía $${total.toLocaleString()} al NEQUI 3137084357 para completar tu orden.`);
+        document.getElementById('nequi-form').classList.remove('hidden');
+        document.getElementById('nequi-processing').classList.add('hidden');
+    }, 2000); 
+}
+
+// ==========================================
+// 11. COMUNIDAD Y FORO (ESTILO iMESSAGE CON VIP)
+// ==========================================
+function openForumModal() {
+    if(!currentUser || !currentUser.registered) return showToast("DEBES REGISTRAR TU PERFIL PARA CREAR UN DEBATE");
+    document.getElementById('f-title').value = "";
+    document.getElementById('f-content').value = "";
+    document.getElementById('f-password').value = "";
+    document.getElementById('f-type').value = "publico";
+    
+    const vipPriceInput = document.getElementById('f-vip-price');
+    const vipPhoneInput = document.getElementById('f-vip-phone');
+    if(vipPriceInput) vipPriceInput.value = "";
+    if(vipPhoneInput) vipPhoneInput.value = "";
+    
+    currentForumImg = "";
+    const preview = document.getElementById('f-preview');
+    if(preview) {
+        preview.src = "";
+        preview.classList.add('hidden');
+    }
+    const label = document.getElementById('f-upload-label');
+    if(label) label.classList.remove('hidden');
+
+    toggleForumPassword();
+    openModal('modal-forum');
+}
+
+function toggleForumPassword() {
+    const type = document.getElementById('f-type').value;
+    const pwdInput = document.getElementById('f-password');
+    const vipOptions = document.getElementById('f-vip-options');
+    
+    if(pwdInput) pwdInput.classList.add('hidden');
+    if(vipOptions) vipOptions.classList.add('hidden');
+    
+    if(type === 'clave' && pwdInput) pwdInput.classList.remove('hidden');
+    if(type === 'vip' && vipOptions) vipOptions.classList.remove('hidden');
+}
+
+function previewForumImage() {
+    const file = document.getElementById('f-file-input').files[0];
+    if(file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 600;
+                let scaleSize = MAX_WIDTH / img.width;
+                if(scaleSize > 1) scaleSize = 1;
+                
+                canvas.width = img.width * scaleSize;
+                canvas.height = img.height * scaleSize;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                currentForumImg = canvas.toDataURL('image/jpeg', 0.7);
+
+                document.getElementById('f-preview').src = currentForumImg;
+                document.getElementById('f-preview').classList.remove('hidden');
+                document.getElementById('f-upload-label').classList.add('hidden');
+            };
+            img.src = event.target.result;
+        }; 
+        reader.readAsDataURL(file);
+    }
+}
+
+async function saveForumPost() {
+    try {
+        const title = document.getElementById('f-title')?.value.trim();
+        const content = document.getElementById('f-content')?.value.trim();
+        const type = document.getElementById('f-type')?.value;
+        const password = document.getElementById('f-password')?.value.trim() || "";
+        
+        if(!title || !content) return showToast("FALTAN DATOS");
+        if(type === 'clave' && !password) return showToast("DEBES ESTABLECER UNA CLAVE");
+
+        let vipPrice = 0;
+        let vipPhone = "";
+        if(type === 'vip') {
+            const priceInput = document.getElementById('f-vip-price');
+            const phoneInput = document.getElementById('f-vip-phone');
+            if(priceInput && phoneInput) {
+                vipPrice = parseInt(priceInput.value);
+                vipPhone = phoneInput.value.trim();
+            }
+            if(!vipPrice || !vipPhone) return showToast("DEBES PONER EL PRECIO Y TU WHATSAPP");
+        }
+
+        await db.collection("foro").add({
+            authorId: myUserId, 
+            authorName: currentUser.name || "Invitado", 
+            title: title, 
+            content: content, 
+            img: currentForumImg, 
+            type: type, 
+            password: password, 
+            vipPrice: vipPrice, 
+            vipPhone: vipPhone, 
+            accessList: [myUserId], 
+            replies: [], 
+            timestamp: new Date().toISOString()
+        });
+
+        currentForumImg = ""; 
+        const preview = document.getElementById('f-preview');
+        if(preview) {
+            preview.src = "";
+            preview.classList.add('hidden');
+        }
+        const label = document.getElementById('f-upload-label');
+        if(label) label.classList.remove('hidden');
+
+        closeModal('modal-forum'); 
+        showToast("¡DEBATE PUBLICADO!");
+    } catch (error) {
+        console.error("Error al guardar debate:", error);
+        showToast("⚠️ ERROR: " + error.message);
+    }
+}
+
+function renderForum() {
+    const feed = document.getElementById('forum-feed');
+    if(!feed) return;
+    
+    feed.innerHTML = forumPosts.map(post => {
+        let tag = '';
+        if(post.type === 'vip') tag = '<span class="tag vip">VIP</span>';
+        if(post.type === 'clave') tag = '<span class="tag locked">🔒 Clave</span>';
+        if(post.type === 'cerrado') tag = '<span class="tag locked">Cerrado</span>';
+        
+        return `
+        <div class="forum-thread-card" onclick="openForumThread('${post.id}')" style="position:relative;">
+            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteForumPost('${post.id}')" style="position:absolute; top:10px; right:10px; background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px;">✕</button>` : ''}
+            <div style="flex-grow: 1; padding-right: 30px; display:flex; align-items:center;">
+                ${post.img ? `<img src="${post.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover; margin-right:12px;">` : ''}
+                <div>
+                    <h3 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom:5px;">${post.title}</h3>
+                    <span class="text-muted" style="font-size:12px;">Por ${post.authorName} • ${(post.replies||[]).length} msjs</span>
+                </div>
+            </div>
+            <div>${tag}</div>
+        </div>`;
+    }).join('');
+}
+
+async function openForumThread(postId) {
+    const post = forumPosts.find(p => p.id === postId);
+    if(!post) return;
+    
+    if (post.type === 'vip' && !isAdmin) {
+        if (!post.accessList || !post.accessList.includes(myUserId)) {
+            pendingVipPost = post; 
+            const priceFormat = post.vipPrice ? post.vipPrice.toLocaleString() : "0";
+            document.getElementById('vip-buy-title').innerText = post.title;
+            document.getElementById('vip-buy-price').innerText = "$" + priceFormat;
+            openModal('modal-buy-vip');
+            return; 
+        }
+    }
+
+    if (post.type === 'clave' && !isAdmin) {
+        const guess = prompt("Este debate requiere contraseña:");
+        if (guess !== post.password) return showToast("CONTRASEÑA INCORRECTA");
+    }
+
+    currentThreadId = postId;
+    showView('forum-detail');
+    
+    document.getElementById('chat-title-display').innerText = post.title;
+    
+    let statusHtml = post.type === 'cerrado' ? 'Debate cerrado' : `Activo`;
+    if (isAdmin) {
+        statusHtml += ` &nbsp;|&nbsp; <button onclick="deleteForumPost('${post.id}')" style="background:var(--danger); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer; font-weight:bold;">🗑️ ELIMINAR</button>`;
+    }
+    document.getElementById('chat-status-display').innerHTML = statusHtml;
+    
+    const inputArea = document.querySelector('.chat-input-area');
+    if(post.type === 'cerrado' && !isAdmin) {
+        if(inputArea) inputArea.classList.add('hidden'); 
+    } else {
+        if(inputArea) inputArea.classList.remove('hidden');
+    }
+
+    renderChatMessages(post);
+}
+
+function renderChatMessages(post) {
+    const container = document.getElementById('chat-messages');
+    
+    let html = `
+    <div class="chat-bubble other">
+        <div class="sender-name" style="color:var(--accent);">${post.authorName} (Autor)</div>
+        ${post.img ? `<img src="${post.img}" style="width:100%; border-radius:10px; margin-bottom:10px;">` : ''}
+        ${post.content}
+        <div class="chat-time">${new Date(post.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        ${post.type !== 'cerrado' || isAdmin ? `<button class="btn-reply-chat" onclick="setReplyTo('${post.authorName}', '${post.content.replace(/'/g,"\\'")}')">Responder</button>` : ''}
+    </div>`;
+
+    (post.replies || []).forEach(r => {
+        const isMe = r.authorId === myUserId;
+        const refHtml = r.replyToText ? `<div class="reply-reference"><em>${r.replyToText.substring(0, 40)}${r.replyToText.length>40?'...':''}</em></div>` : '';
+        
+        html += `
+        <div class="chat-bubble ${isMe ? 'me' : 'other'}">
+            ${!isMe ? `<div class="sender-name">${r.authorName}</div>` : ''}
+            ${refHtml}
+            ${r.text}
+            <div class="chat-time">${new Date(r.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            ${post.type !== 'cerrado' || isAdmin ? `<button class="btn-reply-chat" style="${isMe ? 'color:rgba(255,255,255,0.8);' : ''}" onclick="setReplyTo('${r.authorName}', '${r.text.replace(/'/g,"\\'")}')">Responder</button>` : ''}
+        </div>`;
+    });
+    
+    container.innerHTML = html;
+    setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50); 
+}
+
+function setReplyTo(name, textSnippet) {
+    replyingTo = textSnippet;
+    document.getElementById('reply-to-name').innerText = name;
+    document.getElementById('replying-to-box').classList.remove('hidden');
+    document.getElementById('chat-input').focus();
+}
+
+function cancelReply() {
+    replyingTo = null;
+    document.getElementById('replying-to-box').classList.add('hidden');
+}
+
+async function sendForumReply() {
+    if(!currentUser || !currentUser.registered) return showToast("DEBES REGISTRARTE PARA COMENTAR");
+    
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if(!text || !currentThreadId) return;
+    
+    await db.collection("foro").doc(currentThreadId).update({
+        replies: firebase.firestore.FieldValue.arrayUnion({
+            authorId: myUserId, authorName: currentUser.name, text: text,
+            replyToText: replyingTo, timestamp: new Date().toISOString()
+        })
+    });
+    
+    input.value = '';
+    cancelReply();
+}
+
+async function deleteForumPost(id) {
+    if(confirm("¿Seguro que quieres borrar este debate entero?")) {
+        await db.collection("foro").doc(id).delete();
+        showView('foro'); 
+        showToast("DEBATE ELIMINADO");
+    }
+}
+
+// ==========================================
+// 12. PASARELA DE PAGO VIP
+// ==========================================
+async function processVipWallet() {
+    if(!pendingVipPost) return;
+    const price = pendingVipPost.vipPrice || 0;
+    
+    if(currentUser.balance < price) return showToast("SALDO INSUFICIENTE EN BILLETERA");
+
+    closeModal('modal-buy-vip');
+    showToast("Procesando acceso...");
+
+    await db.collection("usuarios").doc(myUserId).update({ 
+        balance: firebase.firestore.FieldValue.increment(-price) 
+    });
+    
+    await db.collection("foro").doc(pendingVipPost.id).update({
+        accessList: firebase.firestore.FieldValue.arrayUnion(myUserId)
+    });
+
+    const gananciaCreador = price * 0.7;
+    const gananciaUranium = price * 0.3;
+    const phoneFormat = pendingVipPost.vipPhone || "Desconocido";
+
+    let tgMsg = `💎 *ACCESO VIP VENDIDO (BILLETERA)* 💎\n\n*Debate:* ${pendingVipPost.title}\n*Comprador ID:* #${myUserId}\n*Creador ID:* #${pendingVipPost.authorId}\n*Precio Pagado:* $${price}\n\n⚠️ *ACCIÓN REQUERIDA:*\nTransfiere $${gananciaCreador} al creador (WA: ${phoneFormat})\nTu ganancia libre: $${gananciaUranium}`;
+    sendTelegramNotification(tgMsg);
+
+    setTimeout(() => { 
+        showToast("¡ACCESO CONCEDIDO!");
+        openForumThread(pendingVipPost.id); 
+    }, 1500);
+}
+
+function processVipNequi() {
+    if(!pendingVipPost) return;
+    closeModal('modal-buy-vip');
+    
+    const price = pendingVipPost.vipPrice || 0;
+
+    currentReceiptContext = {
+        type: 'vip_access', 
+        postId: pendingVipPost.id,
+        title: pendingVipPost.title,
+        authorPhone: pendingVipPost.vipPhone || "Desconocido",
+        amount: price,
+        token: "VIP-" + Math.random().toString(36).substr(2,5).toUpperCase()
+    };
+    
+    showReceiptModal(`Envía $${price.toLocaleString()} al NEQUI 3137084357 para entrar al debate VIP.\nUna vez verificado, un admin te dará acceso.`);
 }
