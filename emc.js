@@ -80,7 +80,7 @@ let claimContext = null;
 // ==========================================
 async function initSession() {
     document.body.addEventListener('touchstart', function(){}, {passive: true});
-    injectIOSModalContainer(); // Inyecta el contenedor de modales nativos
+    injectIOSModalContainer();
 
     let originalId = localStorage.getItem('original_uid');
     if (!originalId) {
@@ -120,12 +120,12 @@ async function initSession() {
 window.onload = initSession;
 
 function checkBannedStatus() {
-    if(currentUser.banned === true && myUserId !== "170125") {
+    if(currentUser && currentUser.banned === true && myUserId !== "170125") {
         document.body.innerHTML = `
-        <div style="background:var(--bg-color); color:var(--text-main); height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;">
-            <div style="color:var(--danger); margin-bottom:20px;">${ICONS.alert}</div>
+        <div style="background:var(--bg-color, #000); color:var(--text-main, #fff); height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;">
+            <div style="color:var(--danger, #ff3b30); margin-bottom:20px;">${ICONS.alert}</div>
             <h1 style="font-size:24px; font-weight:700; margin-bottom:10px;">Cuenta Suspendida</h1>
-            <p style="color:var(--text-muted); font-size:15px; max-width:300px;">El acceso a tu cuenta ha sido restringido permanentemente por violar los términos de servicio.</p>
+            <p style="color:var(--text-muted, #8e8e93); font-size:15px; max-width:300px;">El acceso a tu cuenta ha sido restringido permanentemente.</p>
         </div>`;
     }
 }
@@ -135,10 +135,31 @@ function checkBannedStatus() {
 // ==========================================
 function injectIOSModalContainer() {
     if (document.getElementById('sys-ios-modal')) return;
+    
+    // Inyectamos el CSS estricto para que la alerta no se vuelva invisible
+    const style = document.createElement('style');
+    style.innerHTML = `
+        #sys-ios-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 99999; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: opacity 0.2s ease; }
+        #sys-ios-modal.hidden { display: none !important; opacity: 0; pointer-events: none; }
+        #sys-ios-modal.closing { opacity: 0; }
+        .ios-dialog { background: #fff; width: 270px; border-radius: 14px; text-align: center; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", sans-serif; color: #000; }
+        @media (prefers-color-scheme: dark) {
+            .ios-dialog { background: #252525; color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+        }
+        .ios-dialog-content { padding: 20px 16px; }
+        .ios-dialog-title { font-weight: 600; font-size: 17px; margin-bottom: 5px; }
+        .ios-dialog-msg { font-size: 13px; opacity: 0.8; line-height: 1.3; }
+        .ios-dialog-input { margin-top: 15px; width: 90%; padding: 8px; border: 1px solid rgba(128,128,128,0.3); border-radius: 6px; font-size: 14px; background: transparent; color: inherit; }
+        .ios-dialog-actions { display: flex; border-top: 1px solid rgba(128,128,128,0.2); }
+        .ios-dialog-btn { flex: 1; background: transparent; border: none; padding: 12px; font-size: 17px; color: #0a84ff; cursor: pointer; font-family: inherit; margin: 0; }
+        .ios-dialog-btn:not(:last-child) { border-right: 1px solid rgba(128,128,128,0.2); }
+        .ios-dialog-btn.bold { font-weight: 600; }
+    `;
+    document.head.appendChild(style);
+
     const div = document.createElement('div');
     div.id = 'sys-ios-modal';
     div.className = 'modal hidden';
-    div.style.zIndex = '9999';
     div.innerHTML = `
         <div class="ios-dialog">
             <div class="ios-dialog-content">
@@ -154,6 +175,8 @@ function injectIOSModalContainer() {
 
 function showIOSModal(title, msg, type, callback) {
     const modal = document.getElementById('sys-ios-modal');
+    if(!modal) return;
+    
     document.getElementById('sys-ios-title').innerText = title;
     document.getElementById('sys-ios-msg').innerText = msg;
     
@@ -165,42 +188,24 @@ function showIOSModal(title, msg, type, callback) {
     input.value = '';
 
     if (type === 'alert') {
-        actions.innerHTML = `<button class="ios-dialog-btn bold" onclick="closeSysModal(); if(${callback}) ${callback}();">OK</button>`;
+        actions.innerHTML = `<button class="ios-dialog-btn bold" onclick="closeSysModal(); if(window.tempSysCallback) window.tempSysCallback();">OK</button>`;
+        window.tempSysCallback = callback || null;
     } 
     else if (type === 'confirm') {
-        const cancelBtn = document.createElement('button');
-        cancelBtn.className = 'ios-dialog-btn';
-        cancelBtn.innerText = 'Cancelar';
-        cancelBtn.onclick = closeSysModal;
-
-        const confirmBtn = document.createElement('button');
-        confirmBtn.className = 'ios-dialog-btn bold';
-        confirmBtn.innerText = 'Confirmar';
-        confirmBtn.onclick = () => { closeSysModal(); if(callback) callback(); };
-
-        actions.appendChild(cancelBtn);
-        actions.appendChild(confirmBtn);
+        window.tempSysCallback = callback;
+        actions.innerHTML = `
+            <button class="ios-dialog-btn" onclick="closeSysModal()">Cancelar</button>
+            <button class="ios-dialog-btn bold" onclick="closeSysModal(); if(window.tempSysCallback) window.tempSysCallback();">Confirmar</button>
+        `;
     }
     else if (type === 'prompt') {
         input.classList.remove('hidden');
         input.focus();
-        
-        const cancelBtn = document.createElement('button');
-        cancelBtn.className = 'ios-dialog-btn';
-        cancelBtn.innerText = 'Cancelar';
-        cancelBtn.onclick = closeSysModal;
-
-        const confirmBtn = document.createElement('button');
-        confirmBtn.className = 'ios-dialog-btn bold';
-        confirmBtn.innerText = 'Aceptar';
-        confirmBtn.onclick = () => {
-            const val = input.value.trim();
-            closeSysModal();
-            if(callback) callback(val);
-        };
-
-        actions.appendChild(cancelBtn);
-        actions.appendChild(confirmBtn);
+        window.tempSysCallback = callback;
+        actions.innerHTML = `
+            <button class="ios-dialog-btn" onclick="closeSysModal()">Cancelar</button>
+            <button class="ios-dialog-btn bold" onclick="const val = document.getElementById('sys-ios-input').value.trim(); closeSysModal(); if(window.tempSysCallback) window.tempSysCallback(val);">Aceptar</button>
+        `;
     }
     
     modal.classList.remove('hidden');
@@ -209,11 +214,11 @@ function showIOSModal(title, msg, type, callback) {
 
 function closeSysModal() {
     const modal = document.getElementById('sys-ios-modal');
+    if(!modal) return;
     modal.classList.add('closing');
     setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('closing'); }, 200);
 }
 
-// Wrappers para usar en todo el código
 function iosAlert(title, message) { showIOSModal(title, message, 'alert'); }
 function iosConfirm(title, message, callback) { showIOSModal(title, message, 'confirm', callback); }
 function iosPrompt(title, message, callback) { showIOSModal(title, message, 'prompt', callback); }
@@ -267,7 +272,7 @@ function openMenu() {
     menu.style.pointerEvents = 'auto';
     
     const nameEl = document.getElementById('menu-user-name');
-    if(nameEl) nameEl.innerText = currentUser?.registered ? currentUser.name : "Invitado";
+    if(nameEl) nameEl.innerText = (currentUser && currentUser.registered) ? currentUser.name : "Invitado";
     
     const idEl = document.getElementById('menu-user-id');
     if(idEl) idEl.innerText = `ID: #${myUserId}`;
@@ -286,7 +291,7 @@ function closeMenu() {
 function updateProfileUI() {
     if(!currentUser) return;
     document.querySelectorAll('.user-balance-display').forEach(el => el.innerText = `$${(currentUser.balance || 0).toLocaleString()}`);
-    document.querySelectorAll('.user-name-display').forEach(el => el.innerText = currentUser.registered ? currentUser.name : "Invitado");
+    document.querySelectorAll('.user-name-display').forEach(el => el.innerText = (currentUser && currentUser.registered) ? currentUser.name : "Invitado");
 }
 
 // ==========================================
@@ -330,7 +335,7 @@ function escucharDatos() {
 }
 
 // ==========================================
-// 8. RENDERIZADO DE PRODUCTOS
+// 8. RENDERIZADO DE PRODUCTOS (Clases Restauradas)
 // ==========================================
 function renderGrid(filterCat = null) {
     const grid = document.getElementById('products-grid');
@@ -346,16 +351,16 @@ function renderGrid(filterCat = null) {
         const discountTag = p.discount > 0 ? `<div class="discount-tag">-$${p.discount.toLocaleString()}</div>` : '';
         
         grid.innerHTML += `
-        <div class="product-card" onclick="verProducto('${p.id}')">
+        <div class="card" onclick="verProducto('${p.id}')">
             <div class="card-img" style="background-image: url('${p.img}')">${discountTag}</div>
             <div class="card-body" style="padding:12px; flex-grow:1; display:flex; flex-direction:column; justify-content:space-between;">
                 <h3 style="font-size:15px; font-weight:600; margin-bottom:5px;">${p.name}</h3>
                 <div>
-                    <p class="price" style="font-weight:700; font-size:16px; margin-bottom:10px; ${p.discount > 0 ? 'color: var(--danger);' : ''}">
+                    <p class="price" style="font-weight:700; font-size:16px; margin-bottom:10px; ${p.discount > 0 ? 'color: var(--danger, #ff3b30);' : ''}">
                         $${finalPrice.toLocaleString()} 
-                        ${p.discount > 0 ? `<br><span style="text-decoration:line-through; font-weight:400; font-size:12px; color:var(--text-muted);">$${p.price.toLocaleString()}</span>` : ''}
+                        ${p.discount > 0 ? `<br><span style="text-decoration:line-through; font-weight:400; font-size:12px; color:gray;">$${p.price.toLocaleString()}</span>` : ''}
                     </p>
-                    <button class="apple-btn-secondary" style="font-size:13px; padding:8px; border-radius:14px; background:var(--bg-color); border:1px solid var(--border-color);" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Añadir</button>
+                    <button class="apple-btn" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Agregar</button>
                 </div>
             </div>
         </div>`;
@@ -372,22 +377,22 @@ function renderAll() {
         const prods = products.filter(p => p.category === cat.id);
         if (prods.length === 0) return;
 
-        let html = `<div class="category-section" style="margin-bottom:30px;"><h2 style="font-size:22px; font-weight:700; margin-bottom:15px;">${cat.name}</h2><div class="product-grid">`;
+        let html = `<div class="category-section" style="margin-bottom:30px;"><h2 class="category-title" style="font-size:22px; font-weight:700; margin-bottom:15px;">${cat.name}</h2><div class="products-grid">`;
         prods.forEach(p => {
             const finalPrice = getFinalPrice(p);
             const discountTag = p.discount > 0 ? `<div class="discount-tag">-$${p.discount.toLocaleString()}</div>` : '';
             
             html += `
-            <div class="product-card" onclick="verProducto('${p.id}')">
+            <div class="card" onclick="verProducto('${p.id}')">
                 <div class="card-img" style="background-image: url('${p.img}')">${discountTag}</div>
                 <div class="card-body" style="padding:12px; display:flex; flex-direction:column; flex-grow:1; justify-content:space-between;">
                     <h3 style="font-size:15px; font-weight:600; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</h3>
                     <div>
-                        <p class="price" style="font-weight:700; font-size:15px; margin-bottom:10px; ${p.discount > 0 ? 'color: var(--danger);' : ''}">
+                        <p class="price" style="font-weight:700; font-size:15px; margin-bottom:10px; ${p.discount > 0 ? 'color: var(--danger, #ff3b30);' : ''}">
                             $${finalPrice.toLocaleString()}
-                            ${p.discount > 0 ? `<span style="text-decoration:line-through; font-weight:400; font-size:12px; color:var(--text-muted); margin-left:5px;">$${p.price.toLocaleString()}</span>` : ''}
+                            ${p.discount > 0 ? `<span style="text-decoration:line-through; font-weight:400; font-size:12px; color:gray; margin-left:5px;">$${p.price.toLocaleString()}</span>` : ''}
                         </p>
-                        <button class="apple-btn-secondary" style="font-size:13px; padding:8px; border-radius:14px; margin-bottom:0;" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Agregar</button>
+                        <button class="apple-btn" onclick="event.stopPropagation(); addToCart('${p.id}', 1)">Agregar</button>
                     </div>
                 </div>
             </div>`;
@@ -405,12 +410,12 @@ function verProducto(id) {
     if(!p) return;
     const finalPrice = getFinalPrice(p);
     
-    document.getElementById('detail-img').src = p.img;
+    document.getElementById('detail-img').style.backgroundImage = `url('${p.img}')`;
     document.getElementById('detail-name').innerText = p.name;
     document.getElementById('detail-desc').innerText = p.desc || 'Sin descripción';
     
     document.getElementById('detail-price').innerHTML = `$${finalPrice.toLocaleString()} ` + 
-        (p.discount > 0 ? `<span style="text-decoration:line-through; font-weight:400; font-size:14px; color:var(--text-muted); margin-left:8px;">$${p.price.toLocaleString()}</span>` : '');
+        (p.discount > 0 ? `<span style="text-decoration:line-through; font-weight:400; font-size:14px; color:gray; margin-left:8px;">$${p.price.toLocaleString()}</span>` : '');
 
     document.getElementById('detail-stock').innerText = `Disponibles: ${p.stock}`;
     
@@ -418,8 +423,8 @@ function verProducto(id) {
     if (isAdmin && adminPanel) {
         adminPanel.classList.remove('hidden');
         adminPanel.innerHTML = `
-            <button class="apple-btn-secondary" onclick="editProduct('${id}')">${ICONS.edit} Editar</button>
-            <button class="apple-btn-secondary" style="color:var(--danger);" onclick="deleteProduct('${id}')">${ICONS.trash} Eliminar</button>
+            <button class="apple-btn" onclick="editProduct('${id}')">${ICONS.edit} Editar</button>
+            <button class="apple-btn" style="background:var(--danger, #ff3b30); color:white;" onclick="deleteProduct('${id}')">${ICONS.trash} Eliminar</button>
         `;
     } else if(adminPanel) {
         adminPanel.classList.add('hidden');
@@ -429,7 +434,7 @@ function verProducto(id) {
     if(userActions) {
         userActions.innerHTML = `
             <button class="apple-btn" style="margin-bottom:12px;" onclick="addToCart('${p.id}', 1)">Añadir al Carrito</button>
-            <button class="apple-btn" style="background:var(--success); color:white;" onclick="abrirClaim('${p.id}')">Reclamar Pantalla</button>
+            <button class="apple-btn" style="background:var(--success, #34c759); color:white;" onclick="abrirClaim('${p.id}')">Reclamar Pantalla Ahora</button>
         `;
     }
 
@@ -440,25 +445,7 @@ function abrirClaim(productId) {
     claimContext = products.find(p => p.id === productId);
     if(!claimContext) return;
     
-    // Inyecta dinámicamente si el modal no existe, o usa el existente.
-    let modal = document.getElementById('modal-claim');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'modal-claim';
-        modal.className = 'modal hidden';
-        modal.innerHTML = `
-        <div class="ios-card detail-box">
-            <button class="close" onclick="closeModal('modal-claim')">${ICONS.close}</button>
-            <h2 style="margin-bottom:20px; font-weight:700;">Reclamar Pantalla</h2>
-            <p style="font-size:14px; color:var(--text-muted); margin-bottom:20px;">Déjanos tus datos y nos pondremos en contacto contigo por WhatsApp para la entrega de tu cuenta.</p>
-            <div class="apple-form">
-                <input type="text" id="claim-name" placeholder="Tu Nombre">
-                <input type="number" id="claim-phone" placeholder="Número de WhatsApp">
-                <button class="apple-btn" style="margin-top:10px; background:var(--success); color:white;" onclick="submitClaim()">Enviar Solicitud</button>
-            </div>
-        </div>`;
-        document.body.appendChild(modal);
-    }
+    // Restaurado al uso de tu modal HTML original para evitar conflictos
     openModal('modal-claim');
 }
 
@@ -468,7 +455,6 @@ function submitClaim() {
     
     if(!name || !phone) return showToast("Por favor, completa todos los datos.");
     
-    // Envío por telegram usando diseño texto limpio sin emojis
     const msg = `*NUEVA PANTALLA RECLAMADA*\n\n*Usuario:* ${name}\n*WhatsApp:* ${phone}\n*Producto:* ${claimContext.name}\n*ID Sistema:* #${myUserId}`;
     
     sendTelegramNotification(msg);
@@ -480,7 +466,7 @@ function submitClaim() {
 }
 
 // ==========================================
-// 10. CARRITO Y PAGOS (CÁLCULO EXACTO)
+// 10. CARRITO Y PAGOS 
 // ==========================================
 function addToCart(id, qty) {
     const p = products.find(x => x.id === id);
@@ -501,10 +487,14 @@ function addToCart(id, qty) {
 
 function updateCartCount() {
     const c = Object.values(cart).reduce((a, b) => a + b, 0);
+    const badge = document.getElementById('cart-count');
+    if (badge) badge.innerText = c;
+    
+    // Soporte opcional para badges múltiples si los tienes
     const badges = document.querySelectorAll('.cart-badge');
-    badges.forEach(badge => {
-        badge.innerText = c;
-        badge.style.display = c > 0 ? 'flex' : 'none';
+    badges.forEach(b => {
+        b.innerText = c;
+        b.style.display = c > 0 ? 'flex' : 'none';
     });
 }
 
@@ -512,10 +502,8 @@ function toggleCart() {
     const c = document.getElementById('cart-sidebar');
     if(!c) return;
     
-    if (c.style.transform === 'translateX(0%)') {
-        c.style.transform = 'translateX(100%)';
-    } else {
-        c.style.transform = 'translateX(0%)';
+    c.classList.toggle('open');
+    if (c.classList.contains('open') || c.style.transform === 'translateX(0%)') {
         renderCart();
     }
 }
@@ -540,12 +528,12 @@ function renderCart() {
         total += finalPrice * qty;
 
         items.innerHTML += `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:var(--surface-elevated); padding:12px 15px; border-radius:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:rgba(128,128,128,0.1); padding:12px 15px; border-radius:14px;">
             <div style="flex-grow:1; padding-right:10px;">
                 <strong style="font-size:15px; font-weight:600;">${p.name}</strong><br>
-                <span class="text-muted" style="font-size:13px;">Cant: ${qty} | $${finalPrice.toLocaleString()} c/u</span>
+                <span class="text-muted" style="font-size:13px; opacity:0.8;">Cant: ${qty} | $${finalPrice.toLocaleString()} c/u</span>
             </div>
-            <button style="background:transparent; border:none; color:var(--text-muted); padding:5px; cursor:pointer;" onclick="delete cart['${id}']; renderCart(); updateCartCount();">${ICONS.trash}</button>
+            <button style="background:transparent; border:none; color:var(--danger, #ff3b30); padding:5px; cursor:pointer;" onclick="delete cart['${id}']; renderCart(); updateCartCount();">${ICONS.trash}</button>
         </div>`;
     }
     const totalEl = document.getElementById('cart-total');
@@ -570,7 +558,7 @@ async function payCart(method) {
     }
 
     if (method === 'billetera') {
-        if (!currentUser.registered) return iosAlert("Acción Requerida", "Debes registrarte en la plataforma para usar tu billetera.");
+        if (!currentUser || !currentUser.registered) return iosAlert("Acción Requerida", "Debes registrarte en la plataforma para usar tu billetera.");
         if (currentUser.balance < total) return iosAlert("Saldo Insuficiente", "No tienes suficiente saldo en tu billetera para realizar esta compra.");
 
         iosConfirm("Confirmar Pago", `Se descontarán $${total.toLocaleString()} de tu saldo. ¿Deseas continuar?`, async () => {
@@ -631,7 +619,7 @@ async function sendReceipt() {
         iosAlert("Enviado", "El comprobante ha sido enviado a revisión. En breve procesaremos tu solicitud.");
         closeModal('modal-receipt');
         const sidebar = document.getElementById('cart-sidebar');
-        if(sidebar && sidebar.style.transform === 'translateX(0%)') toggleCart();
+        if(sidebar && sidebar.classList.contains('open')) toggleCart();
         
     } catch (error) {
         iosAlert("Error", "Ocurrió un problema al enviar el comprobante. Inténtalo de nuevo.");
@@ -644,7 +632,7 @@ async function sendReceipt() {
 }
 
 // ==========================================
-// 12. FORO / CHATS (APPLE UI)
+// 12. FORO / CHATS 
 // ==========================================
 function renderForum() {
     const c = document.getElementById('forum-posts');
@@ -653,24 +641,23 @@ function renderForum() {
     
     forumPosts.forEach(p => {
         const d = new Date(p.timestamp);
-        const vipTag = p.vip ? `<span class="tag vip">VIP</span>` : '';
-        const adminBadge = p.authorRole === 'superadmin' ? `<span style="color:var(--accent); font-size:12px; margin-left:6px; display:inline-flex; align-items:center; gap:3px;">${ICONS.admin} Admin</span>` : '';
+        const vipTag = p.vip ? `<span style="background:var(--accent, #0a84ff); color:#fff; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; margin-left:5px;">VIP</span>` : '';
+        const adminBadge = p.authorRole === 'superadmin' ? `<span style="color:var(--accent, #0a84ff); font-size:12px; margin-left:6px; display:inline-flex; align-items:center; gap:3px;">${ICONS.admin} Admin</span>` : '';
 
         c.innerHTML += `
-        <div class="forum-thread-card" style="margin-bottom:12px;" onclick="openChat('${p.id}')">
+        <div class="card" style="margin-bottom:12px; padding:15px; border-radius:14px; background:rgba(128,128,128,0.05);" onclick="openChat('${p.id}')">
             <div style="flex-grow:1;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
                     <strong style="font-size:16px; font-weight:600;">${p.title}</strong>
                     ${vipTag}
                 </div>
-                <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Por: ${p.authorName} ${adminBadge}</div>
-                <p style="font-size:14px; color:var(--text-main); line-height:1.4; opacity:0.9;">${p.content.substring(0, 80)}...</p>
-                <div style="margin-top:12px; display:flex; gap:16px; color:var(--text-muted); font-size:13px; font-weight:500;">
+                <div style="font-size:13px; color:gray; margin-bottom:8px;">Por: ${p.authorName} ${adminBadge}</div>
+                <p style="font-size:14px; line-height:1.4; opacity:0.9;">${p.content.substring(0, 80)}...</p>
+                <div style="margin-top:12px; display:flex; gap:16px; color:gray; font-size:13px; font-weight:500;">
                     <span style="display:flex; align-items:center; gap:6px;">${ICONS.thumbUp} ${p.likes || 0}</span>
                     <span style="display:flex; align-items:center; gap:6px;">${ICONS.chat} ${(p.replies || []).length}</span>
                 </div>
             </div>
-            <div style="color:var(--border-color);">${ICONS.lock.replace('width="12"', 'width="16"').replace('height="12"', 'height="16"')}</div>
         </div>`;
     });
 }
@@ -693,11 +680,11 @@ function accederChat(post) {
     currentThreadId = post.id;
     document.getElementById('view-forum').classList.add('hidden');
     document.getElementById('view-forum-detail').classList.remove('hidden');
-    document.getElementById('chat-title').innerHTML = post.title + (post.vip ? ' <span style="color:var(--accent); font-size:11px; margin-left:5px; padding:2px 6px; background:rgba(10,132,255,0.1); border-radius:10px;">VIP</span>' : '');
+    document.getElementById('chat-title').innerHTML = post.title + (post.vip ? ' <span style="color:var(--accent, #0a84ff); font-size:11px; margin-left:5px; padding:2px 6px; border:1px solid var(--accent, #0a84ff); border-radius:10px;">VIP</span>' : '');
     
     const actions = document.getElementById('chat-admin-actions');
     if (isAdmin && actions) {
-        actions.innerHTML = `<button style="background:transparent; border:none; color:var(--danger); cursor:pointer;" onclick="deletePost('${post.id}')">${ICONS.trash}</button>`;
+        actions.innerHTML = `<button style="background:transparent; border:none; color:var(--danger, #ff3b30); cursor:pointer;" onclick="deletePost('${post.id}')">${ICONS.trash}</button>`;
     } else if (actions) {
         actions.innerHTML = '';
     }
@@ -709,9 +696,9 @@ function renderChatMessages(post) {
     if(!c) return;
     
     c.innerHTML = `
-    <div style="background:var(--surface-elevated); padding:16px; border-radius:18px; margin-bottom:24px;">
-        <div style="font-size:12px; font-weight:600; color:var(--accent); margin-bottom:8px;">Hilo original por ${post.authorName}</div>
-        <div style="font-size:15px; line-height:1.5; color:var(--text-main);">${post.content}</div>
+    <div style="background:rgba(128,128,128,0.1); padding:16px; border-radius:18px; margin-bottom:24px;">
+        <div style="font-size:12px; font-weight:600; color:var(--accent, #0a84ff); margin-bottom:8px;">Hilo original por ${post.authorName}</div>
+        <div style="font-size:15px; line-height:1.5;">${post.content}</div>
         ${post.img ? `<img src="${post.img}" style="width:100%; border-radius:12px; margin-top:12px;">` : ''}
     </div>`;
 
@@ -719,16 +706,16 @@ function renderChatMessages(post) {
     replies.forEach((r, index) => {
         const isMe = r.authorId === myUserId;
         const align = isMe ? 'flex-end' : 'flex-start';
-        const bg = isMe ? 'var(--accent)' : 'var(--surface-elevated)';
-        const color = isMe ? '#ffffff' : 'var(--text-main)';
-        const adminBadge = r.authorRole === 'superadmin' ? `<span style="color:var(--danger); font-size:10px; font-weight:700;">[STAFF]</span> ` : '';
+        const bg = isMe ? 'var(--accent, #0a84ff)' : 'rgba(128,128,128,0.15)';
+        const color = isMe ? '#ffffff' : 'inherit';
+        const adminBadge = r.authorRole === 'superadmin' ? `<span style="color:var(--danger, #ff3b30); font-size:10px; font-weight:700;">[STAFF]</span> ` : '';
 
         c.innerHTML += `
         <div style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:16px; width:100%;">
-            <div style="font-size:11px; font-weight:500; color:var(--text-muted); margin-bottom:4px; margin-left:8px; margin-right:8px;">${adminBadge}${r.authorName}</div>
-            <div style="background:${bg}; color:${color}; padding:10px 16px; border-radius:18px; max-width:85%; font-size:15px; position:relative; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+            <div style="font-size:11px; font-weight:500; color:gray; margin-bottom:4px; margin-left:8px; margin-right:8px;">${adminBadge}${r.authorName}</div>
+            <div style="background:${bg}; color:${color}; padding:10px 16px; border-radius:18px; max-width:85%; font-size:15px; position:relative;">
                 ${r.content}
-                ${isAdmin || isMe ? `<button onclick="deleteReply('${post.id}', ${index})" style="position:absolute; ${isMe ? 'left:-30px;' : 'right:-30px;'} top:8px; background:none; border:none; color:var(--text-muted); cursor:pointer;">${ICONS.trash}</button>` : ''}
+                ${isAdmin || isMe ? `<button onclick="deleteReply('${post.id}', ${index})" style="position:absolute; ${isMe ? 'left:-30px;' : 'right:-30px;'} top:8px; background:none; border:none; color:gray; cursor:pointer;">${ICONS.trash}</button>` : ''}
             </div>
         </div>`;
     });
