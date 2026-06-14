@@ -449,7 +449,7 @@ function processRecharge() {
 
     setTimeout(() => {
         closeModal('modal-user-recharge');
-        showReceiptModal(`Envía $${parseInt(amount).toLocaleString()} al NEQUI 3137084357 para recargar tu saldo.`);
+        showReceiptModal(`Envía $${parseInt(amount).toLocaleString()} al NEQUI 3137074357 para recargar tu saldo.`);
     }, 1500);
 }
 
@@ -598,7 +598,7 @@ async function handleSaveProduct() {
         short: document.getElementById('p-short').value.trim(),
         desc: document.getElementById('p-desc').value.trim(),
         contact: document.getElementById('p-contact').value.trim() || "3128194596",
-        wa: document.getElementById('p-wa').value.trim() || `Hola URANIUM, me interesa ${name}`,
+        wa: document.getElementById('p-wa').value.trim() || `¡Hola!, me interesa comprar la pantalla de ${name}`,
         catId: document.getElementById('p-cat-select').value,
         pinned: document.getElementById('p-pinned').checked, 
         img: currentImg,
