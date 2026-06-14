@@ -5,88 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>URANIUM DIGITAL | Store</title>
     <link rel="stylesheet" href="style.css">
-    
-    <style>
-        /* Pantalla de Mantenimiento */
-        #maintenance-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #000000;
-            color: #ffffff;
-            z-index: 999999; /* Por encima de todo */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-        }
-
-        /* Switch Toggle (Estilo Apple) */
-        .switch {
-            position: relative; display: inline-block; width: 40px; height: 24px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc; transition: .4s; border-radius: 24px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-            background-color: white; transition: .4s; border-radius: 50%;
-        }
-        input:checked + .slider { background-color: #28a745; }
-        input:checked + .slider:before { transform: translateX(16px); }
-
-        /* Estilos de Producto Agotado */
-        .product-card.agotado {
-            filter: grayscale(100%);
-            opacity: 0.6;
-        }
-        .product-card.agotado .buy-btn, 
-        .product-card.agotado .add-cart-btn {
-            display: none !important; /* Oculta botones de compra */
-        }
-        .badge-agotado {
-            position: absolute; top: 10px; right: 10px;
-            background: #ff3b30; color: white; padding: 5px 10px;
-            border-radius: 15px; font-size: 12px; font-weight: bold; z-index: 10;
-        }
-
-        /* Estilos de Descuento */
-        .price-original {
-            text-decoration: line-through; color: #888; font-size: 14px; margin-right: 5px;
-        }
-        .badge-descuento {
-            position: absolute; top: 10px; left: 10px;
-            background: #af52de; color: white; padding: 5px 10px;
-            border-radius: 15px; font-size: 12px; font-weight: bold; z-index: 10;
-        }
-    </style>
 </head>
 <body>
 
-    <div id="maintenance-screen" class="hidden">
-        <svg width="60" height="60" viewBox="0 0 24 24" fill="#ff9500" style="margin-bottom: 20px;">
-            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
-        </svg>
-        <h1 style="margin-bottom: 10px;">Mantenimiento</h1>
-        <p id="maintenance-msg-display" style="color: #ccc; max-width: 400px;">Estamos realizando mejoras en la plataforma. Volveremos pronto.</p>
-    </div>
-
     <div id="toast-container"></div>
 
-    <header class="main-header">
+    <!-- HEADER APPLE STYLE (GLASSMORPHISM) -->
+        <header class="main-header">
         <div class="logo" onclick="showView('products')">
             URANIUM
         </div>
-        <div class="header-right">
+                <div class="header-right">
             <div class="header-icon hidden" id="btn-add-post-header" onclick="openPublishModal()" style="font-size: 20px;">
                 <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
             </div>
+            
             <div class="header-icon" id="btn-login-gear" onclick="openModal('modal-settings')" style="font-size: 22px;">
                 <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
             </div>
+            
             <div class="cart-wrapper" onclick="openModal('modal-cart')">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                 <span id="cart-count" class="cart-badge">0</span>
@@ -95,8 +32,10 @@
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </div>
         </div>
+
     </header>
 
+    <!-- MENÚ HAMBURGUESA DESLIZABLE -->
     <div id="mobile-menu" class="apple-menu hidden">
         <div class="menu-header">
             <button class="close-menu" onclick="closeMenu()">✕</button>
@@ -114,6 +53,7 @@
             <nav class="menu-links">
                 <a href="#" onclick="showView('products'); closeMenu()">Tienda Oficial</a>
                 <a href="#" onclick="showView('foro'); closeMenu()">Comunidad & Foro</a>
+                <!-- Opciones que solo verá el Admin -->
                 <a href="#" id="btn-admin-menu" class="hidden text-accent" onclick="showView('dashboard'); closeMenu()">Panel de Control (Admin)</a>
                 <a href="#" id="btn-logout-menu" class="hidden text-danger" onclick="handleLogout()">Cerrar Sesión</a>
             </nav>
@@ -121,11 +61,13 @@
     </div>
 
     <main class="content">
+        <!-- VISTA DE PRODUCTOS -->
         <section id="view-products" class="view-section">
             <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
             <div class="product-grid" id="product-grid"></div>
         </section>
 
+        <!-- VISTA DASHBOARD ADMIN -->
         <section id="view-dashboard" class="view-section hidden">
             <h1 class="section-title">Panel de Control</h1>
             
@@ -134,20 +76,21 @@
                 <button class="apple-btn-secondary" style="background: var(--accent); color: white; margin:0;" onclick="openModal('modal-add-cat')">+ Crear Categoría</button>
                 <button class="apple-btn-secondary" style="background: var(--danger); color: white; margin:0;" onclick="openDeleteCatModal()">- Eliminar Categoría</button>
                 <button class="apple-btn-secondary" style="margin:0;" onclick="openModal('modal-manage-admins')">Gestión Admins</button>
-                <button class="apple-btn-secondary" style="background: #333; color: white; margin:0;" onclick="openModal('modal-more-settings')">
-                    ⚙️ Más Ajustes
-                </button>
                 <button id="btn-security" class="apple-btn-secondary hidden" style="background: #ffcc00; color: black; margin:0;" onclick="openModal('modal-security')">
-                    Seguridad
+                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> Seguridad
                 </button>
             </div>
+
             
             <div id="admin-list-container" class="admin-card hidden">
                 <h3>Administradores Activos</h3>
                 <div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
             </div>
+
             <div class="admin-card">
-                <h3>Registro General de Usuarios</h3>
+                <h3>
+                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Registro General de Usuarios
+                </h3>
                 <div class="table-container" style="max-height: 300px; overflow-y: auto;">
                     <table class="apple-table">
                         <thead><tr><th>ID / Usuario</th><th>Saldo</th><th>Estado / Acción</th></tr></thead>
@@ -155,6 +98,7 @@
                     </table>
                 </div>
             </div>
+
             <div class="admin-card">
                 <h3>Log de Movimientos</h3>
                 <div class="table-container">
@@ -166,12 +110,70 @@
             </div>
         </section>
 
+        <!-- VISTA FORO / COMUNIDAD -->
         <section id="view-foro" class="view-section hidden">
-            </section>
+            <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1 class="section-title" style="margin: 0;">
+                    Comunidad <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                </h1>
+                <button class="apple-btn" style="width: auto; padding: 10px 20px;" onclick="openForumModal()">+ Nuevo Debate</button>
+            </div>
+            <div id="forum-feed" class="forum-grid"></div>
+        </section>
+
+        <!-- VISTA DETALLE DEL FORO (ESTILO iMESSAGE) -->
         <section id="view-forum-detail" class="view-section hidden">
-            </section>
+            <div class="chat-header glass-header">
+                <button class="back-btn" onclick="showView('foro')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    Atrás
+                </button>
+                <div class="chat-title-info">
+                    <h3 id="chat-title-display">...</h3>
+                    <span id="chat-status-display" class="chat-status"></span>
+                </div>
+            </div>
+            
+            <!-- Aquí se inyectan las burbujas desde JS -->
+            <div id="chat-messages" class="chat-messages"></div>
+            
+            <!-- Input fijado estilo Apple -->
+            <div class="chat-input-area glass-footer">
+                <div id="replying-to-box" class="replying-to hidden">
+                    <span>Respondiendo a: <strong id="reply-to-name"></strong></span>
+                    <button onclick="cancelReply()">✕</button>
+                </div>
+                <div class="input-wrapper">
+                    <input type="text" id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off" name="chat-msg">
+                    <button class="send-btn" onclick="sendForumReply()">↑</button>
+                </div>
+            </div>
+        </section>
     </main>
 
+    <!-- ========================================= -->
+    <!-- MODALES COMPLETOS CON CLASES APPLE        -->
+    <!-- ========================================= -->
+
+    <!-- PAGO BILLETERA -->
+    <div id="modal-wallet-confirm" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span>
+            <h2 class="text-accent">Pago Billetera</h2>
+            <p class="text-muted" style="margin-bottom: 15px;">Confirma tu pedido para descontar el saldo.</p>
+            <div id="wallet-form" class="apple-form">
+                <input type="text" id="w-pay-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="w-pay-phone" placeholder="Tu Número de WhatsApp">
+                <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total a descontar: <strong id="w-pay-val"></strong></div>
+                <button class="apple-btn" style="background: #28a745;" onclick="processWalletPayment()">Confirmar Compra</button>
+            </div>
+            <div id="wallet-processing" class="hidden" style="text-align: center; padding: 20px 0;">
+                <div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- PERFIL Y REGISTRO -->
     <div id="modal-profile" class="modal hidden">
         <div class="modal-content ios-card">
             <span class="close" onclick="closeModal('modal-profile')">✕</span>
@@ -191,266 +193,279 @@
                 <p class="text-accent" style="font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: center;">REGÍSTRATE Y GANA $5,000 COP</p>
                 <input type="text" id="reg-username" placeholder="@Usuario (Único)">
                 <input type="text" id="reg-name" placeholder="Nombre Mostrado">
-                <input type="password" id="reg-pass" placeholder="Crea una Contraseña">
-                
                 <button class="apple-btn" onclick="registerUser()">Guardar Perfil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECARGAR SALDO -->
+    <div id="modal-user-recharge" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-user-recharge')">✕</span>
+            <h2>Recargar Mi Saldo</h2>
+            <div id="recharge-form" class="apple-form" style="margin-top: 15px;">
+                <input type="text" id="r-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="r-phone" placeholder="Tu Número de WhatsApp">
+                <input type="number" id="r-amount" placeholder="Monto a recargar ($)">
+                <button class="apple-btn" style="background: #28a745;" onclick="processRecharge()">Continuar</button>
+            </div>
+            <div id="recharge-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <!-- COMPROBANTE -->
+    <div id="modal-receipt" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-receipt')">✕</span>
+            <h3>Adjuntar Comprobante</h3>
+            <p id="receipt-instructions" class="text-accent" style="font-size: 14px; margin-bottom: 15px; font-weight: bold; line-height: 1.4;"></p>
+            <div id="receipt-form" class="apple-form">
+                <div class="upload-zone" onclick="document.getElementById('receipt-file-input').click()" style="height: 200px; border: 2px dashed var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;">
+                    <span id="receipt-upload-label" style="text-align: center; color: var(--accent);">
+                        Clic para subir comprobante <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                    </span>
+                    <img id="receipt-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute;">
+                </div>
+                <input type="file" id="receipt-file-input" accept="image/*" class="hidden" onchange="previewReceipt()">
+                <button class="apple-btn" onclick="submitReceipt()">Enviar Comprobante</button>
+            </div>
+            <div id="receipt-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <!-- GESTIÓN ADMINS -->
+    <div id="modal-manage-admins" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-manage-admins')">✕</span>
+            <h2>Gestión Admins</h2>
+            <p class="text-muted" style="font-size: 12px; margin-bottom:15px;">El usuario con este ID podrá acceder al panel de control.</p>
+            <div class="apple-form">
+                <input type="text" id="new-admin-id" placeholder="ID del Usuario">
+                <input type="email" id="new-admin-email" placeholder="Correo Provisional">
+                <input type="password" id="new-admin-pass" placeholder="Clave Provisional">
+                <button class="apple-btn" onclick="addSubAdmin()">Agregar Admin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AÑADIR SALDO MANUAL -->
+    <div id="modal-add-balance" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-add-balance')">✕</span>
+            <h2>Recargar Saldo Manual</h2>
+            <div class="apple-form">
+                <input type="text" id="bal-user-id" placeholder="ID del Usuario">
+                <input type="number" id="bal-amount" placeholder="Cantidad ($)">
+                <button class="apple-btn" style="background: #28a745;" onclick="addBalanceToUser()">Recargar Billetera</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREAR Y ELIMINAR CATEGORÍA -->
+    <div id="modal-add-cat" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-add-cat')">✕</span>
+            <h2>Nueva Categoría</h2>
+            <div class="apple-form">
+                <input type="text" id="new-cat-name" placeholder="Nombre de Plataforma">
+                <button class="apple-btn" onclick="saveNewCategory()">Crear Plataforma</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-delete-cat" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-delete-cat')">✕</span>
+            <h2>Eliminar Categoría</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <select id="d-cat-select"></select>
+                <button class="apple-btn" style="background: var(--danger);" onclick="deleteCategory()">
+                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Eliminar Plataforma
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PUBLICAR PRODUCTO (CON EDITOR GRANDE) -->
+    <div id="modal-publish" class="modal hidden">
+        <div class="modal-content ios-card" style="max-width: 500px;">
+            <span class="close" onclick="closeModal('modal-publish')">✕</span>
+            <h2 id="pub-title">Publicar Producto</h2>
+            <div class="apple-form">
+                <div class="upload-zone" onclick="document.getElementById('file-input').click()" style="height: 150px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;">
+                    <span id="upload-label" style="color: var(--text-muted);">Clic para subir imagen *</span>
+                    <img id="file-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute; background: var(--surface-elevated);">
+                </div>
+                <input type="file" id="file-input" accept="image/*" class="hidden" onchange="previewImage()">
+                <input type="text" id="p-name" placeholder="Nombre (Ej: Netflix)">
+                <textarea id="p-short" placeholder="Slogan / Info extra" style="display: none;"></textarea>
+                <input type="number" id="p-price" placeholder="Precio ($)">
+                <select id="p-cat-select"></select>
                 
-                <div style="text-align: center; margin-top: 15px;">
-                    <a href="#" class="text-accent" style="font-size: 14px; text-decoration: none;" onclick="openRecoverModal()">¿Ya tienes cuenta? Ingresa o Recupera aquí</a>
+                <textarea id="p-desc" placeholder="Descripción Detallada"></textarea>
+                <button type="button" class="apple-btn-secondary" style="margin-top:-5px; margin-bottom:10px; padding: 8px;" onclick="openBigEditor()">
+                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> Abrir Editor Avanzado
+                </button>
+
+                <input type="text" id="p-contact" placeholder="WhatsApp de Contacto">
+                <input type="text" id="p-wa" placeholder="Msj predeterminado WhatsApp">
+                
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <input type="checkbox" id="p-pinned" style="width: auto;"> 
+                    <label for="p-pinned">
+                        <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> Fijar publicación al inicio
+                    </label>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="apple-btn" onclick="handleSaveProduct()">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="modal-recover" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-recover')">✕</span>
-            <h2>Ingresar a mi Cuenta</h2>
-            <p class="text-muted" style="margin-bottom: 15px; font-size:14px;">Ingresa tu ID de usuario y contraseña.</p>
-            <div class="apple-form">
-                <input type="text" id="recover-id" placeholder="ID de Usuario o @Usuario">
-                <input type="password" id="recover-pass" placeholder="Tu Contraseña">
-                <button class="apple-btn" style="background: var(--accent);" onclick="processRecoverAccount()">Acceder</button>
+    <!-- EDITOR GRANDE -->
+    <div id="modal-big-editor" class="modal hidden">
+        <div class="modal-content ios-card" style="width: 95%; max-width: 800px;">
+            <span class="close" onclick="closeBigEditor()">✕</span>
+            <h2>Editor Avanzado</h2>
+            <p class="text-muted" style="font-size:12px; margin-bottom:10px;">Usa **negrita**, __cursiva__, >resaltado o =#FF0000color</p>
+            <textarea id="big-editor-area" style="height: 300px; width: 100%; background: var(--surface-elevated); color: var(--text-main); border: none; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-family: monospace;"></textarea>
+            <button class="apple-btn" onclick="saveBigEditor()">Guardar y Cerrar</button>
+        </div>
+    </div>
+
+    <!-- DETALLE DEL PRODUCTO (VISTA CLIENTE) -->
+    <div id="modal-detail" class="modal hidden">
+        <div class="modal-content ios-card detail-box" style="max-width: 800px;">
+            <span class="close" onclick="closeModal('modal-detail')">✕</span>
+            <div id="detail-body"></div>
+        </div>
+    </div>
+
+    <!-- CARRITO DE COMPRAS -->
+    <div id="modal-cart" class="modal hidden">
+        <div class="modal-content ios-card cart-tall" style="height: 85vh; display: flex; flex-direction: column;">
+            <span class="close" onclick="closeModal('modal-cart')">✕</span>
+            <h2>Carrito</h2>
+            <div id="cart-list" style="flex-grow: 1; overflow-y: auto; margin: 15px 0;"></div>
+            <div class="total-box" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-bottom: 15px; font-size: 20px; font-weight: bold;">
+                Total: <span id="cart-total">$0</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="apple-btn" onclick="goToWalletPayment()">Pagar con Billetera</button>
+                <button class="apple-btn" style="background: #da0081;" onclick="goToPayment()">Pagar con Nequi</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-more-settings" class="modal hidden">
+    <!-- PAGO NEQUI -->
+    <div id="modal-nequi" class="modal hidden">
         <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-more-settings')">✕</span>
-            <h2>Ajustes Avanzados</h2>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                <button class="apple-btn" style="background: #ff9500;" onclick="openModal('modal-maintenance'); closeModal('modal-more-settings')">🚧 Modo Mantenimiento</button>
-                <button class="apple-btn" style="background: #ff3b30;" onclick="openAgotadosModal(); closeModal('modal-more-settings')">📦 Gestionar Agotados</button>
-                <button class="apple-btn" style="background: #af52de;" onclick="openDiscountsModal(); closeModal('modal-more-settings')">🏷️ Crear Descuentos</button>
+            <span class="close" onclick="closeModal('modal-nequi')">✕</span>
+            <h2 style="color: #da0081; margin-bottom: 15px;">Pago Nequi</h2>
+            <div id="nequi-form" class="apple-form">
+                <input type="text" id="pay-name" placeholder="Tus Nombres y Apellidos">
+                <input type="number" id="pay-phone" placeholder="Tu Número de WhatsApp">
+                <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total: <strong id="pay-val"></strong></div>
+                <button class="apple-btn" style="background: #da0081;" onclick="processPayment()">Generar Orden Segura</button>
+            </div>
+            <div id="nequi-processing" class="hidden" style="text-align: center; padding: 20px 0;">
+                <div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3>
             </div>
         </div>
     </div>
 
-    <div id="modal-maintenance" class="modal hidden">
+    <!-- ACCESO Y CONFIGURACIÓN -->
+    <div id="modal-settings" class="modal hidden">
         <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-maintenance')">✕</span>
-            <h2>Modo Mantenimiento</h2>
-            <p class="text-muted" style="font-size:13px; margin-bottom:15px;">Al activarlo, solo los administradores podrán ver la tienda. El resto verá una pantalla negra con este mensaje.</p>
-            <div class="apple-form">
-                <textarea id="maint-input-msg" placeholder="Mensaje para usuarios..." style="height: 80px;">Estamos en mantenimiento. Volvemos pronto.</textarea>
-                <button class="apple-btn" style="background: var(--danger);" onclick="toggleMaintenance(true)">Activar Mantenimiento</button>
-                <button class="apple-btn" style="background: #28a745; margin-top: 10px;" onclick="toggleMaintenance(false)">Desactivar Mantenimiento</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-out-of-stock" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-out-of-stock')">✕</span>
-            <h2>Productos Agotados</h2>
-            <p class="text-muted" style="font-size:12px; margin-bottom:15px;">Apaga el switch para marcar un producto como "Agotado".</p>
-            <div id="agotados-list-render" style="max-height: 350px; overflow-y: auto; background: var(--surface-elevated); border-radius: 10px; padding: 10px;">
+            <span class="close" onclick="closeModal('modal-settings')">✕</span>
+            <div id="login-box">
+                <h2>Acceso Administrador</h2>
+                <div class="apple-form" style="margin-top: 15px;">
+                    <input type="email" id="l-email" placeholder="Correo Electrónico">
+                    <input type="password" id="l-pass" placeholder="Contraseña">
+                    <button class="apple-btn" onclick="handleLogin()">Entrar</button>
                 </div>
+            </div>
+            <div id="logout-box" class="hidden" style="text-align: center;">
+                <h2>Sesión Iniciada</h2>
+                <button class="apple-btn" style="margin-top: 15px; background: var(--danger);" onclick="handleLogout()">Cerrar Sesión</button>
+            </div>
         </div>
     </div>
 
-    <div id="modal-discounts" class="modal hidden">
-        <div class="modal-content ios-card" style="max-width: 600px;">
-            <span class="close" onclick="closeModal('modal-discounts')">✕</span>
-            <h2>Gestión de Descuentos</h2>
+    <!-- SEGURIDAD SUPER ADMIN -->
+    <div id="modal-security" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-security')">✕</span>
+            <h2>Cambiar Credenciales Súper Admin</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <input type="email" id="sec-new-email" placeholder="Nuevo Correo">
+                <input type="password" id="sec-new-pass" placeholder="Nueva Contraseña">
+                <button class="apple-btn" style="background: #ffcc00; color: black;" onclick="updateSuperAdminCreds()">Actualizar Datos</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- CREAR DEBATE -->
+    <div id="modal-forum" class="modal hidden">
+        <div class="modal-content ios-card">
+            <span class="close" onclick="closeModal('modal-forum')">✕</span>
+            <h2>Nuevo Debate</h2>
+            <div class="apple-form" style="margin-top: 15px;">
+                <div class="upload-zone" onclick="document.getElementById('f-file-input').click()" style="height: 100px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 12px;">
+                    <span id="f-upload-label" style="color: var(--text-muted);">
+                        Adjuntar Imagen <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                    </span>
+                    <img id="f-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);">
+                </div>
+                <input type="file" id="f-file-input" accept="image/*" class="hidden" onchange="previewForumImage()">
+                
+                <input type="text" id="f-title" placeholder="Asunto o Tema">
+                <select id="f-type" onchange="toggleForumPassword()" style="margin-bottom: 12px;">
+                    <option value="publico">Público</option>
+                    <option value="vip">Solo VIP (Monetizado)</option>
+                    <option value="clave">Con Clave</option>
+                    <option value="cerrado">Cerrado (Solo lectura)</option>
+                </select>
+                
+                <!-- Campos dinámicos de seguridad/cobro -->
+                <input type="password" id="f-password" class="hidden" placeholder="Establecer Clave">
+                <div id="f-vip-options" class="hidden">
+                    <input type="number" id="f-vip-price" placeholder="Precio de entrada ($)">
+                    <input type="number" id="f-vip-phone" placeholder="Tu WhatsApp (Para recibir pagos)">
+                    <p class="text-muted" style="font-size:11px; margin-bottom:12px; line-height:1.3;">Uranium retiene el 30%. Recibirás el 70% de cada venta directamente a este número cuando los usuarios paguen.</p>
+                </div>
+
+                <textarea id="f-content" placeholder="Escribe tu mensaje aquí..." style="height: 100px; margin-bottom:12px;"></textarea>
+                <button class="apple-btn" onclick="saveForumPost()">Publicar Debate</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- MODAL DE COMPRA VIP -->
+    <div id="modal-buy-vip" class="modal hidden">
+        <div class="modal-content ios-card" style="text-align:center;">
+            <span class="close" onclick="closeModal('modal-buy-vip')">✕</span>
+            <div style="font-size:40px; margin-bottom:10px;">
+                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M19 3H5L2 9l10 14L22 9l-3-6z"/></svg>
+            </div>
+            <h2>Acceso Exclusivo</h2>
+            <p class="text-muted" id="vip-buy-title" style="margin-bottom:15px; font-size:14px;"></p>
+            <h1 style="color:var(--accent); margin-bottom:20px;" id="vip-buy-price">$0</h1>
             
-            <div class="apple-form" style="background: var(--surface-elevated); padding: 15px; border-radius: 10px; margin-top: 15px;">
-                <h3 style="font-size:16px; margin-bottom:10px;">Nuevo Descuento</h3>
-                <input type="text" id="desc-user-id" placeholder="ID del Usuario (Dejar vacío para aplicar a TODOS)">
-                
-                <p class="text-muted" style="font-size: 11px; margin-bottom: 5px;">Selecciona el producto:</p>
-                <select id="desc-product-select" style="margin-bottom: 10px;">
-                    </select>
-                
-                <input type="number" id="desc-percent" placeholder="Porcentaje de Descuento (1 al 100)" min="1" max="100">
-                
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button class="apple-btn" style="background: #af52de;" onclick="createDiscount(false)">Dar a este ID</button>
-                    <button class="apple-btn" style="background: #ff3b30;" onclick="createDiscount(true)">Activar para TODOS</button>
-                </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="apple-btn" style="background:#28a745;" onclick="processVipWallet()">Pagar con Billetera (Instantáneo)</button>
+                <button class="apple-btn" style="background:#da0081;" onclick="processVipNequi()">Pagar con Nequi (Requiere revisión)</button>
             </div>
-
-            <h3 style="font-size:16px; margin-top:20px; border-top:1px solid var(--border-color); padding-top:15px;">Descuentos Activos</h3>
-            <div id="active-discounts-render" style="max-height: 200px; overflow-y: auto; margin-top: 10px; font-size:14px;">
-                </div>
         </div>
     </div>
 
+
+    <!-- SCRIPTS -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    
-    <script>
-        // --- 1. RECUPERAR CUENTA ---
-        function openRecoverModal() {
-            closeModal('modal-profile');
-            openModal('modal-recover');
-        }
-
-        function processRecoverAccount() {
-            const id = document.getElementById('recover-id').value;
-            const pass = document.getElementById('recover-pass').value;
-            if(!id || !pass) return alert("Llena todos los campos");
-            
-            // Aquí debes llamar a Firebase o tu lógica de auth en emc.js
-            // Ejemplo conceptual:
-            // if (checkUserCredentials(id, pass)) { 
-            //    loginUser(); 
-            //    closeModal('modal-recover');
-            // }
-            alert("Función conectada. Esperando validación del backend.");
-        }
-
-        // --- 2. MANTENIMIENTO ---
-        function toggleMaintenance(status) {
-            const msg = document.getElementById('maint-input-msg').value;
-            
-            // En la vida real, guarda esto en una colección de Firebase (ej. 'settings').
-            // db.collection('settings').doc('system').update({ maintenance: status, msg: msg });
-            
-            if(status) {
-                document.getElementById('maintenance-msg-display').innerText = msg;
-                document.getElementById('maintenance-screen').classList.remove('hidden');
-                alert("Mantenimiento ACTIVADO. Los clientes ya no pueden acceder.");
-            } else {
-                document.getElementById('maintenance-screen').classList.add('hidden');
-                alert("Mantenimiento DESACTIVADO. Tienda online de nuevo.");
-            }
-            closeModal('modal-maintenance');
-        }
-
-        // Simulación: Si al cargar la página el estado es Mantenimiento y NO es admin
-        function checkSystemMaintenance(isMaintenanceMode, isAdmin) {
-            if(isMaintenanceMode && !isAdmin) {
-                document.getElementById('maintenance-screen').classList.remove('hidden');
-            }
-        }
-
-        // --- 3. GESTIÓN DE AGOTADOS ---
-        function openAgotadosModal() {
-            openModal('modal-out-of-stock');
-            renderAgotadosList();
-        }
-
-        function renderAgotadosList() {
-            const container = document.getElementById('agotados-list-render');
-            container.innerHTML = '';
-            
-            // Reemplaza 'window.productosGlobales' con tu arreglo real de productos cargados desde Firebase.
-            const productsMock = window.productosGlobales || [
-                { id: '1', name: 'Netflix 1 Pantalla', isAgotado: false },
-                { id: '2', name: 'Spotify Premium', isAgotado: true }
-            ];
-
-            productsMock.forEach(p => {
-                const checked = !p.isAgotado ? 'checked' : ''; 
-                const div = document.createElement('div');
-                div.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border-color);";
-                div.innerHTML = `
-                    <span>${p.name}</span>
-                    <label class="switch">
-                        <input type="checkbox" ${checked} onchange="toggleProductStock('${p.id}', this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function toggleProductStock(productId, isAvailable) {
-            const isAgotado = !isAvailable;
-            // Aquí actualizas en Firebase: 
-            // db.collection('products').doc(productId).update({ isAgotado: isAgotado });
-            
-            console.log(`Producto ${productId} agotado: ${isAgotado}`);
-            // Recargar la vista de la tienda para reflejar los cambios
-            // renderProducts(); 
-        }
-
-        // --- 4. SISTEMA DE DESCUENTOS ---
-        function openDiscountsModal() {
-            openModal('modal-discounts');
-            
-            // Llenar select de productos
-            const select = document.getElementById('desc-product-select');
-            select.innerHTML = '<option value="ALL">Aplicar a toda la tienda</option>';
-            
-            const productsMock = window.productosGlobales || [
-                { id: '1', name: 'Netflix 1 Pantalla' },
-                { id: '2', name: 'Spotify Premium' }
-            ];
-            
-            productsMock.forEach(p => {
-                select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
-            });
-
-            renderActiveDiscounts();
-        }
-
-        function createDiscount(forAll) {
-            let userId = document.getElementById('desc-user-id').value;
-            const productId = document.getElementById('desc-product-select').value;
-            const percent = document.getElementById('desc-percent').value;
-
-            if(forAll) userId = "TODOS";
-            if(!forAll && !userId) return alert("Escribe el ID del usuario.");
-            if(!percent || percent < 1 || percent > 100) return alert("Ingresa un porcentaje válido (1-100).");
-
-            const discountData = {
-                userId: userId,
-                productId: productId,
-                percent: parseInt(percent),
-                id: 'desc_' + Date.now()
-            };
-
-            // Aquí guardas el objeto discountData en Firebase
-            // db.collection('discounts').doc(discountData.id).set(discountData);
-            
-            alert(`Descuento del ${percent}% creado con éxito.`);
-            document.getElementById('desc-user-id').value = '';
-            document.getElementById('desc-percent').value = '';
-            renderActiveDiscounts();
-        }
-
-        function renderActiveDiscounts() {
-            const container = document.getElementById('active-discounts-render');
-            container.innerHTML = '';
-            
-            // Reemplaza con tus descuentos obtenidos de Firebase
-            const discountsMock = [
-                { id: 'd1', userId: 'TODOS', productId: '1', percent: 20 },
-                { id: 'd2', userId: 'user_992', productId: 'ALL', percent: 50 }
-            ];
-
-            if(discountsMock.length === 0) {
-                container.innerHTML = '<p class="text-muted">No hay descuentos activos.</p>';
-                return;
-            }
-
-            discountsMock.forEach(d => {
-                const div = document.createElement('div');
-                div.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--surface); margin-bottom: 5px; border-radius: 8px;";
-                div.innerHTML = `
-                    <div>
-                        <strong style="color:var(--accent)">${d.percent}% OFF</strong><br>
-                        <span style="font-size:11px; color:#888;">User: ${d.userId} | Prod: ${d.productId}</span>
-                    </div>
-                    <button class="apple-btn" style="background:var(--danger); width: auto; padding: 5px 10px; font-size: 12px;" onclick="deleteDiscount('${d.id}')">Eliminar</button>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function deleteDiscount(discountId) {
-            // db.collection('discounts').doc(discountId).delete();
-            alert("Descuento eliminado");
-            renderActiveDiscounts();
-            // renderProducts(); para actualizar los precios en la tienda
-        }
-
-    </script>
     <script src="emc.js"></script>
 </body>
 </html>
