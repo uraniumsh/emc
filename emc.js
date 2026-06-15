@@ -129,6 +129,24 @@ function escucharDatos() {
         if (categories.length > 0) renderAll(); else if (products.length > 0) renderGrid();
     } catch(e) {}
 
+    db.collection("config").doc("system").onSnapshot(doc => {
+        if(doc.exists) {
+            const data = doc.data();
+            const maint = document.getElementById('maint-curtain');
+            if(data.mantenimiento && !isAdmin) {
+                if(!maint) {
+                    document.body.innerHTML += `
+                    <div id="maint-curtain">
+                        <h1 style="font-size:24px; margin-bottom:10px;">🛠️ EN MANTENIMIENTO</h1>
+                        <p style="color:var(--text-muted); font-size:14px;">${data.mensajeMantenimiento || 'Estamos mejorando la plataforma. Vuelve pronto.'}</p>
+                    </div>`;
+                }
+            } else if (maint) {
+                maint.remove();
+            }
+        }
+    });
+
     db.collection("productos").onSnapshot(snap => {
         products = [];
         snap.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
@@ -372,33 +390,71 @@ function updateProfileUI() {
     const pId = document.getElementById('profile-id');
     const pName = document.getElementById('profile-name-display');
     const wBal = document.getElementById('wallet-balance');
-    const rSec = document.getElementById('register-section');
+    const authSection = document.getElementById('auth-section'); // Contenedor que debes crear en el HTML del modal perfil
 
     if(pId) pId.innerText = myUserId;
-    if(pName) pName.innerText = currentUser?.registered ? currentUser.name : "Invitado";
     if(wBal) wBal.innerText = `$${(currentUser?.balance || 0).toLocaleString()}`;
     
-    if(rSec) {
-        if(currentUser?.registered) {
-            rSec.classList.add('hidden');
-        } else {
-            rSec.classList.remove('hidden');
+    if(currentUser?.registered) {
+        if(pName) pName.innerText = currentUser.name;
+        if(authSection) authSection.innerHTML = `<button class="apple-btn-secondary" onclick="openUserRecharge()">Recargar Saldo</button>`;
+    } else {
+        if(pName) pName.innerText = "Invitado";
+        if(authSection) {
+            authSection.innerHTML = `
+                <div id="box-login">
+                    <input type="text" id="log-email" class="apple-form" placeholder="Correo electrónico" style="margin-bottom:10px; width:100%; padding:12px; border-radius:8px; border:none; background:var(--surface-elevated); color:white;">
+                    <button class="apple-btn" onclick="loginUser()">Iniciar Sesión</button>
+                    <p style="text-align:center; font-size:12px; margin-top:10px; cursor:pointer; color:var(--text-muted);" onclick="toggleAuthMode('register')">¿No tienes cuenta? <span style="color:var(--accent)">Regístrate</span></p>
+                </div>
+                <div id="box-register" class="hidden">
+                    <input type="email" id="reg-email" class="apple-form" placeholder="Correo electrónico" style="margin-bottom:10px; width:100%; padding:12px; border-radius:8px; border:none; background:var(--surface-elevated); color:white;">
+                    <input type="text" id="reg-username" class="apple-form" placeholder="Usuario" style="margin-bottom:10px; width:100%; padding:12px; border-radius:8px; border:none; background:var(--surface-elevated); color:white;">
+                    <input type="text" id="reg-name" class="apple-form" placeholder="Nombre completo" style="margin-bottom:10px; width:100%; padding:12px; border-radius:8px; border:none; background:var(--surface-elevated); color:white;">
+                    <button class="apple-btn" onclick="registerUser()">Crear Cuenta</button>
+                    <p style="text-align:center; font-size:12px; margin-top:10px; cursor:pointer; color:var(--text-muted);" onclick="toggleAuthMode('login')">¿Ya tienes cuenta? <span style="color:var(--accent)">Inicia Sesión</span></p>
+                </div>
+            `;
         }
     }
 }
 
+function toggleAuthMode(mode) {
+    if(mode === 'register') {
+        document.getElementById('box-login').classList.add('hidden');
+        document.getElementById('box-register').classList.remove('hidden');
+    } else {
+        document.getElementById('box-register').classList.add('hidden');
+        document.getElementById('box-login').classList.remove('hidden');
+    }
+}
+
 async function registerUser() {
+    const email = document.getElementById('reg-email').value.trim().toLowerCase();
     const user = document.getElementById('reg-username').value.trim();
     const name = document.getElementById('reg-name').value.trim();
-    
-    if(!user || !name) return showToast("LLENA TODOS LOS DATOS");
+    if(!email || !user || !name) return showToast("LLENA TODOS LOS DATOS");
     
     const snapshot = await db.collection("usuarios").where("username", "==", user).get();
-    if (!snapshot.empty) {
-        if (snapshot.docs[0].id !== myUserId) {
-            return showToast("EL USUARIO YA EXISTE, ELIGE OTRO");
-        }
+    if (!snapshot.empty && snapshot.docs[0].id !== myUserId) {
+        return showToast("EL USUARIO YA EXISTE");
     }
+
+    await db.collection("usuarios").doc(myUserId).update({ email: email, username: user, name: name, registered: true, balance: firebase.firestore.FieldValue.increment(5000) });
+    showToast("¡REGISTRO EXITOSO! +$5000 AÑADIDOS"); updateProfileUI();
+}
+
+async function loginUser() {
+    const email = document.getElementById('log-email').value.trim().toLowerCase();
+    if(!email) return showToast("INGRESA TU CORREO");
+    const snap = await db.collection("usuarios").where("email", "==", email).get();
+    if(snap.empty) return showToast("CORREO NO ENCONTRADO");
+    
+    myUserId = snap.docs[0].id;
+    localStorage.setItem('u_id', myUserId);
+    showToast("SESIÓN INICIADA");
+    setTimeout(() => location.reload(), 500);
+}
 
     await db.collection("usuarios").doc(myUserId).update({
         username: user, 
