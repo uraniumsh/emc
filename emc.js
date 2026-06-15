@@ -456,16 +456,9 @@ async function loginUser() {
     setTimeout(() => location.reload(), 500);
 }
 
-    await db.collection("usuarios").doc(myUserId).update({
-        username: user, 
-        name: name, 
-        registered: true, 
-        balance: firebase.firestore.FieldValue.increment(5000)
-    });
-    
-    showToast("¡REGISTRO EXITOSO! +$5000 AÑADIDOS");
-    closeModal('modal-profile'); 
-}
+async function addBalanceToUser() {
+    // ... aquí ya sigue normal tu código
+
 
 async function addBalanceToUser() {
     if(!isAdmin) return;
