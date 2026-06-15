@@ -390,7 +390,7 @@ function updateProfileUI() {
     const pId = document.getElementById('profile-id');
     const pName = document.getElementById('profile-name-display');
     const wBal = document.getElementById('wallet-balance');
-    const authSection = document.getElementById('auth-section'); // Contenedor que debes crear en el HTML del modal perfil
+    const authSection = document.getElementById('auth-section'); 
 
     if(pId) pId.innerText = myUserId;
     if(wBal) wBal.innerText = `$${(currentUser?.balance || 0).toLocaleString()}`;
@@ -441,7 +441,8 @@ async function registerUser() {
     }
 
     await db.collection("usuarios").doc(myUserId).update({ email: email, username: user, name: name, registered: true, balance: firebase.firestore.FieldValue.increment(5000) });
-    showToast("¡REGISTRO EXITOSO! +$5000 AÑADIDOS"); updateProfileUI();
+    showToast("¡REGISTRO EXITOSO! +$5000 AÑADIDOS"); 
+    updateProfileUI();
 }
 
 async function loginUser() {
@@ -455,10 +456,6 @@ async function loginUser() {
     showToast("SESIÓN INICIADA");
     setTimeout(() => location.reload(), 500);
 }
-
-async function addBalanceToUser() {
-    // ... aquí ya sigue normal tu código
-
 
 async function addBalanceToUser() {
     if(!isAdmin) return;
