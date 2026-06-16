@@ -1,6 +1,177 @@
 /* =========================================
    APPLE DESIGN SYSTEM (DARK MODE) - URANIUM
    ========================================= */
+
+:root {
+    --bg-main: #000000;
+    --blue-apple: #0071e3;
+    --text-main: #f5f5f7;
+    --text-secondary: #86868b;
+    --glass-bg: rgba(22, 22, 23, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --nequi: #da0081;
+}
+
+body{
+   background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+    
+
+/* Glassmorphism Apple */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px; /* Border radius menor estilo iOS */
+    padding: 10px; /* Padding compacto */
+}
+
+/* Modales y Contenedores */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* Grid de Inventario (Botones Cuadrados de Configuración) */
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 1. 2. 3. 4. */
+    gap: 8px;
+    padding: 6px;
+}
+
+.inventory-square {
+    aspect-ratio: 1 / 1; /* Cuadrados perfectos */
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.2s;
+    padding: 4px;
+    text-align: center;
+}
+
+.inventory-square:hover {
+    background: rgba(0, 113, 227, 0.2);
+    border-color: var(--blue-apple);
+}
+
+/* Botones e Inputs Compactos */
+button {
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-blue { background: var(--blue-apple); color: white; }
+.btn-nequi { background: var(--nequi); color: white; }
+
+/* Tarjetas de Producto */
+.product-card {
+    position: relative;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.product-img-container {
+    position: relative;
+    width: 100%;
+}
+
+/* Modificadores de Estado de Producto */
+.product-card.agotado {
+    filter: grayscale(100%);
+    opacity: 0.5;
+}
+
+.badge-agotado {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.75);
+    color: white;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    z-index: 2;
+}
+
+.tag-bottom-img {
+    position: absolute;
+    bottom: 0; left: 0; width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 11px;
+    text-align: center;
+    padding: 3px 0;
+}
+
+.price-strike {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-right: 5px;
+}
+
+/* Cortina de Mantenimiento / Baneo */
+.curtain-fullscreen {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #000000;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Líneas divisorias finas */
+.item-divider {
+    border-bottom: 1px solid var(--glass-border);
+    padding: 6px 0;
+}
+
+/* Inputs minimalistas estilo Apple */
+input[type="text"], input[type="email"], input[type="number"] {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: white;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 13px;
+}
+
+
+
 :root {
     --bg-color: #000000;
     --surface: #1c1c1e;
