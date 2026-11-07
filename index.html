@@ -11,10 +11,10 @@
     <meta name="theme-color" content="#0d1117">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2489/2489756.png">
     
-    <!-- Manifest PWA Completo con íconos válidos para Chrome -->
-    <link rel="manifest" href='data:application/json,{"name":"ECD Divisas","short_name":"ECD","start_url":"./","display":"standalone","background_color":"#0d1117","theme_color":"#0d1117","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2489/2489756.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://cdn-icons-png.flaticon.com/512/2489/2489756.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
+    <!-- Enlace al archivo manifest externo para habilitar la instalación en Chrome -->
+    <link rel="manifest" href="./manifest.json">
     
-    <title>ECD - Divisas</title>
+    <title>ECD</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -130,9 +130,10 @@
             color: var(--text-primary);
         }
 
-        /* Chart Section Compacta */
+        /* Chart Section Fluida y Adaptable */
         .chart-section {
-            height: 180px;
+            flex: 1; /* Ocupa exactamente el espacio disponible de manera proporcional */
+            min-height: 140px;
             position: relative;
             background: var(--bg-main);
             padding: 6px 10px;
@@ -501,7 +502,7 @@
         </div>
     </div>
 
-    <!-- Chart Section Compacta -->
+    <!-- Chart Section Adaptable -->
     <div class="chart-section">
         <div class="timeframes">
             <button class="tf-btn active" onclick="setTf('1D', this)">1D</button>
@@ -877,15 +878,9 @@
         closeDepositModal();
     }
 
-    // Registro de Service Worker para PWA
+    // Registro de Service Worker para PWA instalable
     if ('serviceWorker' in navigator) {
-        const swCode = `
-            self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-            self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-            self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-        `;
-        const blob = new Blob([swCode], { type: 'text/javascript' });
-        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
     fetchRates();
