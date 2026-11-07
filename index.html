@@ -698,8 +698,13 @@
         }
     };
 
-    function renderChart(labels, dataPoints) {
+        function renderChart(labels, dataPoints) {
         if (chartInstance) chartInstance.destroy();
+
+        // Calcular mínimos y máximos reales con un margen sutil para evitar cortes
+        const minVal = Math.min(...dataPoints);
+        const maxVal = Math.max(...dataPoints);
+        const padding = (maxVal - minVal) * 0.1 || 0.01;
 
         chartInstance = new Chart(ctx, {
             type: 'line',
@@ -718,11 +723,11 @@
                         const {ctx, chartArea} = chart;
                         if (!chartArea) return null;
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, 'rgba(46, 164, 79, 0.2)');
+                        gradient.addColorStop(0, 'rgba(46, 164, 79, 0.25)');
                         gradient.addColorStop(1, 'rgba(46, 164, 79, 0.0)');
                         return gradient;
                     },
-                    tension: 0.2
+                    tension: 0.15
                 }]
             },
             options: {
@@ -745,13 +750,27 @@
                     }
                 },
                 scales: {
-                    x: { grid: { display: false }, ticks: { color: '#8b949e', font: { size: 8 }, maxTicksLimit: 6 } },
-                    y: { grid: { color: '#21262d' }, ticks: { color: '#8b949e', font: { size: 8 }, callback: (v) => toFixed2(v) } }
+                    x: { 
+                        grid: { display: false }, 
+                        ticks: { color: '#8b949e', font: { size: 8 }, maxTicksLimit: 6 } 
+                    },
+                    y: { 
+                        min: parseFloat((minVal - padding).toFixed(2)),
+                        max: parseFloat((maxVal + padding).toFixed(2)),
+                        grid: { color: '#21262d' }, 
+                        ticks: { 
+                            color: '#8b949e', 
+                            font: { size: 8 }, 
+                            maxTicksLimit: 5, // Evita que se repitan los mismos números verticalmente
+                            callback: (v) => toFixed2(v) 
+                        } 
+                    }
                 }
             },
             plugins: [crosshairPlugin]
         });
     }
+
 
     async function fetchRates() {
         const from = document.getElementById('fromCurrency').value;
