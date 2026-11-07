@@ -2,470 +2,507 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>URANIUM DIGITAL | Store</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Etiquetas clave para modo App Nativa en Celular -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121620">
+    
+    <title>TradeFX Mobile</title>
+    
+    <!-- Google Fonts & Chart.js -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #0b0e14;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        /* Contenedor Adaptado 100% a Pantalla Móvil */
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            background: #121620;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
+        @media (min-width: 480px) {
+            .app-container {
+                max-width: 420px;
+                height: 880px;
+                position: relative;
+                border-radius: 36px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+                border: 1px solid #1e2636;
+            }
+        }
+        /* Header Superior */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            background: #171c28;
+            border-bottom: 1px solid #222b3c;
+        }
+        .asset-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #1e2536;
+            padding: 6px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        .asset-selector span {
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+        .live-badge {
+            background: rgba(0, 200, 83, 0.15);
+            color: #00c853;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #00c853;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        /* Balance Bar */
+        .balance-bar {
+            padding: 10px 18px;
+            background: #151a25;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e2636;
+        }
+        .balance-info small {
+            color: #8b9bb4;
+            font-size: 11px;
+            display: block;
+        }
+        .balance-info span {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .trm-display {
+            text-align: right;
+        }
+        .trm-display small {
+            color: #8b9bb4;
+            font-size: 11px;
+            display: block;
+        }
+        .trm-display span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #38bdf8;
+        }
+        /* Zona de Gráfica */
+        .chart-section {
+            flex: 1;
+            position: relative;
+            background: #0e1219;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .timeframes {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .tf-btn {
+            background: #1a2233;
+            border: none;
+            color: #8b9bb4;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tf-btn.active, .tf-btn:hover {
+            background: #2563eb;
+            color: #fff;
+        }
+        .chart-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        /* Panel de Operación / Conversión */
+        .trading-panel {
+            background: #171c28;
+            padding: 16px 18px;
+            border-top: 1px solid #222b3c;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        .input-group {
+            flex: 1;
+            background: #121620;
+            border: 1px solid #263147;
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group label {
+            font-size: 10px;
+            color: #8b9bb4;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .input-group-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .input-group input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
+            outline: none;
+        }
+        .currency-tag {
+            font-size: 12px;
+            font-weight: 700;
+            color: #38bdf8;
+            background: #1e293b;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .quick-amounts {
+            display: flex;
+            gap: 6px;
+        }
+        .qa-btn {
+            flex: 1;
+            background: #1e2536;
+            border: 1px solid #2a364f;
+            color: #cbd5e1;
+            padding: 8px 0;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .qa-btn:hover {
+            border-color: #38bdf8;
+            color: #38bdf8;
+        }
+        /* Botones de Acción Estilo IQ Option */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-trade {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .btn-buy {
+            background: linear-gradient(135deg, #00c853 0%, #009624 100%);
+        }
+        .btn-sell {
+            background: linear-gradient(135deg, #ff3d00 0%, #d50000 100%);
+        }
+        .btn-trade small {
+            font-size: 10px;
+            font-weight: 500;
+            opacity: 0.85;
+        }
+        /* Barra de Navegación Inferior */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            background: #10141d;
+            border-top: 1px solid #1a2233;
+            padding: 10px 0 16px 0;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 650;
+            cursor: pointer;
+        }
+        .nav-item.active {
+            color: #38bdf8;
+        }
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+    </style>
 </head>
 <body>
 
-    <div id="toast-container"></div>
-
-    <!-- HEADER APPLE STYLE (GLASSMORPHISM) -->
-        <header class="main-header">
-        <div class="logo" onclick="showView('products')">
-            URANIUM
+<div class="app-container">
+    <div class="app-header">
+        <div class="asset-selector" onclick="togglePair()">
+            <span id="currentPairLabel">USD / COP</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#8b9bb4"><path d="M7 10l5 5 5-5z"/></svg>
         </div>
-                <div class="header-right">
-            <div class="header-icon hidden" id="btn-add-post-header" onclick="openPublishModal()" style="font-size: 20px;">
-                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
-            </div>
-            
-            <div class="header-icon" id="btn-login-gear" onclick="openModal('modal-settings')" style="font-size: 22px;">
-                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
-            </div>
-            
-            <div class="cart-wrapper" onclick="openModal('modal-cart')">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                <span id="cart-count" class="cart-badge">0</span>
-            </div>
-            <div class="header-icon menu-btn" onclick="openMenu()">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            </div>
-        </div>
-
-    </header>
-
-    <!-- MENÚ HAMBURGUESA DESLIZABLE -->
-    <div id="mobile-menu" class="apple-menu hidden">
-        <div class="menu-header">
-            <button class="close-menu" onclick="closeMenu()">✕</button>
-        </div>
-        <div class="menu-content">
-            <div class="menu-profile" onclick="openModal('modal-profile'); closeMenu()">
-                <div class="avatar">
-                    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <div class="user-info">
-                    <h3 id="menu-user-name">Usuario</h3>
-                    <p id="menu-user-id">ID:</p>
-                </div>
-            </div>
-            <nav class="menu-links">
-                <a href="#" onclick="showView('products'); closeMenu()">Tienda Oficial</a>
-                <a href="#" onclick="showView('foro'); closeMenu()">Comunidad & Foro</a>
-                <!-- Opciones que solo verá el Admin -->
-                <a href="#" id="btn-admin-menu" class="hidden text-accent" onclick="showView('dashboard'); closeMenu()">Panel de Control (Admin)</a>
-                <a href="#" id="btn-logout-menu" class="hidden text-danger" onclick="handleLogout()">Cerrar Sesión</a>
-            </nav>
+        <div class="live-badge">
+            <div class="live-dot"></div> TRM LIVE
         </div>
     </div>
 
-    <main class="content">
-        <!-- VISTA DE PRODUCTOS -->
-        <section id="view-products" class="view-section">
-            <div class="mobile-cat-nav" id="mobile-nav-cats"></div>
-            <div class="product-grid" id="product-grid"></div>
-        </section>
-
-        <!-- VISTA DASHBOARD ADMIN -->
-        <section id="view-dashboard" class="view-section hidden">
-            <h1 class="section-title">Panel de Control</h1>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 20px 0;">
-                <button class="apple-btn-secondary" style="background: #28a745; color: white; margin:0;" onclick="openModal('modal-add-balance')">+ Saldo Manual</button>
-                <button class="apple-btn-secondary" style="background: var(--accent); color: white; margin:0;" onclick="openModal('modal-add-cat')">+ Crear Categoría</button>
-                <button class="apple-btn-secondary" style="background: var(--danger); color: white; margin:0;" onclick="openDeleteCatModal()">- Eliminar Categoría</button>
-                <button class="apple-btn-secondary" style="margin:0;" onclick="openModal('modal-manage-admins')">Gestión Admins</button>
-                <button id="btn-security" class="apple-btn-secondary hidden" style="background: #ffcc00; color: black; margin:0;" onclick="openModal('modal-security')">
-                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> Seguridad
-                </button>
-            </div>
-
-            
-            <div id="admin-list-container" class="admin-card hidden">
-                <h3>Administradores Activos</h3>
-                <div id="admins-render-area" style="font-size: 13px; margin-top: 10px;"></div>
-            </div>
-
-            <div class="admin-card">
-                <h3>
-                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Registro General de Usuarios
-                </h3>
-                <div class="table-container" style="max-height: 300px; overflow-y: auto;">
-                    <table class="apple-table">
-                        <thead><tr><th>ID / Usuario</th><th>Saldo</th><th>Estado / Acción</th></tr></thead>
-                        <tbody id="users-table"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="admin-card">
-                <h3>Log de Movimientos</h3>
-                <div class="table-container">
-                    <table class="apple-table">
-                        <thead><tr><th>Hora</th><th>Acción</th><th>Detalle / Valor</th></tr></thead>
-                        <tbody id="log-table"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- VISTA FORO / COMUNIDAD -->
-        <section id="view-foro" class="view-section hidden">
-            <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h1 class="section-title" style="margin: 0;">
-                    Comunidad <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                </h1>
-                <button class="apple-btn" style="width: auto; padding: 10px 20px;" onclick="openForumModal()">+ Nuevo Debate</button>
-            </div>
-            <div id="forum-feed" class="forum-grid"></div>
-        </section>
-
-        <!-- VISTA DETALLE DEL FORO (ESTILO iMESSAGE) -->
-        <section id="view-forum-detail" class="view-section hidden">
-            <div class="chat-header glass-header">
-                <button class="back-btn" onclick="showView('foro')">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    Atrás
-                </button>
-                <div class="chat-title-info">
-                    <h3 id="chat-title-display">...</h3>
-                    <span id="chat-status-display" class="chat-status"></span>
-                </div>
-            </div>
-            
-            <!-- Aquí se inyectan las burbujas desde JS -->
-            <div id="chat-messages" class="chat-messages"></div>
-            
-            <!-- Input fijado estilo Apple -->
-            <div class="chat-input-area glass-footer">
-                <div id="replying-to-box" class="replying-to hidden">
-                    <span>Respondiendo a: <strong id="reply-to-name"></strong></span>
-                    <button onclick="cancelReply()">✕</button>
-                </div>
-                <div class="input-wrapper">
-                    <input type="text" id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off" name="chat-msg">
-                    <button class="send-btn" onclick="sendForumReply()">↑</button>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- ========================================= -->
-    <!-- MODALES COMPLETOS CON CLASES APPLE        -->
-    <!-- ========================================= -->
-
-    <!-- PAGO BILLETERA -->
-    <div id="modal-wallet-confirm" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-wallet-confirm')">✕</span>
-            <h2 class="text-accent">Pago Billetera</h2>
-            <p class="text-muted" style="margin-bottom: 15px;">Confirma tu pedido para descontar el saldo.</p>
-            <div id="wallet-form" class="apple-form">
-                <input type="text" id="w-pay-name" placeholder="Tus Nombres y Apellidos">
-                <input type="number" id="w-pay-phone" placeholder="Tu Número de WhatsApp">
-                <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total a descontar: <strong id="w-pay-val"></strong></div>
-                <button class="apple-btn" style="background: #28a745;" onclick="processWalletPayment()">Confirmar Compra</button>
-            </div>
-            <div id="wallet-processing" class="hidden" style="text-align: center; padding: 20px 0;">
-                <div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3>
-            </div>
+    <div class="balance-bar">
+        <div class="balance-info">
+            <small>CUENTA DEMO</small>
+            <span>$10,000.00 USD</span>
+        </div>
+        <div class="trm-display">
+            <small>TASA OFICIAL (TRM)</small>
+            <span id="trmValue">Cargando...</span>
         </div>
     </div>
 
-    <!-- PERFIL Y REGISTRO -->
-    <div id="modal-profile" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-profile')">✕</span>
-            <div class="profile-header-modal" style="text-align: center;">
-                <div class="avatar-lg" style="font-size: 50px;">
-                    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    <div class="chart-section">
+        <div class="timeframes">
+            <button class="tf-btn active" onclick="changeTf('1D', this)">1D</button>
+            <button class="tf-btn" onclick="changeTf('1W', this)">1W</button>
+            <button class="tf-btn" onclick="changeTf('1M', this)">1M</button>
+            <button class="tf-btn" onclick="changeTf('1Y', this)">1Y</button>
+        </div>
+        <div class="chart-container">
+            <canvas id="fxChart"></canvas>
+        </div>
+    </div>
+
+    <div class="trading-panel">
+        <div class="input-row">
+            <div class="input-group">
+                <label>MONTO</label>
+                <div class="input-group-content">
+                    <input type="number" id="amountInput" value="100" oninput="calculateExchange()">
+                    <span class="currency-tag" id="baseTag">USD</span>
                 </div>
-                <h2 id="profile-name-display" style="margin-top: 10px;">Usuario</h2>
-                <p class="text-muted">ID: <span id="profile-id"></span></p>
             </div>
-            <div class="wallet-card" style="background: var(--surface-elevated); padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;">
-                <p class="text-muted" style="font-size: 12px;">SALDO DISPONIBLE</p>
-                <h1 id="wallet-balance" style="margin: 5px 0;">$0</h1>
-                <button class="apple-btn" style="background: #28a745; margin-top: 10px; padding: 10px;" onclick="openUserRecharge()">Recargar Mi Saldo</button>
-            </div>
-            <div id="register-section" class="apple-form" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                <p class="text-accent" style="font-size: 12px; margin-bottom: 10px; font-weight: bold; text-align: center;">REGÍSTRATE Y GANA $5,000 COP</p>
-                <input type="text" id="reg-username" placeholder="@Usuario (Único)">
-                <input type="text" id="reg-name" placeholder="Nombre Mostrado">
-                <button class="apple-btn" onclick="registerUser()">Guardar Perfil</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- RECARGAR SALDO -->
-    <div id="modal-user-recharge" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-user-recharge')">✕</span>
-            <h2>Recargar Mi Saldo</h2>
-            <div id="recharge-form" class="apple-form" style="margin-top: 15px;">
-                <input type="text" id="r-name" placeholder="Tus Nombres y Apellidos">
-                <input type="number" id="r-phone" placeholder="Tu Número de WhatsApp">
-                <input type="number" id="r-amount" placeholder="Monto a recargar ($)">
-                <button class="apple-btn" style="background: #28a745;" onclick="processRecharge()">Continuar</button>
-            </div>
-            <div id="recharge-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
-        </div>
-    </div>
-
-    <!-- COMPROBANTE -->
-    <div id="modal-receipt" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-receipt')">✕</span>
-            <h3>Adjuntar Comprobante</h3>
-            <p id="receipt-instructions" class="text-accent" style="font-size: 14px; margin-bottom: 15px; font-weight: bold; line-height: 1.4;"></p>
-            <div id="receipt-form" class="apple-form">
-                <div class="upload-zone" onclick="document.getElementById('receipt-file-input').click()" style="height: 200px; border: 2px dashed var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;">
-                    <span id="receipt-upload-label" style="text-align: center; color: var(--accent);">
-                        Clic para subir comprobante <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
-                    </span>
-                    <img id="receipt-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute;">
-                </div>
-                <input type="file" id="receipt-file-input" accept="image/*" class="hidden" onchange="previewReceipt()">
-                <button class="apple-btn" onclick="submitReceipt()">Enviar Comprobante</button>
-            </div>
-            <div id="receipt-processing" class="hidden" style="text-align: center; padding: 20px 0;"><div class="spinner"></div></div>
-        </div>
-    </div>
-
-    <!-- GESTIÓN ADMINS -->
-    <div id="modal-manage-admins" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-manage-admins')">✕</span>
-            <h2>Gestión Admins</h2>
-            <p class="text-muted" style="font-size: 12px; margin-bottom:15px;">El usuario con este ID podrá acceder al panel de control.</p>
-            <div class="apple-form">
-                <input type="text" id="new-admin-id" placeholder="ID del Usuario">
-                <input type="email" id="new-admin-email" placeholder="Correo Provisional">
-                <input type="password" id="new-admin-pass" placeholder="Clave Provisional">
-                <button class="apple-btn" onclick="addSubAdmin()">Agregar Admin</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- AÑADIR SALDO MANUAL -->
-    <div id="modal-add-balance" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-add-balance')">✕</span>
-            <h2>Recargar Saldo Manual</h2>
-            <div class="apple-form">
-                <input type="text" id="bal-user-id" placeholder="ID del Usuario">
-                <input type="number" id="bal-amount" placeholder="Cantidad ($)">
-                <button class="apple-btn" style="background: #28a745;" onclick="addBalanceToUser()">Recargar Billetera</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CREAR Y ELIMINAR CATEGORÍA -->
-    <div id="modal-add-cat" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-add-cat')">✕</span>
-            <h2>Nueva Categoría</h2>
-            <div class="apple-form">
-                <input type="text" id="new-cat-name" placeholder="Nombre de Plataforma">
-                <button class="apple-btn" onclick="saveNewCategory()">Crear Plataforma</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-delete-cat" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-delete-cat')">✕</span>
-            <h2>Eliminar Categoría</h2>
-            <div class="apple-form" style="margin-top: 15px;">
-                <select id="d-cat-select"></select>
-                <button class="apple-btn" style="background: var(--danger);" onclick="deleteCategory()">
-                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Eliminar Plataforma
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PUBLICAR PRODUCTO (CON EDITOR GRANDE) -->
-    <div id="modal-publish" class="modal hidden">
-        <div class="modal-content ios-card" style="max-width: 500px;">
-            <span class="close" onclick="closeModal('modal-publish')">✕</span>
-            <h2 id="pub-title">Publicar Producto</h2>
-            <div class="apple-form">
-                <div class="upload-zone" onclick="document.getElementById('file-input').click()" style="height: 150px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 15px;">
-                    <span id="upload-label" style="color: var(--text-muted);">Clic para subir imagen *</span>
-                    <img id="file-preview" class="hidden" style="width: 100%; height: 100%; object-fit: contain; position: absolute; background: var(--surface-elevated);">
-                </div>
-                <input type="file" id="file-input" accept="image/*" class="hidden" onchange="previewImage()">
-                <input type="text" id="p-name" placeholder="Nombre (Ej: Netflix)">
-                <textarea id="p-short" placeholder="Slogan / Info extra" style="display: none;"></textarea>
-                <input type="number" id="p-price" placeholder="Precio ($)">
-                <select id="p-cat-select"></select>
-                
-                <textarea id="p-desc" placeholder="Descripción Detallada"></textarea>
-                <button type="button" class="apple-btn-secondary" style="margin-top:-5px; margin-bottom:10px; padding: 8px;" onclick="openBigEditor()">
-                    <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> Abrir Editor Avanzado
-                </button>
-
-                <input type="text" id="p-contact" placeholder="WhatsApp de Contacto">
-                <input type="text" id="p-wa" placeholder="Msj predeterminado WhatsApp">
-                
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                    <input type="checkbox" id="p-pinned" style="width: auto;"> 
-                    <label for="p-pinned">
-                        <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: text-bottom;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> Fijar publicación al inicio
-                    </label>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="apple-btn" onclick="handleSaveProduct()">Guardar</button>
+            <div class="input-group">
+                <label>CONVERSIÓN</label>
+                <div class="input-group-content">
+                    <input type="text" id="resultInput" readonly style="color: #38bdf8;">
+                    <span class="currency-tag" id="quoteTag">COP</span>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- EDITOR GRANDE -->
-    <div id="modal-big-editor" class="modal hidden">
-        <div class="modal-content ios-card" style="width: 95%; max-width: 800px;">
-            <span class="close" onclick="closeBigEditor()">✕</span>
-            <h2>Editor Avanzado</h2>
-            <p class="text-muted" style="font-size:12px; margin-bottom:10px;">Usa **negrita**, __cursiva__, >resaltado o =#FF0000color</p>
-            <textarea id="big-editor-area" style="height: 300px; width: 100%; background: var(--surface-elevated); color: var(--text-main); border: none; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-family: monospace;"></textarea>
-            <button class="apple-btn" onclick="saveBigEditor()">Guardar y Cerrar</button>
+        <div class="quick-amounts">
+            <button class="qa-btn" onclick="setAmount(10)">$10</button>
+            <button class="qa-btn" onclick="setAmount(50)">$50</button>
+            <button class="qa-btn" onclick="setAmount(100)">$100</button>
+            <button class="qa-btn" onclick="setAmount(500)">$500</button>
+            <button class="qa-btn" onclick="setAmount(1000)">$1k</button>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-trade btn-buy" onclick="executeTrade('COMPRAR')">
+                COMPRAR <small id="buyRate">--</small>
+            </button>
+            <button class="btn-trade btn-sell" onclick="executeTrade('VENDER')">
+                VENDER <small id="sellRate">--</small>
+            </button>
         </div>
     </div>
 
-    <!-- DETALLE DEL PRODUCTO (VISTA CLIENTE) -->
-    <div id="modal-detail" class="modal hidden">
-        <div class="modal-content ios-card detail-box" style="max-width: 800px;">
-            <span class="close" onclick="closeModal('modal-detail')">✕</span>
-            <div id="detail-body"></div>
+    <div class="bottom-nav">
+        <div class="nav-item active">
+            <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+            Trade
+        </div>
+        <div class="nav-item" onclick="alert('Historial limpio.')">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            Portafolio
+        </div>
+        <div class="nav-item" onclick="togglePair()">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.03 2.75z"/></svg>
+            Pares
         </div>
     </div>
+</div>
 
-    <!-- CARRITO DE COMPRAS -->
-    <div id="modal-cart" class="modal hidden">
-        <div class="modal-content ios-card cart-tall" style="height: 85vh; display: flex; flex-direction: column;">
-            <span class="close" onclick="closeModal('modal-cart')">✕</span>
-            <h2>Carrito</h2>
-            <div id="cart-list" style="flex-grow: 1; overflow-y: auto; margin: 15px 0;"></div>
-            <div class="total-box" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-bottom: 15px; font-size: 20px; font-weight: bold;">
-                Total: <span id="cart-total">$0</span>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="apple-btn" onclick="goToWalletPayment()">Pagar con Billetera</button>
-                <button class="apple-btn" style="background: #da0081;" onclick="goToPayment()">Pagar con Nequi</button>
-            </div>
-        </div>
-    </div>
+<script>
+    let currentBase = 'USD';
+    let currentQuote = 'COP';
+    let exchangeRate = 4150.0;
+    let chartInstance = null;
 
-    <!-- PAGO NEQUI -->
-    <div id="modal-nequi" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-nequi')">✕</span>
-            <h2 style="color: #da0081; margin-bottom: 15px;">Pago Nequi</h2>
-            <div id="nequi-form" class="apple-form">
-                <input type="text" id="pay-name" placeholder="Tus Nombres y Apellidos">
-                <input type="number" id="pay-phone" placeholder="Tu Número de WhatsApp">
-                <div class="pay-sum" style="margin-bottom: 15px; font-size: 16px;">Total: <strong id="pay-val"></strong></div>
-                <button class="apple-btn" style="background: #da0081;" onclick="processPayment()">Generar Orden Segura</button>
-            </div>
-            <div id="nequi-processing" class="hidden" style="text-align: center; padding: 20px 0;">
-                <div class="spinner"></div><h3 style="margin-top: 15px;">Procesando...</h3>
-            </div>
-        </div>
-    </div>
+    const ctx = document.getElementById('fxChart').getContext('2d');
+    
+    function initChart(dataLabels, dataPoints) {
+        if (chartInstance) chartInstance.destroy();
 
-    <!-- ACCESO Y CONFIGURACIÓN -->
-    <div id="modal-settings" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-settings')">✕</span>
-            <div id="login-box">
-                <h2>Acceso Administrador</h2>
-                <div class="apple-form" style="margin-top: 15px;">
-                    <input type="email" id="l-email" placeholder="Correo Electrónico">
-                    <input type="password" id="l-pass" placeholder="Contraseña">
-                    <button class="apple-btn" onclick="handleLogin()">Entrar</button>
-                </div>
-            </div>
-            <div id="logout-box" class="hidden" style="text-align: center;">
-                <h2>Sesión Iniciada</h2>
-                <button class="apple-btn" style="margin-top: 15px; background: var(--danger);" onclick="handleLogout()">Cerrar Sesión</button>
-            </div>
-        </div>
-    </div>
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dataLabels,
+                datasets: [{
+                    data: dataPoints,
+                    borderColor: '#00c853',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    fill: true,
+                    backgroundColor: function(context) {
+                        const chart = context.chart;
+                        const {ctx, chartArea} = chart;
+                        if (!chartArea) return null;
+                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        gradient.addColorStop(0, 'rgba(0, 200, 83, 0.3)');
+                        gradient.addColorStop(1, 'rgba(0, 200, 83, 0.0)');
+                        return gradient;
+                    },
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } },
+                    y: { grid: { color: '#1a2233' }, ticks: { color: '#64748b', font: { size: 10 } } }
+                }
+            }
+        });
+    }
 
-    <!-- SEGURIDAD SUPER ADMIN -->
-    <div id="modal-security" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-security')">✕</span>
-            <h2>Cambiar Credenciales Súper Admin</h2>
-            <div class="apple-form" style="margin-top: 15px;">
-                <input type="email" id="sec-new-email" placeholder="Nuevo Correo">
-                <input type="password" id="sec-new-pass" placeholder="Nueva Contraseña">
-                <button class="apple-btn" style="background: #ffcc00; color: black;" onclick="updateSuperAdminCreds()">Actualizar Datos</button>
-            </div>
-        </div>
-    </div>
+    async function fetchRates() {
+        try {
+            const res = await fetch(`https://open.er-api.com/v6/latest/${currentBase}`);
+            const data = await res.json();
+            if (data && data.rates && data.rates[currentQuote]) {
+                exchangeRate = data.rates[currentQuote];
+                document.getElementById('trmValue').innerText = `${currentBase} 1 = ${exchangeRate.toLocaleString()} ${currentQuote}`;
+                document.getElementById('buyRate').innerText = exchangeRate.toFixed(2);
+                document.getElementById('sellRate').innerText = (exchangeRate * 0.998).toFixed(2);
+                calculateExchange();
+                generateMockHistory();
+            }
+        } catch (e) {
+            console.error(e);
+            document.getElementById('trmValue').innerText = `TRM: 4,150.00`;
+        }
+    }
 
-        <!-- CREAR DEBATE -->
-    <div id="modal-forum" class="modal hidden">
-        <div class="modal-content ios-card">
-            <span class="close" onclick="closeModal('modal-forum')">✕</span>
-            <h2>Nuevo Debate</h2>
-            <div class="apple-form" style="margin-top: 15px;">
-                <div class="upload-zone" onclick="document.getElementById('f-file-input').click()" style="height: 100px; border: 2px dashed var(--text-muted); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 12px;">
-                    <span id="f-upload-label" style="color: var(--text-muted);">
-                        Adjuntar Imagen <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
-                    </span>
-                    <img id="f-preview" class="hidden" style="width: 100%; height: 100%; object-fit: cover; position: absolute; background: var(--surface-elevated);">
-                </div>
-                <input type="file" id="f-file-input" accept="image/*" class="hidden" onchange="previewForumImage()">
-                
-                <input type="text" id="f-title" placeholder="Asunto o Tema">
-                <select id="f-type" onchange="toggleForumPassword()" style="margin-bottom: 12px;">
-                    <option value="publico">Público</option>
-                    <option value="vip">Solo VIP (Monetizado)</option>
-                    <option value="clave">Con Clave</option>
-                    <option value="cerrado">Cerrado (Solo lectura)</option>
-                </select>
-                
-                <!-- Campos dinámicos de seguridad/cobro -->
-                <input type="password" id="f-password" class="hidden" placeholder="Establecer Clave">
-                <div id="f-vip-options" class="hidden">
-                    <input type="number" id="f-vip-price" placeholder="Precio de entrada ($)">
-                    <input type="number" id="f-vip-phone" placeholder="Tu WhatsApp (Para recibir pagos)">
-                    <p class="text-muted" style="font-size:11px; margin-bottom:12px; line-height:1.3;">Uranium retiene el 30%. Recibirás el 70% de cada venta directamente a este número cuando los usuarios paguen.</p>
-                </div>
+    function calculateExchange() {
+        const amount = parseFloat(document.getElementById('amountInput').value) || 0;
+        const result = amount * exchangeRate;
+        document.getElementById('resultInput').value = result.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
-                <textarea id="f-content" placeholder="Escribe tu mensaje aquí..." style="height: 100px; margin-bottom:12px;"></textarea>
-                <button class="apple-btn" onclick="saveForumPost()">Publicar Debate</button>
-            </div>
-        </div>
-    </div>
+    function setAmount(val) {
+        document.getElementById('amountInput').value = val;
+        calculateExchange();
+    }
 
-        <!-- MODAL DE COMPRA VIP -->
-    <div id="modal-buy-vip" class="modal hidden">
-        <div class="modal-content ios-card" style="text-align:center;">
-            <span class="close" onclick="closeModal('modal-buy-vip')">✕</span>
-            <div style="font-size:40px; margin-bottom:10px;">
-                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="#ffffff"><path d="M19 3H5L2 9l10 14L22 9l-3-6z"/></svg>
-            </div>
-            <h2>Acceso Exclusivo</h2>
-            <p class="text-muted" id="vip-buy-title" style="margin-bottom:15px; font-size:14px;"></p>
-            <h1 style="color:var(--accent); margin-bottom:20px;" id="vip-buy-price">$0</h1>
-            
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="apple-btn" style="background:#28a745;" onclick="processVipWallet()">Pagar con Billetera (Instantáneo)</button>
-                <button class="apple-btn" style="background:#da0081;" onclick="processVipNequi()">Pagar con Nequi (Requiere revisión)</button>
-            </div>
-        </div>
-    </div>
+    function generateMockHistory(tf = '1D') {
+        let count = tf === '1D' ? 24 : tf === '1W' ? 7 : 30;
+        let labels = [];
+        let points = [];
+        let base = exchangeRate;
 
+        for (let i = count; i >= 0; i--) {
+            labels.push(tf === '1D' ? `${i}:h` : `D-${i}`);
+            base += (Math.random() - 0.49) * (exchangeRate * 0.002);
+            points.push(parseFloat(base.toFixed(2)));
+        }
+        initChart(labels, points);
+    }
 
-    <!-- SCRIPTS -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="emc.js"></script>
+    function changeTf(tf, btn) {
+        document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        generateMockHistory(tf);
+    }
+
+    let pairs = [
+        {base: 'USD', quote: 'COP'},
+        {base: 'EUR', quote: 'COP'},
+        {base: 'EUR', quote: 'USD'},
+        {base: 'GBP', quote: 'USD'}
+    ];
+    let currentPairIdx = 0;
+
+    function togglePair() {
+        currentPairIdx = (currentPairIdx + 1) % pairs.length;
+        currentBase = pairs[currentPairIdx].base;
+        currentQuote = pairs[currentPairIdx].quote;
+        document.getElementById('currentPairLabel').innerText = `${currentBase} / ${currentQuote}`;
+        document.getElementById('baseTag').innerText = currentBase;
+        document.getElementById('quoteTag').innerText = currentQuote;
+        fetchRates();
+    }
+
+    function executeTrade(type) {
+        const amt = document.getElementById('amountInput').value;
+        alert(`Orden simulada: ${type} ${amt} ${currentBase} a tasa ${exchangeRate.toFixed(2)} ${currentQuote}`);
+    }
+
+    fetchRates();
+</script>
+
 </body>
 </html>
