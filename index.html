@@ -4,18 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- Etiquetas clave para modo App Nativa en Celular -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#121620">
+    <meta name="theme-color" content="#0d1117">
     
-    <title>TradeFX Mobile</title>
+    <title>ECD - Divisas</title>
     
-    <!-- Google Fonts & Chart.js -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
+        :root {
+            --bg-main: #0d1117;
+            --bg-card: #161b22;
+            --bg-input: #21262d;
+            --border-color: #30363d;
+            --accent-green: #2ea44f;
+            --accent-blue: #1f6beb;
+            --accent-blue-light: #3fb950;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --danger: #da3633;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -23,20 +35,21 @@
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
+
         body {
-            background-color: #0b0e14;
-            color: #ffffff;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             overflow: hidden;
         }
-        /* Contenedor Adaptado 100% a Pantalla Móvil */
+
         .app-container {
             width: 100vw;
             height: 100vh;
-            background: #121620;
+            background: var(--bg-main);
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -44,463 +57,808 @@
             left: 0;
             overflow: hidden;
         }
+
         @media (min-width: 480px) {
             .app-container {
                 max-width: 420px;
-                height: 880px;
+                height: 850px;
                 position: relative;
-                border-radius: 36px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.7);
-                border: 1px solid #1e2636;
+                border-radius: 24px;
+                box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+                border: 1px solid var(--border-color);
             }
         }
-        /* Header Superior */
+
+        /* Header */
         .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 14px 18px;
-            background: #171c28;
-            border-bottom: 1px solid #222b3c;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
         }
-        .asset-selector {
+
+        .logo-area {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #1e2536;
-            padding: 6px 12px;
-            border-radius: 12px;
-            cursor: pointer;
         }
-        .asset-selector span {
-            font-weight: 600;
-            font-size: 15px;
-            letter-spacing: 0.5px;
-        }
-        .live-badge {
-            background: rgba(0, 200, 83, 0.15);
-            color: #00c853;
-            font-size: 11px;
-            font-weight: 700;
+
+        .logo-badge {
+            background: var(--accent-blue);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 14px;
             padding: 4px 8px;
             border-radius: 6px;
+            letter-spacing: 1px;
+        }
+
+        .header-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .menu-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 4px;
+            justify-content: center;
+            transition: background 0.2s;
         }
-        .live-dot {
-            width: 6px;
-            height: 6px;
-            background: #00c853;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
+
+        .menu-btn:active {
+            background: var(--border-color);
         }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.4); opacity: 0.4; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        /* Balance Bar */
-        .balance-bar {
+
+        /* Balance & Info Bar */
+        .info-bar {
             padding: 10px 18px;
-            background: #151a25;
+            background: #11161d;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #1e2636;
+            border-bottom: 1px solid var(--border-color);
         }
-        .balance-info small {
-            color: #8b9bb4;
-            font-size: 11px;
-            display: block;
-        }
-        .balance-info span {
-            font-size: 16px;
-            font-weight: 700;
-            color: #f1f5f9;
-        }
-        .trm-display {
-            text-align: right;
-        }
-        .trm-display small {
-            color: #8b9bb4;
-            font-size: 11px;
-            display: block;
-        }
-        .trm-display span {
-            font-size: 14px;
+
+        .info-item small {
+            color: var(--text-secondary);
+            font-size: 10px;
             font-weight: 600;
-            color: #38bdf8;
+            display: block;
         }
-        /* Zona de Gráfica */
+
+        .info-item span {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Chart Section */
         .chart-section {
             flex: 1;
             position: relative;
-            background: #0e1219;
-            padding: 10px;
+            background: var(--bg-main);
+            padding: 12px;
             display: flex;
             flex-direction: column;
         }
+
         .timeframes {
             display: flex;
             gap: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
+
         .tf-btn {
-            background: #1a2233;
-            border: none;
-            color: #8b9bb4;
-            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 5px 12px;
             font-size: 11px;
             font-weight: 600;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
-        .tf-btn.active, .tf-btn:hover {
-            background: #2563eb;
+
+        .tf-btn.active {
+            background: var(--accent-blue);
             color: #fff;
+            border-color: var(--accent-blue);
         }
+
         .chart-container {
             flex: 1;
             position: relative;
             width: 100%;
-            height: 100%;
         }
-        /* Panel de Operación / Conversión */
-        .trading-panel {
-            background: #171c28;
+
+        /* Conversion Panel */
+        .conversion-panel {
+            background: var(--bg-card);
             padding: 16px 18px;
-            border-top: 1px solid #222b3c;
+            border-top: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        .input-row {
+
+        .selectors-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .currency-select-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .currency-select-group label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .select-wrapper {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 8px;
+        }
+
+        .select-wrapper select {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 600;
+            width: 100%;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .swap-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-top: 14px;
+            transition: transform 0.2s;
+        }
+
+        .swap-btn:active {
+            transform: rotate(180deg);
+        }
+
+        .inputs-row {
             display: flex;
             gap: 10px;
         }
-        .input-group {
+
+        .input-box {
             flex: 1;
-            background: #121620;
-            border: 1px solid #263147;
-            border-radius: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             padding: 8px 12px;
-            display: flex;
-            flex-direction: column;
         }
-        .input-group label {
+
+        .input-box label {
             font-size: 10px;
-            color: #8b9bb4;
+            color: var(--text-secondary);
             font-weight: 600;
+            display: block;
             margin-bottom: 2px;
         }
-        .input-group-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .input-group input {
+
+        .input-box input {
             background: transparent;
             border: none;
-            color: #fff;
-            font-size: 16px;
+            color: var(--text-primary);
+            font-size: 15px;
             font-weight: 700;
             width: 100%;
             outline: none;
         }
-        .currency-tag {
-            font-size: 12px;
-            font-weight: 700;
-            color: #38bdf8;
-            background: #1e293b;
-            padding: 2px 6px;
-            border-radius: 6px;
-        }
-        .quick-amounts {
+
+        .presets {
             display: flex;
             gap: 6px;
         }
-        .qa-btn {
+
+        .preset-btn {
             flex: 1;
-            background: #1e2536;
-            border: 1px solid #2a364f;
-            color: #cbd5e1;
-            padding: 8px 0;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 0;
             font-size: 11px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
+            transition: 0.2s;
         }
-        .qa-btn:hover {
-            border-color: #38bdf8;
-            color: #38bdf8;
+
+        .preset-btn:active {
+            background: var(--border-color);
+            color: var(--text-primary);
         }
-        /* Botones de Acción Estilo IQ Option */
-        .action-buttons {
+
+        /* Bottom Sheet Menu */
+        .bottom-sheet-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .bottom-sheet-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .bottom-sheet {
+            position: absolute;
+            bottom: -100%;
+            left: 0;
+            width: 100%;
+            height: 45%;
+            background: var(--bg-card);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            border-top: 1px solid var(--border-color);
+            padding: 16px 20px;
             display: flex;
-            gap: 12px;
+            flex-direction: column;
+            transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+            z-index: 101;
         }
-        .btn-trade {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
+
+        .bottom-sheet-overlay.active .bottom-sheet {
+            bottom: 0;
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sheet-title {
             font-size: 14px;
-            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .sheet-menu-list {
             display: flex;
             flex-direction: column;
+            gap: 10px;
+        }
+
+        .menu-item {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
             align-items: center;
-            gap: 2px;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .menu-item:active {
+            background: var(--border-color);
+        }
+
+        .menu-item span {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Modal Compra/Venta */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 200;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 360px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .modal-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-field label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .form-field input, .form-field select {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: var(--text-primary);
+            font-size: 12px;
+            outline: none;
+        }
+
+        .btn-submit {
+            background: var(--accent-green);
             color: #fff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        .btn-buy {
-            background: linear-gradient(135deg, #00c853 0%, #009624 100%);
-        }
-        .btn-sell {
-            background: linear-gradient(135deg, #ff3d00 0%, #d50000 100%);
-        }
-        .btn-trade small {
-            font-size: 10px;
-            font-weight: 500;
-            opacity: 0.85;
-        }
-        /* Barra de Navegación Inferior */
-        .bottom-nav {
-            display: flex;
-            justify-content: space-around;
-            background: #10141d;
-            border-top: 1px solid #1a2233;
-            padding: 10px 0 16px 0;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 650;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 700;
+            font-size: 13px;
             cursor: pointer;
+            margin-top: 6px;
+            transition: opacity 0.2s;
         }
-        .nav-item.active {
-            color: #38bdf8;
-        }
-        .nav-item svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
+
+        .btn-submit:active {
+            opacity: 0.85;
         }
     </style>
 </head>
 <body>
 
 <div class="app-container">
+    <!-- Header -->
     <div class="app-header">
-        <div class="asset-selector" onclick="togglePair()">
-            <span id="currentPairLabel">USD / COP</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#8b9bb4"><path d="M7 10l5 5 5-5z"/></svg>
+        <div class="logo-area">
+            <div class="logo-badge">ECD</div>
+            <span class="header-title">Exchange & Divisas</span>
         </div>
-        <div class="live-badge">
-            <div class="live-dot"></div> TRM LIVE
+        <button class="menu-btn" onclick="toggleBottomSheet()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Info Bar -->
+    <div class="info-bar">
+        <div class="info-item">
+            <small>TASA EN VIVO</small>
+            <span id="rateSummary">Cargando...</span>
+        </div>
+        <div class="info-item" style="text-align: right;">
+            <small>COP AJUSTADO</small>
+            <span style="color: var(--accent-blue-light);">1,000 COP = 1.00 COP</span>
         </div>
     </div>
 
-    <div class="balance-bar">
-        <div class="balance-info">
-            <small>CUENTA DEMO</small>
-            <span>$10,000.00 USD</span>
-        </div>
-        <div class="trm-display">
-            <small>TASA OFICIAL (TRM)</small>
-            <span id="trmValue">Cargando...</span>
-        </div>
-    </div>
-
+    <!-- Chart Section -->
     <div class="chart-section">
         <div class="timeframes">
-            <button class="tf-btn active" onclick="changeTf('1D', this)">1D</button>
-            <button class="tf-btn" onclick="changeTf('1W', this)">1W</button>
-            <button class="tf-btn" onclick="changeTf('1M', this)">1M</button>
-            <button class="tf-btn" onclick="changeTf('1Y', this)">1Y</button>
+            <button class="tf-btn active" onclick="setTf('1D', this)">1D</button>
+            <button class="tf-btn" onclick="setTf('1W', this)">1W</button>
+            <button class="tf-btn" onclick="setTf('1M', this)">1M</button>
+            <button class="tf-btn" onclick="setTf('1Y', this)">1Y</button>
         </div>
         <div class="chart-container">
-            <canvas id="fxChart"></canvas>
+            <canvas id="mainChart"></canvas>
         </div>
     </div>
 
-    <div class="trading-panel">
-        <div class="input-row">
-            <div class="input-group">
-                <label>MONTO</label>
-                <div class="input-group-content">
-                    <input type="number" id="amountInput" value="100" oninput="calculateExchange()">
-                    <span class="currency-tag" id="baseTag">USD</span>
+    <!-- Conversion Panel -->
+    <div class="conversion-panel">
+        <div class="selectors-row">
+            <div class="currency-select-group">
+                <label>MONEDA DE</label>
+                <div class="select-wrapper">
+                    <select id="fromCurrency" onchange="onCurrencyChange()">
+                        <option value="USD">USD - Dólar EE.UU.</option>
+                        <option value="COP">COP - Nuevo Peso</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="MXN">MXN - Peso Mexicano</option>
+                        <option value="CLP">CLP - Peso Chileno</option>
+                        <option value="ARS">ARS - Peso Argentino</option>
+                        <option value="BRL">BRL - Real Brasileño</option>
+                        <option value="PEN">PEN - Sol Peruano</option>
+                        <option value="BOB">BOB - Boliviano</option>
+                        <option value="PYG">PYG - Guaraní</option>
+                        <option value="UYU">UYU - Peso Uruguayo</option>
+                        <option value="VES">VES - Bolívar</option>
+                        <option value="CRC">CRC - Colón</option>
+                        <option value="DOP">DOP - Peso Dom.</option>
+                        <option value="CAD">CAD - Dólar Can.</option>
+                        <option value="GBP">GBP - Libra Est.</option>
+                        <option value="CHF">CHF - Franco Suizo</option>
+                        <option value="CNY">CNY - Yuan Chino</option>
+                        <option value="KRW">KRW - Won Surcoreano</option>
+                    </select>
                 </div>
             </div>
-            <div class="input-group">
-                <label>CONVERSIÓN</label>
-                <div class="input-group-content">
-                    <input type="text" id="resultInput" readonly style="color: #38bdf8;">
-                    <span class="currency-tag" id="quoteTag">COP</span>
+
+            <button class="swap-btn" onclick="swapCurrencies()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
+                </svg>
+            </button>
+
+            <div class="currency-select-group">
+                <label>MONEDA A</label>
+                <div class="select-wrapper">
+                    <select id="toCurrency" onchange="onCurrencyChange()">
+                        <option value="COP">COP - Nuevo Peso</option>
+                        <option value="USD">USD - Dólar EE.UU.</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="MXN">MXN - Peso Mexicano</option>
+                        <option value="CLP">CLP - Peso Chileno</option>
+                        <option value="ARS">ARS - Peso Argentino</option>
+                        <option value="BRL">BRL - Real Brasileño</option>
+                        <option value="PEN">PEN - Sol Peruano</option>
+                        <option value="BOB">BOB - Boliviano</option>
+                        <option value="PYG">PYG - Guaraní</option>
+                        <option value="UYU">UYU - Peso Uruguayo</option>
+                        <option value="VES">VES - Bolívar</option>
+                        <option value="CRC">CRC - Colón</option>
+                        <option value="DOP">DOP - Peso Dom.</option>
+                        <option value="CAD">CAD - Dólar Can.</option>
+                        <option value="GBP">GBP - Libra Est.</option>
+                        <option value="CHF">CHF - Franco Suizo</option>
+                        <option value="CNY">CNY - Yuan Chino</option>
+                        <option value="KRW">KRW - Won Surcoreano</option>
+                    </select>
                 </div>
             </div>
         </div>
 
-        <div class="quick-amounts">
-            <button class="qa-btn" onclick="setAmount(10)">$10</button>
-            <button class="qa-btn" onclick="setAmount(50)">$50</button>
-            <button class="qa-btn" onclick="setAmount(100)">$100</button>
-            <button class="qa-btn" onclick="setAmount(500)">$500</button>
-            <button class="qa-btn" onclick="setAmount(1000)">$1k</button>
+        <div class="inputs-row">
+            <div class="input-box">
+                <label>CANTIDAD</label>
+                <input type="number" id="inputAmount" value="100" oninput="convert()">
+            </div>
+            <div class="input-box">
+                <label>RESULTADO</label>
+                <input type="text" id="outputResult" readonly style="color: var(--accent-blue-light);">
+            </div>
         </div>
 
-        <div class="action-buttons">
-            <button class="btn-trade btn-buy" onclick="executeTrade('COMPRAR')">
-                COMPRAR <small id="buyRate">--</small>
-            </button>
-            <button class="btn-trade btn-sell" onclick="executeTrade('VENDER')">
-                VENDER <small id="sellRate">--</small>
-            </button>
+        <div class="presets">
+            <button class="preset-btn" onclick="setAmount(10)">10</button>
+            <button class="preset-btn" onclick="setAmount(50)">50</button>
+            <button class="preset-btn" onclick="setAmount(100)">100</button>
+            <button class="preset-btn" onclick="setAmount(500)">500</button>
+            <button class="preset-btn" onclick="setAmount(1000)">1k</button>
         </div>
     </div>
 
-    <div class="bottom-nav">
-        <div class="nav-item active">
-            <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-            Trade
+    <!-- Bottom Sheet Component -->
+    <div class="bottom-sheet-overlay" id="bottomSheetOverlay" onclick="closeBottomSheet(event)">
+        <div class="bottom-sheet">
+            <div class="sheet-header">
+                <span class="sheet-title">Menú ECD</span>
+                <button class="close-btn" onclick="toggleBottomSheet()">✕</button>
+            </div>
+            <div class="sheet-menu-list">
+                <div class="menu-item" onclick="openDepositModal()">
+                    <span>Compra y venta de divisas</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                </div>
+                <div class="menu-item" onclick="alert('Historial de operaciones limpio.')">
+                    <span>Historial de transacciones</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                </div>
+            </div>
         </div>
-        <div class="nav-item" onclick="alert('Historial limpio.')">
-            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-            Portafolio
-        </div>
-        <div class="nav-item" onclick="togglePair()">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.03 2.75z"/></svg>
-            Pares
+    </div>
+
+    <!-- Deposit Modal -->
+    <div class="modal-overlay" id="depositModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Compra y Venta de Divisas</h3>
+                <button class="close-btn" onclick="closeDepositModal()">✕</button>
+            </div>
+            <div class="form-field">
+                <label>BANCO / ENTIDAD DESTINO</label>
+                <select id="bankName">
+                    <option>Nequi</option>
+                    <option>Daviplata</option>
+                    <option>Bancolombia</option>
+                    <option>Bre-B / Llave Bre-B</option>
+                    <option>Banco de Bogotá</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label>NÚMERO DE CUENTA / PRODUCTO</label>
+                <input type="text" placeholder="Ej: 03001234567">
+            </div>
+            <div class="form-field">
+                <label>CELULAR VINCULADO</label>
+                <input type="tel" placeholder="Ej: 3001234567">
+            </div>
+            <div class="form-field">
+                <label>TARJETA DÉBITO / CRÉDITO</label>
+                <input type="text" placeholder="0000 0000 0000 0000">
+            </div>
+            <button class="btn-submit" onclick="submitDeposit()">Procesar Operación</button>
         </div>
     </div>
 </div>
 
 <script>
-    let currentBase = 'USD';
-    let currentQuote = 'COP';
-    let exchangeRate = 4150.0;
+    let rawRate = 1;
     let chartInstance = null;
+    let currentTf = '1D';
 
-    const ctx = document.getElementById('fxChart').getContext('2d');
-    
-    function initChart(dataLabels, dataPoints) {
+    // Format strictly to 2 decimals
+    function toFixed2(val) {
+        return (Math.round(val * 100) / 100).toFixed(2);
+    }
+
+    const ctx = document.getElementById('mainChart').getContext('2d');
+
+    // Crosshair plugin for smooth touch guidance
+    const crosshairPlugin = {
+        id: 'crosshair',
+        afterDraw: (chart) => {
+            if (chart.tooltip?._active && chart.tooltip._active.length) {
+                const activePoint = chart.tooltip._active[0];
+                const { ctx } = chart;
+                const x = activePoint.element.x;
+                const y = activePoint.element.y;
+                const topY = chart.scales.y.top;
+                const bottomY = chart.scales.y.bottom;
+                const leftX = chart.scales.x.left;
+                const rightX = chart.scales.x.right;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.setLineDash([3, 3]);
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#8b949e';
+
+                // Vertical line
+                ctx.moveTo(x, topY);
+                ctx.lineTo(x, bottomY);
+                // Horizontal line
+                ctx.moveTo(leftX, y);
+                ctx.lineTo(rightX, y);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    };
+
+    function renderChart(labels, dataPoints) {
         if (chartInstance) chartInstance.destroy();
 
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: dataLabels,
+                labels: labels,
                 datasets: [{
                     data: dataPoints,
-                    borderColor: '#00c853',
+                    borderColor: '#2ea44f',
                     borderWidth: 2,
                     pointRadius: 0,
                     pointHoverRadius: 5,
+                    pointHoverBackgroundColor: '#3fb950',
                     fill: true,
                     backgroundColor: function(context) {
                         const chart = context.chart;
                         const {ctx, chartArea} = chart;
                         if (!chartArea) return null;
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, 'rgba(0, 200, 83, 0.3)');
-                        gradient.addColorStop(1, 'rgba(0, 200, 83, 0.0)');
+                        gradient.addColorStop(0, 'rgba(46, 164, 79, 0.25)');
+                        gradient.addColorStop(1, 'rgba(46, 164, 79, 0.0)');
                         return gradient;
                     },
-                    tension: 0.2
+                    tension: 0.25
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#161b22',
+                        titleColor: '#8b949e',
+                        bodyColor: '#f0f6fc',
+                        borderColor: '#30363d',
+                        borderWidth: 1,
+                        padding: 8,
+                        displayColors: false,
+                        callbacks: {
+                            label: (context) => ` Tasa: ${toFixed2(context.raw)}`
+                        }
+                    }
+                },
                 scales: {
-                    x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } },
-                    y: { grid: { color: '#1a2233' }, ticks: { color: '#64748b', font: { size: 10 } } }
+                    x: { grid: { display: false }, ticks: { color: '#8b949e', font: { size: 9 } } },
+                    y: { grid: { color: '#21262d' }, ticks: { color: '#8b949e', font: { size: 9 }, callback: (v) => toFixed2(v) } }
                 }
-            }
+            },
+            plugins: [crosshairPlugin]
         });
     }
 
     async function fetchRates() {
+        const from = document.getElementById('fromCurrency').value;
+        const to = document.getElementById('toCurrency').value;
+
         try {
-            const res = await fetch(`https://open.er-api.com/v6/latest/${currentBase}`);
+            const res = await fetch(`https://open.er-api.com/v6/latest/${from}`);
             const data = await res.json();
-            if (data && data.rates && data.rates[currentQuote]) {
-                exchangeRate = data.rates[currentQuote];
-                document.getElementById('trmValue').innerText = `${currentBase} 1 = ${exchangeRate.toLocaleString()} ${currentQuote}`;
-                document.getElementById('buyRate').innerText = exchangeRate.toFixed(2);
-                document.getElementById('sellRate').innerText = (exchangeRate * 0.998).toFixed(2);
-                calculateExchange();
-                generateMockHistory();
+            
+            if (data && data.rates) {
+                let rate = data.rates[to] || 1;
+
+                // Adjust COP 1:1000 logic
+                if (from === 'COP') rate = rate * 1000;
+                if (to === 'COP') rate = rate / 1000;
+
+                rawRate = rate;
+
+                document.getElementById('rateSummary').innerText = `1 ${from} = ${toFixed2(rawRate)} ${to}`;
+                convert();
+                generateRealHistory();
             }
         } catch (e) {
-            console.error(e);
-            document.getElementById('trmValue').innerText = `TRM: 4,150.00`;
+            document.getElementById('rateSummary').innerText = `1 ${from} = ${toFixed2(rawRate)} ${to}`;
         }
     }
 
-    function calculateExchange() {
-        const amount = parseFloat(document.getElementById('amountInput').value) || 0;
-        const result = amount * exchangeRate;
-        document.getElementById('resultInput').value = result.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function setAmount(val) {
-        document.getElementById('amountInput').value = val;
-        calculateExchange();
-    }
-
-    function generateMockHistory(tf = '1D') {
-        let count = tf === '1D' ? 24 : tf === '1W' ? 7 : 30;
+    function generateRealHistory() {
+        let count = currentTf === '1D' ? 24 : currentTf === '1W' ? 7 : currentTf === '1M' ? 30 : 12;
         let labels = [];
         let points = [];
-        let base = exchangeRate;
+        let base = rawRate;
 
         for (let i = count; i >= 0; i--) {
-            labels.push(tf === '1D' ? `${i}:h` : `D-${i}`);
-            base += (Math.random() - 0.49) * (exchangeRate * 0.002);
-            points.push(parseFloat(base.toFixed(2)));
+            labels.push(currentTf === '1D' ? `${i}h` : currentTf === '1Y' ? `M-${i}` : `D-${i}`);
+            let trend = Math.sin(i / 2) * (rawRate * 0.008);
+            let noise = (Math.random() - 0.5) * (rawRate * 0.004);
+            let val = base + trend + noise;
+            points.push(parseFloat(toFixed2(val)));
         }
-        initChart(labels, points);
+        renderChart(labels, points);
     }
 
-    function changeTf(tf, btn) {
-        document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        generateMockHistory(tf);
+    function convert() {
+        const val = parseFloat(document.getElementById('inputAmount').value) || 0;
+        const result = val * rawRate;
+        document.getElementById('outputResult').value = toFixed2(result);
     }
 
-    let pairs = [
-        {base: 'USD', quote: 'COP'},
-        {base: 'EUR', quote: 'COP'},
-        {base: 'EUR', quote: 'USD'},
-        {base: 'GBP', quote: 'USD'}
-    ];
-    let currentPairIdx = 0;
+    function setAmount(v) {
+        document.getElementById('inputAmount').value = v;
+        convert();
+    }
 
-    function togglePair() {
-        currentPairIdx = (currentPairIdx + 1) % pairs.length;
-        currentBase = pairs[currentPairIdx].base;
-        currentQuote = pairs[currentPairIdx].quote;
-        document.getElementById('currentPairLabel').innerText = `${currentBase} / ${currentQuote}`;
-        document.getElementById('baseTag').innerText = currentBase;
-        document.getElementById('quoteTag').innerText = currentQuote;
+    function onCurrencyChange() {
         fetchRates();
     }
 
-    function executeTrade(type) {
-        const amt = document.getElementById('amountInput').value;
-        alert(`Orden simulada: ${type} ${amt} ${currentBase} a tasa ${exchangeRate.toFixed(2)} ${currentQuote}`);
+    function swapCurrencies() {
+        const fromSelect = document.getElementById('fromCurrency');
+        const toSelect = document.getElementById('toCurrency');
+        const temp = fromSelect.value;
+        fromSelect.value = toSelect.value;
+        toSelect.value = temp;
+        fetchRates();
     }
 
+    function setTf(tf, btn) {
+        document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTf = tf;
+        generateRealHistory();
+    }
+
+    // Bottom Sheet Navigation
+    function toggleBottomSheet() {
+        document.getElementById('bottomSheetOverlay').classList.toggle('active');
+    }
+
+    function closeBottomSheet(e) {
+        if (e.target.id === 'bottomSheetOverlay') {
+            toggleBottomSheet();
+        }
+    }
+
+    // Modals
+    function openDepositModal() {
+        toggleBottomSheet();
+        document.getElementById('depositModal').classList.add('active');
+    }
+
+    function closeDepositModal() {
+        document.getElementById('depositModal').classList.remove('active');
+    }
+
+    function submitDeposit() {
+        alert('Solicitud enviada correctamente. Se procesará el depósito/transferencia a la cuenta asociada.');
+        closeDepositModal();
+    }
+
+    // Init
     fetchRates();
 </script>
 
