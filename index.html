@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
+    <!-- Metas para PWA e Instalación en Móvil -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0d1117">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2489/2489756.png">
+    
+    <!-- Manifest PWA Completo con íconos válidos para Chrome -->
+    <link rel="manifest" href='data:application/json,{"name":"ECD Divisas","short_name":"ECD","start_url":"./","display":"standalone","background_color":"#0d1117","theme_color":"#0d1117","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2489/2489756.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://cdn-icons-png.flaticon.com/512/2489/2489756.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
     
     <title>ECD - Divisas</title>
     
@@ -48,7 +53,7 @@
 
         .app-container {
             width: 100vw;
-            height: 100vh;
+            height: 100dvh;
             background: var(--bg-main);
             display: flex;
             flex-direction: column;
@@ -56,6 +61,7 @@
             top: 0;
             left: 0;
             overflow: hidden;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         @media (min-width: 480px) {
@@ -126,10 +132,10 @@
 
         /* Chart Section Compacta */
         .chart-section {
-            height: 600px;
+            height: 180px;
             position: relative;
             background: var(--bg-main);
-            padding: 8px 12px;
+            padding: 6px 10px;
             display: flex;
             flex-direction: column;
             border-bottom: 1px solid var(--border-color);
@@ -138,7 +144,7 @@
         .timeframes {
             display: flex;
             gap: 4px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .tf-btn {
@@ -165,7 +171,7 @@
             width: 100%;
         }
 
-        /* Conversion Panel Subido */
+        /* Conversion Panel */
         .conversion-panel {
             background: var(--bg-card);
             padding: 10px 14px;
@@ -508,7 +514,7 @@
         </div>
     </div>
 
-    <!-- Conversion Panel Subido -->
+    <!-- Conversion Panel -->
     <div class="conversion-panel">
         <div class="selectors-row">
             <div class="currency-select-group">
@@ -663,8 +669,14 @@
     let chartInstance = null;
     let currentTf = '1D';
 
-    function toFixed2(val) {
-        return (Math.round(val * 100) / 100).toFixed(2);
+    function formatDynamic(val) {
+        if (val === 0) return "0.00";
+        const absVal = Math.abs(val);
+        if (absVal < 0.01) {
+            const decimals = Math.min(Math.max(Math.ceil(-Math.log10(absVal)) + 2, 4), 6);
+            return val.toFixed(decimals);
+        }
+        return val.toFixed(2);
     }
 
     const ctx = document.getElementById('mainChart').getContext('2d');
@@ -698,10 +710,9 @@
         }
     };
 
-        function renderChart(labels, dataPoints) {
+    function renderChart(labels, dataPoints) {
         if (chartInstance) chartInstance.destroy();
 
-        // Calcular mínimos y máximos reales con un margen sutil para evitar cortes
         const minVal = Math.min(...dataPoints);
         const maxVal = Math.max(...dataPoints);
         const padding = (maxVal - minVal) * 0.1 || 0.01;
@@ -745,7 +756,7 @@
                         padding: 6,
                         displayColors: false,
                         callbacks: {
-                            label: (context) => ` Tasa: ${toFixed2(context.raw)}`
+                            label: (context) => ` Tasa: ${formatDynamic(context.raw)}`
                         }
                     }
                 },
@@ -755,14 +766,14 @@
                         ticks: { color: '#8b949e', font: { size: 8 }, maxTicksLimit: 6 } 
                     },
                     y: { 
-                        min: parseFloat((minVal - padding).toFixed(2)),
-                        max: parseFloat((maxVal + padding).toFixed(2)),
+                        min: parseFloat((minVal - padding).toFixed(4)),
+                        max: parseFloat((maxVal + padding).toFixed(4)),
                         grid: { color: '#21262d' }, 
                         ticks: { 
                             color: '#8b949e', 
                             font: { size: 8 }, 
-                            maxTicksLimit: 5, // Evita que se repitan los mismos números verticalmente
-                            callback: (v) => toFixed2(v) 
+                            maxTicksLimit: 5, 
+                            callback: (v) => formatDynamic(v) 
                         } 
                     }
                 }
@@ -770,7 +781,6 @@
             plugins: [crosshairPlugin]
         });
     }
-
 
     async function fetchRates() {
         const from = document.getElementById('fromCurrency').value;
@@ -788,12 +798,12 @@
 
                 rawRate = rate;
 
-                document.getElementById('rateSummary').innerText = `1 ${from} = ${toFixed2(rawRate)} ${to}`;
+                document.getElementById('rateSummary').innerText = `1 ${from} = ${formatDynamic(rawRate)} ${to}`;
                 convert();
                 generateRealHistory();
             }
         } catch (e) {
-            document.getElementById('rateSummary').innerText = `1 ${from} = ${toFixed2(rawRate)} ${to}`;
+            document.getElementById('rateSummary').innerText = `1 ${from} = ${formatDynamic(rawRate)} ${to}`;
         }
     }
 
@@ -803,12 +813,11 @@
         let points = [];
         let base = rawRate;
 
-        // Generación de historial lógico y estable sin saltos extraños
         for (let i = count; i >= 0; i--) {
             labels.push(currentTf === '1D' ? `${i}:00` : currentTf === '1Y' ? `M-${i}` : `D-${i}`);
             let smoothFactor = Math.cos(i / 3) * (rawRate * 0.003);
             let val = base + smoothFactor;
-            points.push(parseFloat(toFixed2(val)));
+            points.push(parseFloat(Number(val).toFixed(6)));
         }
         renderChart(labels, points);
     }
@@ -816,7 +825,7 @@
     function convert() {
         const val = parseFloat(document.getElementById('inputAmount').value) || 0;
         const result = val * rawRate;
-        document.getElementById('outputResult').value = toFixed2(result);
+        document.getElementById('outputResult').value = formatDynamic(result);
     }
 
     function setAmount(v) {
@@ -866,6 +875,17 @@
     function submitDeposit() {
         alert('Solicitud enviada correctamente. Se procesará el depósito/transferencia a la cuenta asociada.');
         closeDepositModal();
+    }
+
+    // Registro de Service Worker para PWA
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+            self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+            self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+            self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+        `;
+        const blob = new Blob([swCode], { type: 'text/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
     }
 
     fetchRates();
