@@ -486,7 +486,7 @@
     <div class="app-header">
         <div class="logo-area">
             <div class="logo-badge">ECD</div>
-            <span class="header-title">Exchange & Divisas</span>
+            <span class="header-title">1:1</span>
         </div>
     </div>
 
@@ -541,6 +541,34 @@
                         <option value="CHF">CHF - Franco Suizo</option>
                         <option value="CNY">CNY - Yuan Chino</option>
                         <option value="KRW">KRW - Won Surcoreano</option>
+                        <option value="ESP">ESP - Peso Emauses</option>
+                        <option value="INR">INR - Rupia india</option>
+<option value="JPY">JPY - Yen japonés</option>
+<option value="PHP">PHP - Peso filipino</option>
+<option value="RUB">RUB - Rublo ruso</option>
+<option value="MNT">MNT - Tugrik mongol</option>
+<option value="MAD">MAD - Dirham marroquí</option>
+<option value="USD">USD - Dólar estadounidense (El Salvador)</option>
+<option value="AUD">AUD - Dólar australiano</option>
+<option value="IDR">IDR - Rupia indonesia</option>
+<option value="EUR">EUR - Euro (Mónaco)</option>
+<option value="SAR">SAR - Riyal saudí</option>
+<option value="AED">AED - Dirham de los Emiratos Árabes Unidos</option>
+<option value="EGP">EGP - Libra egipcia</option>
+<option value="ZAR">ZAR - Rand sudafricano</option>
+<option value="CVE">CVE - Escudo caboverdiano</option>
+<option value="PLN">PLN - Zloty polaco</option>
+<option value="BYN">BYN - Rublo bielorruso</option>
+<option value="UAH">UAH - Grivna ucraniana</option>
+<option value="KZT">KZT - Tenge kazajo</option>
+<option value="VND">VND - Dong vietnamita</option>
+<option value="SRD">SRD - Dólar de Surinam</option>
+<option value="GYD">GYD - Dólar guyanés</option>
+<option value="HTG">HTG - Gourde haitiano</option>
+<option value="HKD">HKD - Dólar de Hong Kong</option>
+<option value="RON">RON - Leu rumano</option>
+<option value="AMD">AMD - Dram armenio</option>
+<option value="PKR">PKR - Rupia pakistaní</option>
                     </select>
                 </div>
             </div>
@@ -783,21 +811,32 @@
         });
     }
 
-    async function fetchRates() {
+        async function fetchRates() {
         const from = document.getElementById('fromCurrency').value;
         const to = document.getElementById('toCurrency').value;
 
         try {
-            const res = await fetch(`https://open.er-api.com/v6/latest/${from}`);
+            // Usamos base USD como pivote universal para calcular cualquier cruce perfectamente
+            const res = await fetch(`https://open.er-api.com/v6/latest/USD`);
             const data = await res.json();
             
             if (data && data.rates) {
-                let rate = data.rates[to] || 1;
+                let rates = data.rates;
 
-                if (from === 'COP') rate = rate * 1000;
-                if (to === 'COP') rate = rate / 1000;
+                // 1. Ajuste COP (Nuevo Peso: 1,000 COP tradicionales = 1.00 COP)
+                rates['COP'] = rates['COP'] / 1000;
 
-                rawRate = rate;
+                // ==========================================
+                // 2. AQUÍ PONES TUS MONEDAS INVENTADAS:
+                // ==========================================
+                rates['ESP'] = 0.93;        // 1 Dólar = 10.00 ECD
+                //rates['MND'] = 00.00;       // 1 Dólar = 50.50 de tu otra moneda inventada
+                // ==========================================
+
+                const rateFromUSD = rates[from] || 1;
+                const rateToUSD = rates[to] || 1;
+
+                rawRate = rateToUSD / rateFromUSD;
 
                 document.getElementById('rateSummary').innerText = `1 ${from} = ${formatDynamic(rawRate)} ${to}`;
                 convert();
